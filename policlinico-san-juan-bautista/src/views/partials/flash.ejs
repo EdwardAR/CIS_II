@@ -1,0 +1,15 @@
+<% if (flash) { %>
+  <div class="flash <%= flash.type === 'error' ? 'flash-error' : 'flash-success' %>">
+    <%= flash.message %>
+  </div>
+<% } %>
+
+<% if (formErrors && formErrors.length) { %>
+  <div class="flash flash-error">
+    <ul>
+      <% formErrors.forEach((error) => { %>
+        <li><%= error.msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>

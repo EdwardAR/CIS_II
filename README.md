@@ -1,4 +1,4 @@
-# Sistema Web de Gestion de Citas - Policlinico San Juan Bautista
+# Sistema Web de Gestion de Citas - Policlinico San Juan Bautista (CIS II)
 
 Aplicacion web full-stack para la gestion integral de citas medicas, orientada al flujo real de un policlinico de atencion ambulatoria.
 

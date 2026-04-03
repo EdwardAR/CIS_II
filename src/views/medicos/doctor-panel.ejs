@@ -1,0 +1,41 @@
+<%- include('../partials/head') %>
+<%- include('../partials/flash') %>
+
+<section class="page-hero card">
+  <img src="/img/hero-medical-panel.svg" alt="Ilustracion del panel medico" />
+  <div class="page-hero-copy">
+    <span class="page-kicker"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel médico</span>
+    <h2>Agenda operativa con foco en atención y seguimiento</h2>
+    <p>Visualice sus pacientes, horarios y estado de citas desde una sola vista.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel del Médico</h2>
+  <p>Vista operativa de su agenda de atención.</p>
+</section>
+
+<section class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Paciente</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% panel.appointments.forEach((a) => { %>
+        <tr>
+          <td><%= a.appointment_date %></td>
+          <td><%= a.start_time %> - <%= a.end_time %></td>
+          <td><%= a.patient_name %></td>
+          <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/foot') %>

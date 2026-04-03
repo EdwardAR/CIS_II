@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<%- include('../partials/flash') %>
+
+<section class="page-hero card">
+  <img src="/img/hero-schedule.svg" alt="Ilustracion de horarios medicos" />
+  <div class="page-hero-copy">
+    <span class="page-kicker"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios</span>
+    <h2>Defina turnos claros y organizados para cada médico</h2>
+    <p>Configure bloques de atención por día para evitar conflictos de reserva.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Horarios - <%= doctor.full_name %></h2>
+  <form method="post" action="/medicos/<%= doctor.id %>/horarios" class="grid-form two-cols register-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+    <label><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Día de semana</label>
+    <select name="day_of_week" required>
+      <option value="1">Lunes</option>
+      <option value="2">Martes</option>
+      <option value="3">Miércoles</option>
+      <option value="4">Jueves</option>
+      <option value="5">Viernes</option>
+      <option value="6">Sábado</option>
+      <option value="0">Domingo</option>
+    </select>
+
+    <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Hora inicio</label>
+    <input type="time" name="start_time" required />
+
+    <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Hora fin</label>
+    <input type="time" name="end_time" required />
+
+    <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Duración del bloque (min)</label>
+    <input type="number" name="slot_minutes" value="30" min="10" max="120" required />
+
+    <button type="submit" class="btn auth-submit">Agregar horario</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Horarios activos</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Día</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Bloque</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% schedules.forEach((s) => { %>
+        <tr>
+          <td><%= ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][s.day_of_week] %></td>
+          <td><%= s.start_time %></td>
+          <td><%= s.end_time %></td>
+          <td><%= s.slot_minutes %> min</td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/foot') %>

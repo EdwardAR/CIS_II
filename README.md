@@ -1,212 +1,124 @@
-# Sistema Web de Gestion de Citas - Policlinico San Juan Bautista (CIS II)
+# Sistema Web de Gestion de Citas - Policlinico San Juan Bautista
 
-Aplicacion web full-stack para la gestion integral de citas medicas, orientada al flujo real de un policlinico de atencion ambulatoria.
+Aplicacion web full-stack para la gestion integral de citas medicas, orientada a un flujo real de policlinico de atencion ambulatoria.
 
-## 1. Introduccion y Objetivos
+## 1. Objetivo del proyecto
 
-El proyecto busca resolver, con una arquitectura simple y robusta, el ciclo completo de atencion administrativa en consulta externa:
+Este sistema digitaliza el proceso de gestion de citas para tres tipos de usuario:
 
-- Registro y autenticacion de pacientes.
-- Gestion de medicos, especialidades y horarios de atencion.
-- Reserva de citas con control de disponibilidad real.
-- Seguimiento de estados de cita: pendiente, completada, cancelada.
-- Visualizacion ejecutiva para personal administrativo.
+- Paciente
+- Medico
+- Administrador
 
-### Objetivo General
+Permite registrar usuarios, definir horarios medicos, reservar citas y hacer seguimiento del estado de atencion.
 
-Digitalizar el proceso de citas del Policlinico San Juan Bautista con una interfaz clara y una implementacion facil de desplegar localmente.
+## 2. Stack tecnologico
 
-### Objetivos Tecnicos
-
-- Mantener baja complejidad operacional (sin infraestructura pesada).
-- Aplicar buenas practicas de seguridad web desde el inicio.
-- Diseñar modulos desacoplados por dominio de negocio.
-- Dejar base lista para evolucion futura (reportes, historia clinica, etc.).
-
-## 2. Stack Tecnologico
-
-- Backend: Node.js + Express
-- Renderizado server-side: EJS
-- Base de datos: SQLite (archivo local)
-- Sesiones: express-session + connect-sqlite3
+- Node.js + Express
+- EJS (renderizado server-side)
+- SQLite (better-sqlite3)
+- express-session + connect-sqlite3
 - Seguridad: helmet, csurf, express-rate-limit
-- Validacion de datos: express-validator
+- Validaciones: express-validator
 - Hash de contrasenas: bcrypt
 - Logging: morgan
 
-## 3. Funcionalidades por Rol
-
-### Paciente
-
-- Registro de cuenta (nombre, correo, contrasena, DNI, telefono, datos de contacto).
-- Inicio y cierre de sesion.
-- Gestion de perfil personal.
-- Consulta de medicos disponibles.
-- Consulta de disponibilidad por fecha.
-- Reserva de cita.
-- Visualizacion de historial de citas.
-- Cancelacion de citas pendientes.
-
-### Medico
-
-- Inicio y cierre de sesion.
-- Panel personal de agenda.
-- Visualizacion de citas asignadas.
-- Cambio de estado de cita a completada.
-- Cancelacion de cita cuando corresponda.
-
-### Administrador (Personal del Policlinico)
-
-- Inicio y cierre de sesion.
-- Dashboard con resumen global:
-  - Total de citas
-  - Pendientes
-  - Completadas
-  - Canceladas
-- Visualizacion de proximas citas.
-- Registro de medicos.
-- Gestion de horarios por medico.
-- Visualizacion global de citas.
-- Cambio de estado de citas (completar/cancelar).
-
-## 4. Arquitectura del Proyecto
+## 3. Estructura del proyecto
 
 ```text
-policlinico-san-juan-bautista/
-├─ package.json
-├─ .env.example
-├─ README.md
-├─ src/
-│  ├─ app.js
-│  ├─ server.js
-│  ├─ config/
-│  │  ├─ env.js
-│  │  ├─ db.js
-│  │  └─ session.js
-│  ├─ database/
-│  │  ├─ schema.sql
-│  │  ├─ seed.sql
-│  │  └─ init-db.js
-│  ├─ middlewares/
-│  ├─ modules/
-│  │  ├─ auth/
-│  │  ├─ pacientes/
-│  │  ├─ medicos/
-│  │  ├─ citas/
-│  │  └─ admin/
-│  ├─ views/
-│  └─ public/
-└─ tests/
+CIS-II_-Sistema-Web-de-Gesti-n-de-Citas-en-un-Policlinico-San-Juan-Bautista-/
+|- package.json
+|- README.md
+|- src/
+|  |- app.js
+|  |- server.js
+|  |- config/
+|  |  |- env.js
+|  |  |- db.js
+|  |  |- session.js
+|  |- database/
+|  |  |- schema.sql
+|  |  |- seed.sql
+|  |  |- init-db.js
+|  |- middlewares/
+|  |- modules/
+|  |  |- auth/
+|  |  |- pacientes/
+|  |  |- medicos/
+|  |  |- citas/
+|  |  |- admin/
+|  |- views/
+|  |- public/
+|- tests/
 ```
 
-## 5. Modelo de Datos (ERD en texto)
+## 4. Requisitos
 
-```text
-users
-- id (PK)
-- full_name
-- email (UNIQUE)
-- password_hash
-- role [paciente|medico|admin]
-- is_active
-- created_at
-
-patients
-- id (PK)
-- user_id (FK -> users.id, UNIQUE)
-- dni (UNIQUE)
-- phone
-- birth_date
-- address
-- emergency_contact
-
-doctors
-- id (PK)
-- user_id (FK -> users.id, UNIQUE)
-- specialty
-- license_number (UNIQUE)
-- office
-
-doctor_schedules
-- id (PK)
-- doctor_id (FK -> doctors.id)
-- day_of_week [0-6]
-- start_time
-- end_time
-- slot_minutes
-- is_active
-
-appointments
-- id (PK)
-- patient_id (FK -> patients.id)
-- doctor_id (FK -> doctors.id)
-- appointment_date
-- start_time
-- end_time
-- status [pendiente|completada|cancelada]
-- reason
-- notes
-- created_by_user_id (FK -> users.id)
-- created_at
-- UNIQUE(doctor_id, appointment_date, start_time)
-```
-
-## 6. Seguridad Implementada
-
-- Hash de contrasenas con bcrypt.
-- Sesiones HTTPOnly con expiracion controlada.
-- Almacenamiento de sesiones en SQLite.
-- Proteccion CSRF en formularios.
-- Validaciones y sanitizacion de entradas con express-validator.
-- Helmet para cabeceras de seguridad HTTP.
-- Limitador de intentos para autenticacion (rate limit).
-- Control de acceso por rol (RBAC) en rutas.
-
-## 7. Instalacion Paso a Paso (Desde Cero)
-
-### Requisitos
-
-- Node.js LTS (recomendado >= 18)
+- Node.js LTS (18 o superior)
 - npm
 
-### Instalacion
+Verificacion rapida:
 
-1. Clonar o copiar el proyecto al equipo.
-1. Abrir terminal en la raiz del proyecto.
-1. Instalar dependencias:
+```bash
+node -v
+npm -v
+```
+
+## 5. Instalacion y ejecucion
+
+Desde la raiz del proyecto:
+
+1. Instalar dependencias.
 
 ```bash
 npm install
 ```
 
-1. Crear archivo de entorno:
+2. Crear archivo de entorno.
 
 ```bash
 copy .env.example .env
 ```
 
-1. (Opcional) Editar variables en `.env`:
-
-- `PORT`
-- `SESSION_SECRET`
-- `DB_PATH`
-- `NODE_ENV`
-
-1. Iniciar la aplicacion:
+3. Levantar la aplicacion.
 
 ```bash
 npm start
 ```
 
-1. Abrir en navegador:
+4. Abrir en navegador.
 
 ```text
 http://localhost:3000
 ```
 
-## 8. Credenciales Iniciales
+## 6. Scripts disponibles
 
-Se crean automaticamente al primer arranque:
+- `npm start`: inicia el servidor en modo normal.
+- `npm run dev`: inicia servidor con watch para desarrollo.
+- `npm run db:init`: ejecuta inicializacion de base de datos.
+
+## 7. Variables de entorno
+
+Configuradas en `src/config/env.js`:
+
+- `PORT`: puerto HTTP (default `3000`).
+- `SESSION_SECRET`: secreto de sesion (default `change_me_please`).
+- `DB_PATH`: ruta de SQLite (default `./src/database/clinic.sqlite`).
+- `NODE_ENV`: entorno (`development` o `production`).
+
+Ejemplo recomendado:
+
+```env
+PORT=3000
+SESSION_SECRET=coloca_un_secreto_largo_y_unico
+DB_PATH=./src/database/clinic.sqlite
+NODE_ENV=development
+```
+
+## 8. Credenciales iniciales
+
+Si no existe el usuario admin, al iniciar se crean cuentas por defecto:
 
 - Admin
   - Correo: `admin@policlinico.pe`
@@ -215,65 +127,70 @@ Se crean automaticamente al primer arranque:
   - Correo: `ana.torres@policlinico.pe`
   - Contrasena: `Admin123*`
 
-## 9. Flujo Operativo Recomendado
+## 9. Rutas principales por modulo
 
-1. Ingresar como admin.
-2. Registrar medicos adicionales.
-3. Definir horarios de atencion por medico.
-4. Registrar pacientes (o permitir autorregistro).
-5. Paciente consulta disponibilidad y reserva cita.
-6. Medico/admin actualiza estado de la atencion.
-7. Admin monitorea indicadores en panel.
+### Auth
 
-## 10. Instrucciones de Uso por Pantalla
-
-### Login y Registro
-
-- `/auth/login`: autenticacion general por rol.
-- `/auth/register`: alta de nuevos pacientes.
-
-### Pacientes
-
-- `/pacientes/perfil`: visualiza y actualiza informacion de contacto.
+- `GET /auth/login`
+- `POST /auth/login`
+- `GET /auth/register`
+- `POST /auth/register`
+- `POST /auth/logout`
 
 ### Citas
 
-- `/citas`: listado de citas segun rol.
-- `/citas/disponibilidad`: consulta de horarios disponibles (paciente/admin).
-- Alta de cita con motivo de consulta.
-- Botones de completar/cancelar segun permisos.
+- `GET /citas`
+- `GET /citas/disponibilidad` (paciente/admin)
+- `POST /citas` (paciente)
+- `POST /citas/:id/completar` (admin/medico)
+- `POST /citas/:id/cancelar` (admin/medico/paciente)
 
-### Medicos (Admin)
+### Medicos
 
-- `/medicos`: alta de medico y listado.
-- `/medicos/:doctorId/horarios`: configuracion de turnos por dia.
+- `GET /medicos/mi-panel` (medico)
+- `GET /medicos` (admin)
+- `POST /medicos` (admin)
+- `GET /medicos/:doctorId/horarios` (admin)
+- `POST /medicos/:doctorId/horarios` (admin)
 
-### Medico (Panel propio)
+### Admin
 
-- `/medicos/mi-panel`: agenda del medico autenticado.
+- `GET /admin` (admin)
 
-### Administracion
+## 10. Seguridad implementada
 
-- `/admin`: dashboard global con resumen y proximas citas.
+- Password hashing con bcrypt.
+- Sesiones con cookie `httpOnly` y `sameSite=lax`.
+- CSRF en formularios.
+- Helmet para headers de seguridad.
+- Rate-limit de login.
+- Control de acceso por rol (RBAC).
 
-## 11. Buenas Practicas para Produccion
+## 11. Optimizaciones y recomendaciones
 
-- Cambiar `SESSION_SECRET` por un valor robusto.
-- Forzar HTTPS y `secure=true` en cookies.
-- Definir politicas de backup para SQLite.
-- Implementar auditoria de cambios por usuario.
-- Agregar pruebas automatizadas para rutas criticas.
-- Separar entornos de desarrollo, QA y produccion.
+Se incorporaron mejoras de rendimiento y robustez:
 
-## 12. Roadmap Sugerido
+- SQLite en modo `WAL` para mejor concurrencia lectura/escritura.
+- `busy_timeout` para reducir fallos por bloqueo temporal de DB.
+- Consultas de citas preparadas y reutilizadas en servicio.
+- Generacion de horarios disponibles optimizada con `Set` (busqueda O(1)).
+- Semilla inicial envuelta en transaccion para consistencia.
+- Correccion de script `db:init` hacia `src/database/init-db.js`.
+
+Para producción:
+- Definir `SESSION_SECRET` fuerte y unico.
+- Forzar HTTPS y cookies seguras (`NODE_ENV=production`).
+- Respaldar periodicamente archivo SQLite.
+- Agregar auditoria de cambios sensibles.
+- Incorporar pruebas automatizadas de rutas criticas.
+
+## 12. Roadmap sugerido
 
 - Reprogramacion de citas.
-- Recordatorios por correo o WhatsApp.
-- Reporteria mensual por especialidad.
-- Ficha clinica resumida por paciente.
-- Exportacion de citas a Excel/PDF.
+- Recordatorios por correo/WhatsApp.
+- Reporteria por especialidad.
+- Exportacion de citas (Excel/PDF).
 
 ---
 
-Proyecto diseñado bajo la filosofia: simplicidad potente.
-Listo para ejecutar y evolucionar en entorno clinico real.
+Proyecto listo para ejecucion local y evolucion incremental.

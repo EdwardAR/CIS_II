@@ -25,10 +25,8 @@
     <%- include('nav') %>
   <% } %>
   <main class="container">
-    <% if (currentUser) { 
+    <% if (currentUser && pageTitle !== 'Panel administrativo') { 
       const userName = currentUser.full_name || 'Usuario';
-      const hasAcademicTitle = /^dr\.?|^dra\.?/i.test(userName.trim());
-      const displayName = hasAcademicTitle ? userName : userName;
       const roleLabelMap = {
         admin: 'acceso administrativo',
         medico: 'seguimiento clínico',
@@ -43,7 +41,7 @@
       <section class="user-welcome card">
         <div class="user-welcome-copy">
           <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Sesión activa</span>
-          <h2><%= greetingByRole[currentUser.role] || 'Bienvenido' %>, <%= displayName %></h2>
+          <h2><%= greetingByRole[currentUser.role] || 'Bienvenido' %>, <%= userName %></h2>
           <p>Te encuentras en <%= roleLabelMap[currentUser.role] || 'el sistema' %>. Aquí tienes un acceso rápido y ordenado a tus funciones.</p>
         </div>
       </section>

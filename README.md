@@ -64,9 +64,23 @@ node -v
 npm -v
 ```
 
-## 5. Instalacion y ejecucion
+## 5. Como levantar el proyecto (inicio rapido)
 
-Desde la raiz del proyecto:
+Ejecute estos comandos desde la raiz del proyecto (`CIS_II`):
+
+```bash
+npm install
+npm run db:init
+npm start
+```
+
+Luego abra en su navegador:
+
+```text
+http://localhost:3000
+```
+
+### 5.1 Paso a paso
 
 1. Instalar dependencias.
 
@@ -74,33 +88,43 @@ Desde la raiz del proyecto:
 npm install
 ```
 
-1. Inicializar base de datos (tablas + datos de referencia).
+2. Inicializar base de datos (crea tablas y datos de referencia).
 
 ```bash
 npm run db:init
 ```
 
-1. Levantar la aplicacion.
+3. Iniciar servidor.
 
 ```bash
 npm start
 ```
 
-1. Abrir en navegador.
-
-```text
-http://localhost:3000
-```
-
-### 5.1 Flujo recomendado para entorno local
+4. Verificar que la app responde (opcional).
 
 ```bash
-npm install
+curl http://localhost:3000/auth/login
+```
+
+### 5.2 Modo desarrollo (reinicio automatico)
+
+```bash
+npm run dev
+```
+
+Use este modo cuando este haciendo cambios de codigo frecuentes.
+
+### 5.3 Reinicio limpio de la base de datos
+
+Si desea empezar desde cero con datos de prueba:
+
+1. Detenga el servidor (Ctrl + C).
+2. Elimine `src/database/clinic.sqlite`.
+3. Ejecute nuevamente:
+
+```bash
 npm run db:init
-npm start
 ```
-
-Si desea reiniciar completamente los datos de prueba, elimine primero el archivo SQLite y luego vuelva a ejecutar `npm run db:init`.
 
 ## 6. Scripts disponibles
 
@@ -255,9 +279,24 @@ Opciones:
 - Detener la instancia anterior.
 - Cambiar temporalmente el puerto:
 
-```bash
+En PowerShell (Windows):
+
+```powershell
+$env:PORT=3001
+npm start
+```
+
+En CMD (Windows):
+
+```bat
 set PORT=3001
 npm start
+```
+
+En Linux/macOS:
+
+```bash
+PORT=3001 npm start
 ```
 
 ### 12.3 No aparecen tablas/datos en SQLite

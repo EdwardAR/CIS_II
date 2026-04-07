@@ -1,21 +1,40 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
+<%
+  const appointments = Array.isArray(panel?.appointments) ? panel.appointments : [];
+  const pendingCount = appointments.filter((a) => a.status === 'pendiente').length;
+  const completedCount = appointments.filter((a) => a.status === 'completada').length;
+%>
 
-<section class="page-hero card">
-  <img src="/img/hero-medical-panel.svg" alt="Ilustracion del panel medico" />
+<section class="page-hero card executive-hero">
   <div class="page-hero-copy">
     <span class="page-kicker"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel médico</span>
     <h2>Agenda operativa con foco en atención y seguimiento</h2>
     <p>Visualice sus pacientes, horarios y estado de citas desde una sola vista.</p>
   </div>
+  <div class="executive-hero-media">
+    <img src="/img/hero-medical-panel.svg" alt="Ilustracion del panel medico" />
+  </div>
 </section>
 
-<section class="card">
+<section class="metrics-grid dashboard-section-gap doctor-kpis-grid">
+  <article class="metric card">
+    <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total en agenda</h3>
+    <p><%= appointments.length %></p>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Pendientes</h3>
+    <p><%= pendingCount %></p>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-clipboard.svg" alt="" class="metric-icon" />Completadas</h3>
+    <p><%= completedCount %></p>
+  </article>
+</section>
+
+<section class="card dashboard-section-gap dashboard-table-card">
   <h2><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel del Médico</h2>
-  <p>Vista operativa de su agenda de atención.</p>
-</section>
-
-<section class="card">
+  <p class="helper">Vista operativa de su agenda de atención.</p>
   <table>
     <thead>
       <tr>
@@ -26,7 +45,7 @@
       </tr>
     </thead>
     <tbody>
-      <% panel.appointments.forEach((a) => { %>
+      <% appointments.forEach((a) => { %>
         <tr>
           <td><%= a.appointment_date %></td>
           <td><%= a.start_time %> - <%= a.end_time %></td>
@@ -34,6 +53,11 @@
           <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
         </tr>
       <% }) %>
+      <% if (!appointments.length) { %>
+        <tr>
+          <td colspan="4" class="helper">No hay citas registradas para mostrar.</td>
+        </tr>
+      <% } %>
     </tbody>
   </table>
 </section>

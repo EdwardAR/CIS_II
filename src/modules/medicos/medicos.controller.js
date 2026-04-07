@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const {
   getAllDoctors,
+  getDoctorSpecialties,
   createDoctor,
   getDoctorById,
   getSchedulesByDoctor,
@@ -9,20 +10,28 @@ const {
 } = require('./medicos.service');
 
 function index(req, res) {
-  const doctors = getAllDoctors();
+  const selectedSpecialty = req.query.specialty || '';
+  const specialties = getDoctorSpecialties();
+  const doctors = getAllDoctors(selectedSpecialty);
   return res.render('medicos/index', {
     pageTitle: 'Gestion de medicos',
-    doctors
+    doctors,
+    specialties,
+    selectedSpecialty
   });
 }
 
 function create(req, res) {
   const errors = validationResult(req);
+  const specialties = getDoctorSpecialties();
+  const selectedSpecialty = '';
   if (!errors.isEmpty()) {
-    const doctors = getAllDoctors();
+    const doctors = getAllDoctors(selectedSpecialty);
     return res.status(400).render('medicos/index', {
       pageTitle: 'Gestion de medicos',
       doctors,
+      specialties,
+      selectedSpecialty,
       formErrors: errors.array()
     });
   }

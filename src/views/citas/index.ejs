@@ -1,7 +1,7 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="hero-media card">
+<section class="hero-media card module-hero-compact">
   <img src="/img/hero-appointments.svg" alt="Ilustracion de agenda y reserva de citas" />
 </section>
 
@@ -17,6 +17,14 @@
 <section class="card">
   <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Reservar Cita</h2>
   <form method="get" action="/citas/disponibilidad" class="grid-form two-cols register-form">
+    <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Especialidad</label>
+    <select name="specialty">
+      <option value="">Todas</option>
+      <% specialties.forEach((specialty) => { %>
+        <option value="<%= specialty %>" <%= selectedSpecialty === specialty ? 'selected' : '' %>><%= specialty %></option>
+      <% }) %>
+    </select>
+
     <label><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Médico</label>
     <select name="doctor_id" required>
       <option value="">Seleccione</option>
@@ -36,6 +44,7 @@
   <% if (slots.length) { %>
     <form method="post" action="/citas" class="grid-form two-cols register-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="specialty" value="<%= selectedSpecialty || '' %>" />
       <input type="hidden" name="doctor_id" value="<%= selectedDoctorId %>" />
       <input type="hidden" name="appointment_date" value="<%= selectedDate %>" />
 

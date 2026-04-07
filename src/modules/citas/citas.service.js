@@ -80,6 +80,34 @@ function getDoctorOptions() {
     .all();
 }
 
+function getDoctorSpecialties() {
+  return db
+    .prepare(
+      `SELECT DISTINCT specialty
+       FROM doctors
+       WHERE specialty IS NOT NULL AND trim(specialty) <> ''
+       ORDER BY specialty ASC`
+    )
+    .all()
+    .map((row) => row.specialty);
+}
+
+function getDoctorOptionsBySpecialty(specialty) {
+  if (!specialty) {
+    return getDoctorOptions();
+  }
+
+  return db
+    .prepare(
+      `SELECT d.id, u.full_name, d.specialty
+       FROM doctors d
+       INNER JOIN users u ON u.id = d.user_id
+       WHERE d.specialty = ?
+       ORDER BY u.full_name ASC`
+    )
+    .all(specialty);
+}
+
 function getAvailableSlots(doctorId, date) {
   const dayOfWeek = getDayOfWeek(date);
   const schedule = availableScheduleStmt.get(doctorId, dayOfWeek);
@@ -148,6 +176,8 @@ function updateAppointmentStatus(appointmentId, status) {
 module.exports = {
   listAppointmentsForRole,
   getDoctorOptions,
+  getDoctorSpecialties,
+  getDoctorOptionsBySpecialty,
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus

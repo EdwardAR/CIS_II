@@ -1,15 +1,35 @@
 const bcrypt = require('bcrypt');
 const { db } = require('../../config/db');
 
-function getAllDoctors() {
-  return db
-    .prepare(
-      `SELECT d.id, u.full_name, u.email, d.specialty, d.license_number, d.office
-       FROM doctors d
-       INNER JOIN users u ON u.id = d.user_id
-       ORDER BY u.full_name ASC`
-    )
-    .all();
+const listDoctorsBaseQuery = `SELECT d.id, u.full_name, u.email, d.specialty, d.license_number, d.office
+                              FROM doctors d
+                              INNER JOIN users u ON u.id = d.user_id`;
+
+const listDoctorsStmt = db.prepare(`${listDoctorsBaseQuery} ORDER BY u.full_name ASC`);
+
+const listDoctorsBySpecialtyStmt = db.prepare(
+  `${listDoctorsBaseQuery}
+   WHERE d.specialty = ?
+   ORDER BY u.full_name ASC`
+);
+
+const listSpecialtiesStmt = db.prepare(
+  `SELECT DISTINCT specialty
+   FROM doctors
+   WHERE specialty IS NOT NULL AND trim(specialty) <> ''
+   ORDER BY specialty ASC`
+);
+
+function getAllDoctors(specialty) {
+  if (specialty) {
+    return listDoctorsBySpecialtyStmt.all(specialty);
+  }
+
+  return listDoctorsStmt.all();
+}
+
+function getDoctorSpecialties() {
+  return listSpecialtiesStmt.all().map((row) => row.specialty);
 }
 
 function createDoctor(payload) {
@@ -76,6 +96,7 @@ function getDoctorPanelByUserId(userId) {
 
 module.exports = {
   getAllDoctors,
+  getDoctorSpecialties,
   createDoctor,
   getDoctorById,
   getSchedulesByDoctor,

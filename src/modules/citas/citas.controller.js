@@ -2,56 +2,59 @@ const { validationResult } = require('express-validator');
 const {
   listAppointmentsForRole,
   getDoctorOptions,
+  getDoctorSpecialties,
+  getDoctorOptionsBySpecialty,
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus
 } = require('./citas.service');
 
-function index(req, res) {
-  const appointments = listAppointmentsForRole(req.session.user);
-  const doctors = getDoctorOptions();
-  return res.render('citas/index', {
+function buildViewData(user, options = {}) {
+  const selectedSpecialty = options.selectedSpecialty || '';
+  const doctors = selectedSpecialty ? getDoctorOptionsBySpecialty(selectedSpecialty) : getDoctorOptions();
+
+  return {
     pageTitle: 'Sistema de citas',
-    appointments,
+    appointments: listAppointmentsForRole(user),
     doctors,
-    slots: [],
-    selectedDoctorId: null,
-    selectedDate: null
-  });
+    specialties: getDoctorSpecialties(),
+    slots: options.slots || [],
+    selectedSpecialty,
+    selectedDoctorId: options.selectedDoctorId || null,
+    selectedDate: options.selectedDate || null,
+    formErrors: options.formErrors || []
+  };
+}
+
+function index(req, res) {
+  return res.render('citas/index', buildViewData(req.session.user));
 }
 
 function searchSlots(req, res) {
-  const appointments = listAppointmentsForRole(req.session.user);
-  const doctors = getDoctorOptions();
+  const selectedSpecialty = req.query.specialty || '';
   const selectedDoctorId = Number(req.query.doctor_id);
   const selectedDate = req.query.appointment_date;
 
   const slots = selectedDoctorId && selectedDate ? getAvailableSlots(selectedDoctorId, selectedDate) : [];
 
-  return res.render('citas/index', {
-    pageTitle: 'Sistema de citas',
-    appointments,
-    doctors,
-    slots,
-    selectedDoctorId,
-    selectedDate
-  });
+  return res.render(
+    'citas/index',
+    buildViewData(req.session.user, {
+      slots,
+      selectedSpecialty,
+      selectedDoctorId,
+      selectedDate
+    })
+  );
 }
 
 function create(req, res) {
   const errors = validationResult(req);
+  const selectedSpecialty = req.body.specialty || '';
   if (!errors.isEmpty()) {
-    const appointments = listAppointmentsForRole(req.session.user);
-    const doctors = getDoctorOptions();
-    return res.status(400).render('citas/index', {
-      pageTitle: 'Sistema de citas',
-      appointments,
-      doctors,
-      slots: [],
-      selectedDoctorId: null,
-      selectedDate: null,
-      formErrors: errors.array()
-    });
+    return res
+      .status(400)
+      .render('citas/index', buildViewData(req.session.user, { selectedSpecialty, formErrors: errors.array() }));
   }
 
   try {

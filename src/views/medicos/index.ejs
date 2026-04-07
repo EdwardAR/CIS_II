@@ -1,5 +1,10 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
+<%
+  const specialtyOptions = Array.isArray(specialties) ? specialties : [];
+  const doctorRows = Array.isArray(doctors) ? doctors : [];
+  const activeSpecialty = typeof selectedSpecialty === 'string' ? selectedSpecialty : '';
+%>
 
 <section class="page-hero card">
   <img src="/img/hero-doctors.svg" alt="Ilustracion de gestion de medicos" />
@@ -38,6 +43,18 @@
 
 <section class="card">
   <h3><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Listado de Médicos</h3>
+  <form method="get" action="/medicos" class="grid-form two-cols register-form" style="margin-bottom: 1rem;">
+    <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Filtrar por especialidad</label>
+    <select name="specialty">
+      <option value="">Todas</option>
+      <% specialtyOptions.forEach((specialty) => { %>
+        <option value="<%= specialty %>" <%= activeSpecialty === specialty ? 'selected' : '' %>><%= specialty %></option>
+      <% }) %>
+    </select>
+
+    <button type="submit" class="btn btn-secondary">Aplicar filtro</button>
+  </form>
+
   <table>
     <thead>
       <tr>
@@ -49,7 +66,7 @@
       </tr>
     </thead>
     <tbody>
-      <% doctors.forEach((doctor) => { %>
+      <% doctorRows.forEach((doctor) => { %>
         <tr>
           <td><%= doctor.full_name %></td>
           <td><%= doctor.specialty %></td>
@@ -58,6 +75,11 @@
           <td><a class="btn btn-secondary" href="/medicos/<%= doctor.id %>/horarios">Gestionar</a></td>
         </tr>
       <% }) %>
+      <% if (!doctorRows.length) { %>
+        <tr>
+          <td colspan="5" class="helper">No hay medicos para el filtro seleccionado.</td>
+        </tr>
+      <% } %>
     </tbody>
   </table>
 </section>

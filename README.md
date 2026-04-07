@@ -74,29 +74,39 @@ Desde la raiz del proyecto:
 npm install
 ```
 
-2. Crear archivo de entorno.
+1. Inicializar base de datos (tablas + datos de referencia).
 
 ```bash
-copy .env.example .env
+npm run db:init
 ```
 
-3. Levantar la aplicacion.
+1. Levantar la aplicacion.
 
 ```bash
 npm start
 ```
 
-4. Abrir en navegador.
+1. Abrir en navegador.
 
 ```text
 http://localhost:3000
 ```
 
+### 5.1 Flujo recomendado para entorno local
+
+```bash
+npm install
+npm run db:init
+npm start
+```
+
+Si desea reiniciar completamente los datos de prueba, elimine primero el archivo SQLite y luego vuelva a ejecutar `npm run db:init`.
+
 ## 6. Scripts disponibles
 
 - `npm start`: inicia el servidor en modo normal.
 - `npm run dev`: inicia servidor con watch para desarrollo.
-- `npm run db:init`: ejecuta inicializacion de base de datos.
+- `npm run db:init`: ejecuta inicializacion de base de datos y carga datos de referencia idempotentes.
 
 ## 7. Variables de entorno
 
@@ -116,16 +126,37 @@ DB_PATH=./src/database/clinic.sqlite
 NODE_ENV=development
 ```
 
-## 8. Credenciales iniciales
+## 8. Credenciales y datos de referencia
 
-Si no existe el usuario admin, al iniciar se crean cuentas por defecto:
+La inicializacion (`npm run db:init`) crea automaticamente usuarios de demo, medicos por especialidad, horarios y citas de ejemplo.
 
-- Admin
-  - Correo: `admin@policlinico.pe`
-  - Contrasena: `Admin123*`
-- Medico
-  - Correo: `ana.torres@policlinico.pe`
-  - Contrasena: `Admin123*`
+Contrasena por defecto para todos los usuarios demo: `Admin123*`
+
+### 8.1 Usuario administrador
+
+- Correo: `admin@policlinico.pe`
+
+### 8.2 Medicos de referencia
+
+- `ana.torres@policlinico.pe` - Medicina General
+- `carlos.rios@policlinico.pe` - Cardiologia
+- `lucia.herrera@policlinico.pe` - Pediatria
+- `mateo.salazar@policlinico.pe` - Dermatologia
+- `valeria.nunez@policlinico.pe` - Neurologia
+- `diego.paredes@policlinico.pe` - Traumatologia
+- `sofia.campos@policlinico.pe` - Ginecologia
+
+### 8.3 Pacientes de referencia
+
+- `maria.perez@pacientes.pe`
+- `jose.quispe@pacientes.pe`
+- `carla.mendoza@pacientes.pe`
+- `luis.alvarado@pacientes.pe`
+- `rosa.huaman@pacientes.pe`
+
+### 8.4 Citas de referencia
+
+Se insertan citas de ejemplo en estado `pendiente` y `completada` para facilitar pruebas del flujo de agenda.
 
 ## 9. Rutas principales por modulo
 
@@ -145,6 +176,11 @@ Si no existe el usuario admin, al iniciar se crean cuentas por defecto:
 - `POST /citas/:id/completar` (admin/medico)
 - `POST /citas/:id/cancelar` (admin/medico/paciente)
 
+Funcionalidad incorporada:
+
+- Filtro por especialidad en la reserva de citas.
+- Lista dinamica de medicos segun especialidad seleccionada.
+
 ### Medicos
 
 - `GET /medicos/mi-panel` (medico)
@@ -153,11 +189,88 @@ Si no existe el usuario admin, al iniciar se crean cuentas por defecto:
 - `GET /medicos/:doctorId/horarios` (admin)
 - `POST /medicos/:doctorId/horarios` (admin)
 
+Funcionalidad incorporada:
+
+- Filtro por especialidad en gestion de medicos (vista admin).
+
 ### Admin
 
 - `GET /admin` (admin)
 
-## 10. Seguridad implementada
+## 10. Flujo de uso por rol
+
+### 10.1 Administrador
+
+1. Iniciar sesion con `admin@policlinico.pe`.
+2. Entrar a `Panel Admin` para revisar metricas de citas.
+3. Ir a `Medicos` para registrar especialistas y horarios.
+4. Ir a `Citas` para monitorear estados y completar/cancelar cuando corresponda.
+
+### 10.2 Paciente
+
+1. Registrarse en `/auth/register` o usar un usuario demo.
+2. Ir a `Citas`.
+3. Seleccionar `especialidad` y luego `medico`.
+4. Consultar disponibilidad por fecha y confirmar la cita.
+
+### 10.3 Medico
+
+1. Iniciar sesion con un medico demo.
+2. Abrir `Mi panel` (`/medicos/mi-panel`).
+3. Revisar citas pendientes y completadas.
+4. Marcar citas como completadas o canceladas desde modulo `Citas`.
+
+## 11. Funcionalidades implementadas
+
+- Gestion de usuarios por rol: paciente, medico y administrador.
+- Registro y autenticacion con sesiones seguras.
+- Registro de medicos y asignacion de horarios.
+- Reserva de citas con validacion de disponibilidad.
+- Filtros por especialidad:
+  - En `Citas` para encontrar medico rapidamente.
+  - En `Medicos` para gestion administrativa.
+- Saludo contextual por rol con nombre del usuario en las pantallas internas.
+- Panel administrativo con metricas y proximas citas.
+- Datos de referencia listos para pruebas funcionales.
+
+## 12. Solucion de problemas comunes
+
+### 12.1 Error interno en Medicos despues de actualizar codigo
+
+Si se modifican vistas/controladores mientras el servidor sigue corriendo, puede quedar codigo en memoria y mostrar `Error interno`.
+
+Solucion:
+
+```bash
+# detener el servidor en ejecucion (Ctrl + C)
+npm start
+```
+
+### 12.2 Puerto en uso (EADDRINUSE)
+
+Si aparece `listen EADDRINUSE: address already in use :::3000`, hay otra instancia corriendo.
+
+Opciones:
+
+- Detener la instancia anterior.
+- Cambiar temporalmente el puerto:
+
+```bash
+set PORT=3001
+npm start
+```
+
+### 12.3 No aparecen tablas/datos en SQLite
+
+Ejecutar nuevamente la inicializacion:
+
+```bash
+npm run db:init
+```
+
+Si desea un reinicio completo, elimine `src/database/clinic.sqlite` y vuelva a inicializar.
+
+## 13. Seguridad implementada
 
 - Password hashing con bcrypt.
 - Sesiones con cookie `httpOnly` y `sameSite=lax`.
@@ -166,7 +279,7 @@ Si no existe el usuario admin, al iniciar se crean cuentas por defecto:
 - Rate-limit de login.
 - Control de acceso por rol (RBAC).
 
-## 11. Optimizaciones y recomendaciones
+## 14. Optimizaciones y recomendaciones
 
 Se incorporaron mejoras de rendimiento y robustez:
 
@@ -175,16 +288,18 @@ Se incorporaron mejoras de rendimiento y robustez:
 - Consultas de citas preparadas y reutilizadas en servicio.
 - Generacion de horarios disponibles optimizada con `Set` (busqueda O(1)).
 - Semilla inicial envuelta en transaccion para consistencia.
-- Correccion de script `db:init` hacia `src/database/init-db.js`.
+- Script `db:init` ejecutable directamente desde `src/database/init-db.js`.
+- Datos de referencia idempotentes (no duplican registros al re-ejecutar).
 
 Para producción:
+
 - Definir `SESSION_SECRET` fuerte y unico.
 - Forzar HTTPS y cookies seguras (`NODE_ENV=production`).
 - Respaldar periodicamente archivo SQLite.
 - Agregar auditoria de cambios sensibles.
 - Incorporar pruebas automatizadas de rutas criticas.
 
-## 12. Roadmap sugerido
+## 15. Roadmap sugerido
 
 - Reprogramacion de citas.
 - Recordatorios por correo/WhatsApp.

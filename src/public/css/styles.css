@@ -111,6 +111,23 @@ body {
   margin-bottom: 1.1rem;
 }
 
+.user-welcome {
+  margin-bottom: 1.1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f3faff 100%);
+  border-left: 4px solid #0d7fa3;
+}
+
+.user-welcome-copy h2 {
+  margin-bottom: 0.45rem;
+  font-size: 1.45rem;
+}
+
+.user-welcome-copy p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
 .auth-card {
   max-width: 620px;
   margin: 2rem auto;
@@ -216,6 +233,16 @@ body {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.module-hero-compact {
+  padding: 0.45rem 0.9rem;
+}
+
+.module-hero-compact img {
+  width: 100%;
+  max-height: 185px;
+  object-fit: contain;
 }
 
 .page-hero {
@@ -485,6 +512,10 @@ th, td {
 
   .auth-card-elevated {
     max-width: 100%;
+  }
+
+  .module-hero-compact img {
+    max-height: 150px;
   }
 }
 

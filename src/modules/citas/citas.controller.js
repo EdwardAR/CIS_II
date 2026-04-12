@@ -12,10 +12,12 @@ const {
 function buildViewData(user, options = {}) {
   const selectedSpecialty = options.selectedSpecialty || '';
   const doctors = selectedSpecialty ? getDoctorOptionsBySpecialty(selectedSpecialty) : getDoctorOptions();
+  const appointments = listAppointmentsForRole(user);
 
   return {
     pageTitle: 'Sistema de citas',
-    appointments: listAppointmentsForRole(user),
+    appointments,
+    appointmentSummary: buildAppointmentSummary(appointments),
     doctors,
     specialties: getDoctorSpecialties(),
     slots: options.slots || [],
@@ -23,6 +25,29 @@ function buildViewData(user, options = {}) {
     selectedDoctorId: options.selectedDoctorId || null,
     selectedDate: options.selectedDate || null,
     formErrors: options.formErrors || []
+  };
+}
+
+function buildAppointmentSummary(appointments) {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const todayIso = `${year}-${month}-${day}`;
+
+  const pending = appointments.filter((item) => item.status === 'pendiente').length;
+  const completed = appointments.filter((item) => item.status === 'completada').length;
+  const cancelled = appointments.filter((item) => item.status === 'cancelada').length;
+  const todayCount = appointments.filter((item) => item.appointment_date === todayIso).length;
+  const upcomingCount = appointments.filter((item) => item.appointment_date >= todayIso).length;
+
+  return {
+    total: appointments.length,
+    pending,
+    completed,
+    cancelled,
+    today: todayCount,
+    upcoming: upcomingCount
   };
 }
 

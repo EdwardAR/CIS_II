@@ -2,6 +2,8 @@ const { db } = require('../../config/db');
 
 function getSummary() {
   const total = db.prepare('SELECT COUNT(*) as total FROM appointments').get().total;
+  const totalDoctors = db.prepare('SELECT COUNT(*) as total FROM doctors').get().total;
+  const totalPatients = db.prepare('SELECT COUNT(*) as total FROM patients').get().total;
   const pending = db
     .prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'pendiente'")
     .get().total;
@@ -11,6 +13,11 @@ function getSummary() {
   const cancelled = db
     .prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'cancelada'")
     .get().total;
+  const today = db
+    .prepare('SELECT COUNT(*) as total FROM appointments WHERE appointment_date = DATE(\'now\', \'localtime\')')
+    .get().total;
+
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const upcoming = db
     .prepare(
@@ -26,7 +33,17 @@ function getSummary() {
     )
     .all();
 
-  return { total, pending, completed, cancelled, upcoming };
+  return {
+    total,
+    totalDoctors,
+    totalPatients,
+    pending,
+    completed,
+    cancelled,
+    today,
+    completionRate,
+    upcoming
+  };
 }
 
 module.exports = { getSummary };

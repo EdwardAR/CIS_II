@@ -1,63 +1,106 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="page-hero card executive-hero">
-  <div class="page-hero-copy">
+<section class="card admin-hero-shell">
+  <div class="admin-hero-copy">
     <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Panel administrativo</span>
-    <h2>Control ejecutivo de la operación clínica</h2>
-    <p>Visualice el comportamiento de la demanda y administre la agenda con rapidez.</p>
-    <p class="executive-subtitle">Indicadores clave y próximas atenciones en una vista compacta y accionable.</p>
+    <h2>Centro de control clínico</h2>
+    <p>Monitorea la operación diaria, detecta cuellos de botella y accede a acciones clave en segundos.</p>
+
+    <div class="admin-insight-strip">
+      <div>
+        <strong>Efectividad de atención</strong>
+        <p><%= summary.completionRate %>% de citas completadas</p>
+      </div>
+      <div class="insight-progress" aria-hidden="true">
+        <span style="width: <%= summary.completionRate %>%"></span>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar médicos</a>
+      <a href="/citas" class="btn btn-secondary action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Revisar agenda</a>
+    </div>
   </div>
-  <div class="executive-hero-media">
+  <div class="admin-hero-media">
     <img src="/img/hero-dashboard.svg" alt="Resumen visual del panel administrativo" />
   </div>
 </section>
 
-<section class="metrics-grid dashboard-section-gap">
+<section class="metrics-grid dashboard-section-gap admin-metrics-extended">
   <article class="metric card">
-    <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total de citas</h3>
+    <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total citas</h3>
     <p><%= summary.total %></p>
+    <small>Registro global del sistema</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
+    <p><%= summary.today %></p>
+    <small>Citas programadas para hoy</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Pendientes</h3>
     <p><%= summary.pending %></p>
+    <small>Atenciones por resolver</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Completadas</h3>
     <p><%= summary.completed %></p>
+    <small>Atenciones finalizadas</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Canceladas</h3>
     <p><%= summary.cancelled %></p>
+    <small>Incidencias y ausencias</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Médicos</h3>
+    <p><%= summary.totalDoctors %></p>
+    <small>Especialistas activos</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Pacientes</h3>
+    <p><%= summary.totalPatients %></p>
+    <small>Usuarios registrados</small>
   </article>
 </section>
 
 <section class="card dashboard-section-gap dashboard-table-card">
-  <h2>Próximas citas</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Paciente</th>
-        <th>Médico</th>
-        <th>Especialidad</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% summary.upcoming.forEach((a) => { %>
-        <tr>
-          <td><%= a.appointment_date %></td>
-          <td><%= a.start_time %></td>
-          <td><%= a.patient_name %></td>
-          <td><%= a.doctor_name %></td>
-          <td><%= a.specialty %></td>
-          <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <div class="section-title-wrap">
+    <h2>Próximas citas</h2>
+    <span class="table-count"><%= summary.upcoming.length %> en lista</span>
+  </div>
+
+  <% if (!summary.upcoming.length) { %>
+    <p class="helper">No hay citas próximas registradas por el momento.</p>
+  <% } else { %>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% summary.upcoming.forEach((a) => { %>
+            <tr>
+              <td><%= a.appointment_date %></td>
+              <td><%= a.start_time %></td>
+              <td><%= a.patient_name %></td>
+              <td><%= a.doctor_name %></td>
+              <td><%= a.specialty %></td>
+              <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
 </section>
 
 <%- include('../partials/foot') %>

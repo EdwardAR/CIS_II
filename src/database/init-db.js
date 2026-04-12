@@ -79,6 +79,50 @@ const DEFAULT_DOCTORS = [
       { day: 2, start: '08:00', end: '12:00', slot: 30 },
       { day: 4, start: '08:00', end: '12:00', slot: 30 }
     ]
+  },
+  {
+    fullName: 'Dr. Renato Flores',
+    email: 'renato.flores@policlinico.pe',
+    specialty: 'Endocrinologia',
+    licenseNumber: 'CMP-01901',
+    office: 'Consultorio 309',
+    schedules: [
+      { day: 1, start: '14:00', end: '18:00', slot: 30 },
+      { day: 4, start: '08:00', end: '12:00', slot: 30 }
+    ]
+  },
+  {
+    fullName: 'Dra. Patricia Leon',
+    email: 'patricia.leon@policlinico.pe',
+    specialty: 'Otorrinolaringologia',
+    licenseNumber: 'CMP-02015',
+    office: 'Consultorio 110',
+    schedules: [
+      { day: 2, start: '10:00', end: '14:00', slot: 30 },
+      { day: 5, start: '08:00', end: '12:00', slot: 30 }
+    ]
+  },
+  {
+    fullName: 'Dr. Javier Molina',
+    email: 'javier.molina@policlinico.pe',
+    specialty: 'Urologia',
+    licenseNumber: 'CMP-02160',
+    office: 'Consultorio 312',
+    schedules: [
+      { day: 3, start: '09:00', end: '13:00', slot: 30 },
+      { day: 5, start: '14:00', end: '18:00', slot: 30 }
+    ]
+  },
+  {
+    fullName: 'Dra. Elisa Romero',
+    email: 'elisa.romero@policlinico.pe',
+    specialty: 'Oftalmologia',
+    licenseNumber: 'CMP-02234',
+    office: 'Consultorio 207',
+    schedules: [
+      { day: 1, start: '08:30', end: '12:30', slot: 30 },
+      { day: 4, start: '14:00', end: '18:00', slot: 30 }
+    ]
   }
 ];
 
@@ -127,6 +171,60 @@ const DEFAULT_PATIENTS = [
     birthDate: '1979-07-03',
     address: 'Jr. San Martin 950',
     emergencyContact: 'Pedro Huaman - 966778899'
+  },
+  {
+    fullName: 'Andrea Salinas',
+    email: 'andrea.salinas@pacientes.pe',
+    dni: '75112233',
+    phone: '989001122',
+    birthDate: '1998-05-27',
+    address: 'Av. El Sol 330',
+    emergencyContact: 'Miguel Salinas - 978881144'
+  },
+  {
+    fullName: 'Pedro Caceres',
+    email: 'pedro.caceres@pacientes.pe',
+    dni: '71234590',
+    phone: '982776655',
+    birthDate: '1986-10-10',
+    address: 'Jr. Lima 541',
+    emergencyContact: 'Ruth Caceres - 981998877'
+  },
+  {
+    fullName: 'Daniela Rojas',
+    email: 'daniela.rojas@pacientes.pe',
+    dni: '76789012',
+    phone: '985667788',
+    birthDate: '1993-01-19',
+    address: 'Calle Central 88',
+    emergencyContact: 'Luis Rojas - 977554433'
+  },
+  {
+    fullName: 'Ricardo Vega',
+    email: 'ricardo.vega@pacientes.pe',
+    dni: '70011223',
+    phone: '984443322',
+    birthDate: '1975-12-02',
+    address: 'Av. Progreso 761',
+    emergencyContact: 'Diana Vega - 971220033'
+  },
+  {
+    fullName: 'Luciana Soto',
+    email: 'luciana.soto@pacientes.pe',
+    dni: '77889900',
+    phone: '981110022',
+    birthDate: '2000-03-30',
+    address: 'Jr. Los Claveles 452',
+    emergencyContact: 'Rosa Soto - 972334455'
+  },
+  {
+    fullName: 'Fernando Aquino',
+    email: 'fernando.aquino@pacientes.pe',
+    dni: '73445566',
+    phone: '986220044',
+    birthDate: '1981-06-14',
+    address: 'Urb. Santa Ana Mz B Lt 9',
+    emergencyContact: 'Silvia Aquino - 973660077'
   }
 ];
 
@@ -180,6 +278,66 @@ const DEFAULT_APPOINTMENTS = [
     status: 'pendiente',
     reason: 'Dolor de cabeza recurrente',
     notes: 'Solicita evaluacion neurologica'
+  },
+  {
+    patientEmail: 'andrea.salinas@pacientes.pe',
+    doctorEmail: 'renato.flores@policlinico.pe',
+    date: '2026-04-13',
+    start: '14:00',
+    end: '14:30',
+    status: 'pendiente',
+    reason: 'Control de tiroides',
+    notes: 'Paciente con seguimiento de laboratorio'
+  },
+  {
+    patientEmail: 'pedro.caceres@pacientes.pe',
+    doctorEmail: 'patricia.leon@policlinico.pe',
+    date: '2026-04-14',
+    start: '10:00',
+    end: '10:30',
+    status: 'completada',
+    reason: 'Congestion nasal persistente',
+    notes: 'Se indica tratamiento por 7 dias'
+  },
+  {
+    patientEmail: 'daniela.rojas@pacientes.pe',
+    doctorEmail: 'elisa.romero@policlinico.pe',
+    date: '2026-04-15',
+    start: '08:30',
+    end: '09:00',
+    status: 'pendiente',
+    reason: 'Evaluacion de agudeza visual',
+    notes: 'Primera consulta oftalmologica'
+  },
+  {
+    patientEmail: 'ricardo.vega@pacientes.pe',
+    doctorEmail: 'javier.molina@policlinico.pe',
+    date: '2026-04-16',
+    start: '09:00',
+    end: '09:30',
+    status: 'cancelada',
+    reason: 'Dolor lumbar y malestar urinario',
+    notes: 'Paciente solicito reprogramacion'
+  },
+  {
+    patientEmail: 'luciana.soto@pacientes.pe',
+    doctorEmail: 'lucia.herrera@policlinico.pe',
+    date: '2026-04-17',
+    start: '08:00',
+    end: '08:20',
+    status: 'pendiente',
+    reason: 'Control de crecimiento',
+    notes: 'Consulta preventiva'
+  },
+  {
+    patientEmail: 'fernando.aquino@pacientes.pe',
+    doctorEmail: 'diego.paredes@policlinico.pe',
+    date: '2026-04-18',
+    start: '09:00',
+    end: '09:30',
+    status: 'completada',
+    reason: 'Dolor en hombro derecho',
+    notes: 'Se indica terapia fisica'
   }
 ];
 

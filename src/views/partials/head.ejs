@@ -25,7 +25,7 @@
     <%- include('nav') %>
   <% } %>
   <main class="container">
-    <% if (currentUser && pageTitle !== 'Panel administrativo') { 
+    <% if (currentUser && pageTitle !== 'Panel administrativo' && pageTitle !== 'Sistema de citas') { 
       const userName = currentUser.full_name || 'Usuario';
       const roleLabelMap = {
         admin: 'acceso administrativo',

@@ -169,6 +169,10 @@ Contrasena por defecto para todos los usuarios demo: `Admin123*`
 - `valeria.nunez@policlinico.pe` - Neurologia
 - `diego.paredes@policlinico.pe` - Traumatologia
 - `sofia.campos@policlinico.pe` - Ginecologia
+- `renato.flores@policlinico.pe` - Endocrinologia
+- `patricia.leon@policlinico.pe` - Otorrinolaringologia
+- `javier.molina@policlinico.pe` - Urologia
+- `elisa.romero@policlinico.pe` - Oftalmologia
 
 ### 8.3 Pacientes de referencia
 
@@ -177,6 +181,12 @@ Contrasena por defecto para todos los usuarios demo: `Admin123*`
 - `carla.mendoza@pacientes.pe`
 - `luis.alvarado@pacientes.pe`
 - `rosa.huaman@pacientes.pe`
+- `andrea.salinas@pacientes.pe`
+- `pedro.caceres@pacientes.pe`
+- `daniela.rojas@pacientes.pe`
+- `ricardo.vega@pacientes.pe`
+- `luciana.soto@pacientes.pe`
+- `fernando.aquino@pacientes.pe`
 
 ### 8.4 Citas de referencia
 

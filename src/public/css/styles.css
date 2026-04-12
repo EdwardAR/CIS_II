@@ -711,6 +711,59 @@ th, td {
   padding-top: 0.8rem;
 }
 
+.doctor-panel-hero {
+  display: grid;
+  grid-template-columns: 1.1fr minmax(260px, 0.95fr);
+  gap: 1rem;
+  align-items: center;
+  background:
+    radial-gradient(circle at 0% 0%, #edf8ff 0, #edf8ff 28%, transparent 60%),
+    linear-gradient(145deg, #ffffff 0%, #f8fcff 57%, #eef7ff 100%);
+  border: 1px solid #d2e3f1;
+}
+
+.doctor-panel-hero-copy h2 {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 1.95rem;
+  line-height: 1.12;
+}
+
+.doctor-panel-hero-copy p {
+  margin: 0;
+  color: #50667a;
+}
+
+.doctor-panel-hero-media img {
+  width: 100%;
+  max-height: 230px;
+  object-fit: contain;
+  border-radius: 13px;
+  border: 1px solid #d4e4f1;
+  background: #f0f8ff;
+}
+
+.doctor-insight-strip {
+  margin-top: 0.95rem;
+  border: 1px solid #c9dff0;
+  border-radius: 12px;
+  background: #f1f8ff;
+  padding: 0.82rem 0.92rem;
+}
+
+.doctor-insight-strip strong {
+  font-size: 0.94rem;
+}
+
+.doctor-insight-strip p {
+  margin-top: 0.16rem;
+  font-size: 0.88rem;
+}
+
+.doctor-panel-kpis {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.85rem;
+}
+
 .metric-icon {
   width: 18px;
   height: 18px;
@@ -728,6 +781,14 @@ th, td {
 }
 
 @media (max-width: 900px) {
+  .doctor-panel-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-panel-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .appointments-hero {
     grid-template-columns: 1fr;
   }
@@ -848,5 +909,13 @@ th, td {
 
   .appointments-kpis {
     grid-template-columns: 1fr;
+  }
+
+  .doctor-panel-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-panel-hero-copy h2 {
+    font-size: 1.55rem;
   }
 }

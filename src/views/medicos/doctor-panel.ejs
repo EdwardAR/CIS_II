@@ -4,62 +4,100 @@
   const appointments = Array.isArray(panel?.appointments) ? panel.appointments : [];
   const pendingCount = appointments.filter((a) => a.status === 'pendiente').length;
   const completedCount = appointments.filter((a) => a.status === 'completada').length;
+  const cancelledCount = appointments.filter((a) => a.status === 'cancelada').length;
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const todayCount = appointments.filter((a) => a.appointment_date === todayIso).length;
+  const productivity = appointments.length ? Math.round((completedCount / appointments.length) * 100) : 0;
 %>
 
-<section class="page-hero card executive-hero">
-  <div class="page-hero-copy">
+<section class="card doctor-panel-hero">
+  <div class="doctor-panel-hero-copy">
     <span class="page-kicker"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel médico</span>
-    <h2>Agenda operativa con foco en atención y seguimiento</h2>
-    <p>Visualice sus pacientes, horarios y estado de citas desde una sola vista.</p>
+    <h2>Cabina clínica de atención diaria</h2>
+    <p>Supervise su agenda en tiempo real y priorice atenciones pendientes con una vista compacta.</p>
+
+    <div class="doctor-insight-strip">
+      <div>
+        <strong>Rendimiento de atención</strong>
+        <p><%= productivity %>% de citas completadas.</p>
+      </div>
+      <div class="insight-progress" aria-hidden="true">
+        <span style="width: <%= productivity %>%"></span>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="/citas" class="btn action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Abrir agenda</a>
+    </div>
   </div>
-  <div class="executive-hero-media">
+  <div class="doctor-panel-hero-media">
     <img src="/img/hero-medical-panel.svg" alt="Ilustracion del panel medico" />
   </div>
 </section>
 
-<section class="metrics-grid dashboard-section-gap doctor-kpis-grid">
+<section class="metrics-grid dashboard-section-gap doctor-panel-kpis">
   <article class="metric card">
     <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total en agenda</h3>
     <p><%= appointments.length %></p>
+    <small>Citas registradas</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
+    <p><%= todayCount %></p>
+    <small>Atenciones del dia</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Pendientes</h3>
     <p><%= pendingCount %></p>
+    <small>Por atender</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-clipboard.svg" alt="" class="metric-icon" />Completadas</h3>
     <p><%= completedCount %></p>
+    <small>Atenciones cerradas</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-shield.svg" alt="" class="metric-icon" />Canceladas</h3>
+    <p><%= cancelledCount %></p>
+    <small>Inasistencias o cambios</small>
   </article>
 </section>
 
 <section class="card dashboard-section-gap dashboard-table-card">
-  <h2><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Panel del Médico</h2>
-  <p class="helper">Vista operativa de su agenda de atención.</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Paciente</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% appointments.forEach((a) => { %>
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Agenda del médico</h2>
+    <span class="table-count"><%= appointments.length %> en lista</span>
+  </div>
+  <p class="helper">Vista operativa para seguimiento diario de pacientes.</p>
+
+  <div class="table-shell">
+    <table>
+      <thead>
         <tr>
-          <td><%= a.appointment_date %></td>
-          <td><%= a.start_time %> - <%= a.end_time %></td>
-          <td><%= a.patient_name %></td>
-          <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Paciente</th>
+          <th>Estado</th>
         </tr>
-      <% }) %>
-      <% if (!appointments.length) { %>
-        <tr>
-          <td colspan="4" class="helper">No hay citas registradas para mostrar.</td>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% appointments.forEach((a) => { %>
+          <tr>
+            <td><%= a.appointment_date %></td>
+            <td><%= a.start_time %> - <%= a.end_time %></td>
+            <td><%= a.patient_name %></td>
+            <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
+          </tr>
+        <% }) %>
+        <% if (!appointments.length) { %>
+          <tr>
+            <td colspan="4" class="helper">No hay citas registradas para mostrar.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <%- include('../partials/foot') %>

@@ -2,22 +2,50 @@
 <%- include('../partials/flash') %>
 
 <section class="login-shell">
-  <article class="login-visual card">
-    <img src="/img/hero-login.svg" alt="Ilustracion de acceso al sistema clinico" />
+  <article class="login-visual card login-visual-pro">
+    <div class="login-visual-media-wrap">
+      <img src="/img/hero-login.svg" alt="Ilustracion de acceso al sistema clinico" />
+      <span class="login-badge">Acceso protegido</span>
+    </div>
+
     <div class="login-visual-copy">
-      <h2>Atencion ordenada, pacientes mejor atendidos.</h2>
-      <p>Centralice reservas, seguimiento y atencion medica en una sola plataforma segura.</p>
+      <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Plataforma clinica</span>
+      <h2>Gestione su policlinico con una experiencia profesional</h2>
+      <p>Inicie sesion para administrar agenda, atenciones y flujo medico con seguridad y trazabilidad.</p>
       <div class="login-tags">
         <span>Agenda inteligente</span>
         <span>Control por roles</span>
-        <span>Seguridad clinica</span>
+        <span>Sesiones seguras</span>
+      </div>
+
+      <div class="login-trust-grid" aria-label="Beneficios del sistema">
+        <article>
+          <strong>+11</strong>
+          <p>Especialidades de referencia</p>
+        </article>
+        <article>
+          <strong>24/7</strong>
+          <p>Acceso web operativo</p>
+        </article>
+        <article>
+          <strong>100%</strong>
+          <p>Flujo centralizado de citas</p>
+        </article>
       </div>
     </div>
   </article>
 
-  <article class="card auth-card auth-card-elevated">
-    <h2>Iniciar sesión</h2>
-    <p>Ingrese con su cuenta para gestionar su atención en el Policlínico.</p>
+  <article class="card auth-card auth-card-elevated auth-login-pro">
+    <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Inicio de sesion</span>
+    <h2>Bienvenido de nuevo</h2>
+    <p>Ingrese con su cuenta institucional para continuar en el sistema de gestion de citas.</p>
+
+    <div class="demo-credentials">
+      <h3>Acceso demo</h3>
+      <p><strong>Administrador:</strong> admin@policlinico.pe</p>
+      <p><strong>Clave:</strong> Admin123*</p>
+    </div>
+
     <form method="post" action="/auth/login" class="grid-form auth-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>

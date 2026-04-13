@@ -84,7 +84,7 @@ Este sistema digitaliza el proceso completo de gestión de citas médicas para t
 
 ### 3.1 Arquitectura de Capas
 
-**Tipo de gráfico:** `Flowchart` (`graph TD`)
+**Tipo de gráfico:** `Diagrama de flujo` (`graph TD`)
 
 ```mermaid
 graph TD
@@ -106,7 +106,7 @@ graph TD
 
 ### 3.2 Flujo de una Solicitud HTTP
 
-**Tipo de gráfico:** `Sequence Diagram` (`sequenceDiagram`)
+**Tipo de gráfico:** `Diagrama de secuencia` (`sequenceDiagram`)
 
 ```mermaid
 sequenceDiagram
@@ -138,7 +138,7 @@ sequenceDiagram
 
 ### 3.3 Arquitectura de Módulos
 
-**Tipo de gráfico:** `Flowchart` (`graph LR`)
+**Tipo de gráfico:** `Diagrama de flujo` (`graph LR`)
 
 ```mermaid
 graph LR
@@ -633,7 +633,7 @@ Cada rol tiene un flujo específico optimizado para su función.
 
 **Objetivo:** Supervisar todo el sistema y gestionar recursos.
 
-**Tipo de gráfico:** `State Diagram` (`stateDiagram-v2`)
+**Tipo de gráfico:** `Diagrama de estados` (`stateDiagram-v2`)
 
 ```mermaid
 stateDiagram-v2
@@ -682,7 +682,7 @@ stateDiagram-v2
 
 **Objetivo:** Reservar citas con médicos disponibles.
 
-**Tipo de gráfico:** `Flowchart` (`graph TD`)
+**Tipo de gráfico:** `Diagrama de flujo` (`graph TD`)
 
 ```mermaid
 graph TD
@@ -726,7 +726,7 @@ graph TD
 
 **Objetivo:** Revisar citas asignadas y mantener su disponibilidad.
 
-**Tipo de gráfico:** `Flowchart` (`graph TD`)
+**Tipo de gráfico:** `Diagrama de flujo` (`graph TD`)
 
 ```mermaid
 graph TD
@@ -776,7 +776,7 @@ La base de datos SQLite utiliza 4 tablas principales con relaciones normalizadas
 
 ### 12.1 Diagrama Entidad-Relación (ER)
 
-**Tipo de gráfico:** `Entity Relationship Diagram` (`erDiagram`)
+**Tipo de gráfico:** `Diagrama entidad-relación` (`erDiagram`)
 
 ```mermaid
 erDiagram

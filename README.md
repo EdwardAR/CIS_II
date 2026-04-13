@@ -675,25 +675,28 @@ stateDiagram-v2
 **Objetivo:** Reservar citas con médicos disponibles.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Registro["Registrarse o<br/>Login"]
-    Registro --> Home["Página de Inicio"]
-    Home --> Citas
-    Home --> Perfil
+graph TD
+    A["🔓 Registrarse o<br/>Login"] --> B["🏠 Página de Inicio"]
+    B --> C["📋 Citas"]
+    B --> D["👤 Perfil"]
     
-    Citas --> SeleccionarEsp["1. Seleccionar<br/>Especialidad"]
-    SeleccionarEsp --> SeleccionarMed["2. Elegir<br/>Médico"]
-    SeleccionarMed --> ConsultarDisp["3. Consultar<br/>Disponibilidad"]
-    ConsultarDisp --> Reservar["4. Reservar<br/>Cita"]
+    C --> E["1️⃣ Seleccionar<br/>Especialidad"]
+    E --> F["2️⃣ Elegir<br/>Médico"]
+    F --> G["3️⃣ Consultar<br/>Disponibilidad"]
+    G --> H["4️⃣ Reservar<br/>Cita"]
     
-    Reservar --> ConfirmCita{¿Disponible?}
-    ConfirmCita -->|Sí| CitaGuardada["✅ Cita<br/>Guardada"]
-    ConfirmCita -->|No| ConsultarDisp
+    H --> I{¿Disponible?}
+    I -->|✅ Sí| J["✅ Cita<br/>Guardada"]
+    I -->|❌ No| G
     
-    CitaGuardada --> Home
-    Perfil --> Home
-    Home --> Logout
-    Logout --> [*]
+    J --> B
+    D --> B
+    B --> K["🚪 Logout"]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff3e0
+    style J fill:#c8e6c9
+    style K fill:#ffccbc
 ```
 
 **Pasos en el sistema:**
@@ -714,27 +717,33 @@ stateDiagram-v2
 **Objetivo:** Revisar citas asignadas y mantener su disponibilidad.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Login["Login como<br/>Médico"]
-    Login --> Panel["Mi Panel<br/>(/medicos/mi-panel)"]
-    Panel --> VerCitas["Ver Citas<br/>Asignadas"]
-    Panel --> VerHorarios["Ver Horarios"]
-    Panel --> VerEstadisticas["Estadísticas"]
+graph TD
+    A["🔓 Login como<br/>Médico"] --> B["🏥 Mi Panel<br/>(/medicos/mi-panel)"]
+    B --> C["📋 Ver Citas<br/>Asignadas"]
+    B --> D["📅 Ver Horarios"]
+    B --> E["📊 Estadísticas"]
     
-    VerCitas --> FiltroCitas{¿Filtro?}
-    FiltroCitas -->|Pendientes| CitasPend["Mostrar<br/>Pendientes"]
-    FiltroCitas -->|Completadas| CitasComp["Mostrar<br/>Completadas"]
-    FiltroCitas -->|Todas| TodasCitas["Mostrar Todas"]
+    C --> F{¿Filtro?}
+    F -->|⏳ Pendientes| G["Mostrar<br/>Pendientes"]
+    F -->|✅ Completadas| H["Mostrar<br/>Completadas"]
+    F -->|📋 Todas| I["Mostrar Todas"]
     
-    CitasPend --> Acciones["Opciones"]
-    Acciones --> Completar["Marcar como<br/>Completada"]
-    Acciones --> Cancelar["Cancelar Cita"]
+    G --> J["⚙️ Opciones"]
+    H --> J
+    I --> J
+    J --> K["✓ Marcar como<br/>Completada"]
+    J --> L["❌ Cancelar Cita"]
     
-    VerHorarios --> Panel
-    Completar --> Panel
-    Cancelar --> Panel
-    Panel --> Logout
-    Logout --> [*]
+    D --> B
+    K --> B
+    L --> B
+    B --> M["🚪 Logout"]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff3e0
+    style K fill:#c8e6c9
+    style L fill:#ffccbc
+    style M fill:#ffccbc
 ```
 
 **Pasos en el sistema:**

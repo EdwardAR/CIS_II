@@ -397,6 +397,27 @@ Remove-Item src/database/clinic.sqlite -Force
 npm run db:init
 ```
 
+### 6.5 Abrir la Base de Datos en VS Code (SQLite Viewer)
+
+Para explorar la base de datos sin salir de VS Code:
+
+1. Instale la extension **SQLite Viewer**
+    - Marketplace ID: `qwtel.sqlite-viewer`
+2. Abra el archivo principal de base de datos:
+    - `src/database/clinic.sqlite`
+3. Haga clic derecho sobre el archivo y seleccione **Open Database**.
+4. Explore tablas y ejecute consultas en modo lectura.
+
+Si el archivo `src/database/clinic.sqlite` no existe todavia:
+
+```bash
+npm run db:init
+```
+
+**Nota:**
+- `clinic.sqlite-wal` y `clinic.sqlite-shm` son archivos auxiliares del modo WAL.
+- El archivo principal que debe abrir es `clinic.sqlite`.
+
 ---
 
 ## 7. Scripts Disponibles

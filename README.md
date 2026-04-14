@@ -174,10 +174,6 @@ graph LR
 
 ## 4. Estructura del Proyecto
 
----
-
-## 4. Estructura del Proyecto
-
 ```
 CIS_II/
 ├─ 📄 package.json                 # Dependencias y scripts
@@ -279,10 +275,6 @@ CIS_II/
 - `*-service.js`: Contiene lógica de negocio
 - `*-routes.js`: Define endpoints
 - `*-validators.js`: Valida datos de entrada
-
----
-
-## 5. Requisitos
 
 ---
 
@@ -401,14 +393,14 @@ npm run db:init
 
 Para explorar la base de datos sin salir de VS Code:
 
-1. Instale la extension **SQLite Viewer**
+1. Instale la extensión **SQLite Viewer**
     - Marketplace ID: `qwtel.sqlite-viewer`
 2. Abra el archivo principal de base de datos:
     - `src/database/clinic.sqlite`
 3. Haga clic derecho sobre el archivo y seleccione **Open Database**.
 4. Explore tablas y ejecute consultas en modo lectura.
 
-Si el archivo `src/database/clinic.sqlite` no existe todavia:
+Si el archivo `src/database/clinic.sqlite` no existe todavía:
 
 ```bash
 npm run db:init
@@ -417,10 +409,6 @@ npm run db:init
 **Nota:**
 - `clinic.sqlite-wal` y `clinic.sqlite-shm` son archivos auxiliares del modo WAL.
 - El archivo principal que debe abrir es `clinic.sqlite`.
-
----
-
-## 7. Scripts Disponibles
 
 ---
 
@@ -736,7 +724,7 @@ graph TD
 2. 📋 Ir a **Citas**
 3. 🏥 Seleccionar **especialidad** (Cardiología, Pediatría, etc.)
 4. 👨‍⚕️ Elegir **médico** de la lista
-5. 📅 Consultar **disponibilidad** porFecha-Hora
+5. 📅 Consultar **disponibilidad** por fecha y hora
 6. ✍️ **Confirmar reserva**
 7. 📧 Recibe confirmación de cita
 8. 👤 Puede ver su perfil y **historial de citas**
@@ -1010,58 +998,6 @@ Usuario (Paciente)
 - 📊 **Logging** de eventos importantes
 
 ---
-
-## 14. Seguridad
-
-### 12.1 Error interno en Medicos despues de actualizar codigo
-
-Si se modifican vistas/controladores mientras el servidor sigue corriendo, puede quedar codigo en memoria y mostrar `Error interno`.
-
-Solucion:
-
-```bash
-# detener el servidor en ejecucion (Ctrl + C)
-npm start
-```
-
-### 12.2 Puerto en uso (EADDRINUSE)
-
-Si aparece `listen EADDRINUSE: address already in use :::3000`, hay otra instancia corriendo.
-
-Opciones:
-
-- Detener la instancia anterior.
-- Cambiar temporalmente el puerto:
-
-En PowerShell (Windows):
-
-```powershell
-$env:PORT=3001
-npm start
-```
-
-En CMD (Windows):
-
-```bat
-set PORT=3001
-npm start
-```
-
-En Linux/macOS:
-
-```bash
-PORT=3001 npm start
-```
-
-### 12.3 No aparecen tablas/datos en SQLite
-
-Ejecutar nuevamente la inicializacion:
-
-```bash
-npm run db:init
-```
-
-Si desea un reinicio completo, elimine `src/database/clinic.sqlite` y vuelva a inicializar.
 
 ## 14. Seguridad
 
@@ -1364,8 +1300,6 @@ logger.error('Error en query BD:', error);
 - 💾 **Backup automático** de BD cada 24 horas
 - 📊 **Monitorear uso de CPU/RAM** en producción
 - 🔐 **Auditar cambios sensibles** (crear cita, cambiar estado, etc.)
-
----
 
 ---
 

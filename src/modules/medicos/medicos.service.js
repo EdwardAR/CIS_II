@@ -80,6 +80,11 @@ function getDoctorPanelByUserId(userId) {
   const doctor = db.prepare('SELECT id, office FROM doctors WHERE user_id = ?').get(userId);
   if (!doctor) return null;
 
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const dayOfWeek = now.getDay();
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
   const appointments = db
     .prepare(
       `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status, u.full_name as patient_name, d.office AS doctor_office
@@ -92,7 +97,45 @@ function getDoctorPanelByUserId(userId) {
     )
     .all(doctor.id);
 
-  return { doctorId: doctor.id, doctorOffice: doctor.office, appointments };
+  const todayPendingAppointments = db
+    .prepare(
+      `SELECT a.id, a.start_time, a.end_time, u.full_name as patient_name
+       FROM appointments a
+       INNER JOIN patients p ON p.id = a.patient_id
+       INNER JOIN users u ON u.id = p.user_id
+       WHERE a.doctor_id = ?
+         AND a.appointment_date = ?
+         AND a.status = 'pendiente'
+       ORDER BY a.start_time ASC`
+    )
+    .all(doctor.id, todayIso);
+
+  const todaySchedules = db
+    .prepare(
+      `SELECT day_of_week, start_time, end_time, slot_minutes
+       FROM doctor_schedules
+       WHERE doctor_id = ?
+         AND is_active = 1
+         AND day_of_week = ?
+       ORDER BY start_time ASC`
+    )
+    .all(doctor.id, dayOfWeek);
+
+  const isInShiftNow = todaySchedules.some((slot) => slot.start_time <= currentTime && slot.end_time > currentTime);
+  const todayScheduleLabel = todaySchedules.length
+    ? todaySchedules.map((slot) => `${slot.start_time} - ${slot.end_time}`).join(' | ')
+    : 'Sin horario asignado para hoy';
+
+  return {
+    doctorId: doctor.id,
+    doctorOffice: doctor.office,
+    appointments,
+    todayPendingAppointments,
+    todaySchedules,
+    isInShiftNow,
+    todayScheduleLabel,
+    todayIso
+  };
 }
 
 module.exports = {

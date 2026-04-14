@@ -2,6 +2,10 @@
 <%- include('../partials/flash') %>
 <%
   const appointments = Array.isArray(panel?.appointments) ? panel.appointments : [];
+  const todayPendingAppointments = Array.isArray(panel?.todayPendingAppointments) ? panel.todayPendingAppointments : [];
+  const todaySchedules = Array.isArray(panel?.todaySchedules) ? panel.todaySchedules : [];
+  const hasPendingToday = todayPendingAppointments.length > 0;
+  const nextPending = hasPendingToday ? todayPendingAppointments[0] : null;
   const pendingCount = appointments.filter((a) => a.status === 'pendiente').length;
   const completedCount = appointments.filter((a) => a.status === 'completada').length;
   const cancelledCount = appointments.filter((a) => a.status === 'cancelada').length;
@@ -39,6 +43,51 @@
   <div class="doctor-panel-hero-media">
     <img src="/img/hero-medical-panel.svg" alt="Ilustracion del panel medico" />
   </div>
+</section>
+
+<section class="doctor-alert-shell dashboard-section-gap">
+  <% if (hasPendingToday) { %>
+    <article class="card doctor-alert doctor-alert-busy">
+      <div class="doctor-alert-header">
+        <span class="doctor-alert-pill">Agenda activa</span>
+        <strong>Tiene pacientes por atender hoy</strong>
+      </div>
+      <p>
+        Proxima consulta: <b><%= nextPending.patient_name %></b> (<%= nextPending.start_time %> - <%= nextPending.end_time %>).
+        Tiene <b><%= todayPendingAppointments.length %></b> cita(s) pendiente(s) para hoy.
+      </p>
+    </article>
+  <% } else { %>
+    <article class="card doctor-alert doctor-alert-free">
+      <div class="doctor-alert-header">
+        <span class="doctor-alert-pill">Estado del dia</span>
+        <strong>Esta libre por hoy</strong>
+      </div>
+      <p>No cuenta con citas o pacientes por atender hoy. Puede usar este espacio para seguimiento clinico o gestion de agenda.</p>
+    </article>
+  <% } %>
+
+  <article class="card doctor-shift-card">
+    <div class="doctor-shift-top">
+      <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horario de atencion de hoy</h3>
+      <span class="status <%= panel?.isInShiftNow ? 'status-in-shift' : 'status-out-shift' %>">
+        <%= panel?.isInShiftNow ? 'En horario' : 'Fuera de horario' %>
+      </span>
+    </div>
+    <p class="helper"><%= panel?.todayScheduleLabel || 'Sin horario asignado para hoy' %></p>
+    <% if (todaySchedules.length) { %>
+      <ul class="doctor-shift-list">
+        <% todaySchedules.forEach((slot) => { %>
+          <li>
+            <span><%= slot.start_time %> - <%= slot.end_time %></span>
+            <small>Intervalo: <%= slot.slot_minutes %> min</small>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="helper">No tiene turnos activos configurados para el dia de hoy.</p>
+    <% } %>
+  </article>
 </section>
 
 <section class="metrics-grid dashboard-section-gap doctor-panel-kpis">

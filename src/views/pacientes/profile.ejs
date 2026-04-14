@@ -1,7 +1,7 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="page-hero card">
+<section class="page-hero card page-hero-profile">
   <img src="/img/hero-profile.svg" alt="Ilustracion de perfil de paciente" />
   <div class="page-hero-copy">
     <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Perfil clínico</span>
@@ -10,7 +10,7 @@
   </div>
 </section>
 
-<section class="card">
+<section class="card profile-form-card">
   <h2><img src="/img/icon-user.svg" alt="" class="inline-icon" />Perfil del Paciente</h2>
   <form method="post" action="/pacientes/perfil" class="grid-form two-cols register-form">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -37,7 +37,7 @@
   </form>
 </section>
 
-<section class="card availability-card">
+<section class="card availability-card availability-card-pro">
   <div class="section-title-wrap">
     <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Disponibilidad de médicos</h2>
     <span class="table-count"><%= availabilitySummary.inShift %> en horario ahora</span>

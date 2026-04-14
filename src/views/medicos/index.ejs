@@ -6,7 +6,7 @@
   const activeSpecialty = typeof selectedSpecialty === 'string' ? selectedSpecialty : '';
 %>
 
-<section class="page-hero card">
+<section class="page-hero card page-hero-doctors">
   <img src="/img/hero-doctors.svg" alt="Ilustracion de gestion de medicos" />
   <div class="page-hero-copy">
     <span class="page-kicker"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestión médica</span>
@@ -15,7 +15,7 @@
   </div>
 </section>
 
-<section class="card">
+<section class="card doctors-form-card">
   <h2><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Gestión de Médicos</h2>
   <form method="post" action="/medicos" class="grid-form two-cols register-form">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -41,7 +41,7 @@
   </form>
 </section>
 
-<section class="card">
+<section class="card doctors-list-card">
   <h3><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Listado de Médicos</h3>
   <form method="get" action="/medicos" class="grid-form two-cols register-form" style="margin-bottom: 1rem;">
     <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Filtrar por especialidad</label>

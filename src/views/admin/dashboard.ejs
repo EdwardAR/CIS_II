@@ -1,16 +1,25 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
+<%
+  const upcoming = Array.isArray(summary?.upcoming) ? summary.upcoming : [];
+  const pendingBySpecialty = Array.isArray(summary?.pendingBySpecialty) ? summary.pendingBySpecialty : [];
+  const todayPendingDetails = Array.isArray(summary?.todayPendingDetails) ? summary.todayPendingDetails : [];
+  const hasOperationalLoad = summary?.todayPending > 0;
+%>
 
 <section class="card admin-hero-shell">
   <div class="admin-hero-copy">
     <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Panel administrativo</span>
-    <h2>Centro de control clínico</h2>
-    <p>Monitorea la operación diaria, detecta cuellos de botella y accede a acciones clave en segundos.</p>
+    <h2>Centro de control clinico</h2>
+    <p>Monitorea la operacion diaria, detecta cuellos de botella y ejecuta acciones concretas con contexto completo.</p>
 
     <div class="admin-insight-strip">
       <div>
-        <strong>Efectividad de atención</strong>
-        <p><%= summary.completionRate %>% de citas completadas</p>
+        <strong>Efectividad de atencion</strong>
+        <p>
+          <%= summary.completionRate %>% de citas completadas.
+          <%= summary.todayPending %> pendiente(s) para hoy.
+        </p>
       </div>
       <div class="insight-progress" aria-hidden="true">
         <span style="width: <%= summary.completionRate %>%"></span>
@@ -18,13 +27,46 @@
     </div>
 
     <div class="quick-actions">
-      <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar médicos</a>
+      <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar medicos</a>
       <a href="/citas" class="btn btn-secondary action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Revisar agenda</a>
     </div>
   </div>
   <div class="admin-hero-media">
     <img src="/img/hero-dashboard.svg" alt="Resumen visual del panel administrativo" />
   </div>
+</section>
+
+<section class="admin-ops-grid dashboard-section-gap">
+  <article class="card admin-ops-alert <%= hasOperationalLoad ? 'admin-ops-alert-busy' : 'admin-ops-alert-clear' %>">
+    <div class="admin-ops-head">
+      <span class="admin-ops-pill"><%= hasOperationalLoad ? 'Operacion activa' : 'Operacion estable' %></span>
+      <strong><%= hasOperationalLoad ? 'Hay pacientes por atender hoy' : 'No hay citas pendientes para hoy' %></strong>
+    </div>
+
+    <% if (hasOperationalLoad && summary.nextAppointment) { %>
+      <p>
+        Proxima atencion: <b><%= summary.nextAppointment.patient_name %></b> con
+        <b><%= summary.nextAppointment.doctor_name %></b> a las <b><%= summary.nextAppointment.start_time %></b>.
+      </p>
+    <% } else { %>
+      <p>La agenda de hoy no presenta pendientes activos. Puede priorizar tareas administrativas y seguimiento preventivo.</p>
+    <% } %>
+  </article>
+
+  <article class="card admin-ops-shift">
+    <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Cobertura medica actual</h3>
+    <div class="admin-ops-shift-grid">
+      <div>
+        <span>Medicos en turno ahora</span>
+        <strong><%= summary.doctorsInShiftNow %></strong>
+      </div>
+      <div>
+        <span>Medicos con pendientes hoy</span>
+        <strong><%= summary.doctorsWithAppointmentsToday %></strong>
+      </div>
+    </div>
+    <p class="helper">Referencia operativa en tiempo real para coordinar derivaciones y redistribucion de carga.</p>
+  </article>
 </section>
 
 <section class="metrics-grid dashboard-section-gap admin-metrics-extended">
@@ -36,12 +78,12 @@
   <article class="metric card">
     <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
     <p><%= summary.today %></p>
-    <small>Citas programadas para hoy</small>
+    <small>Citas programadas en fecha actual</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Pendientes</h3>
     <p><%= summary.pending %></p>
-    <small>Atenciones por resolver</small>
+    <small>Atenciones por resolver (global)</small>
   </article>
   <article class="metric card">
     <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Completadas</h3>
@@ -63,15 +105,91 @@
     <p><%= summary.totalPatients %></p>
     <small>Usuarios registrados</small>
   </article>
+  <article class="metric card metric-highlight">
+    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Pendientes hoy</h3>
+    <p><%= summary.todayPending %></p>
+    <small>Objetivo principal del dia</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-clipboard.svg" alt="" class="metric-icon" />Completadas hoy</h3>
+    <p><%= summary.todayCompleted %></p>
+    <small>Atenciones finalizadas hoy</small>
+  </article>
+  <article class="metric card">
+    <h3><img src="/img/icon-shield.svg" alt="" class="metric-icon" />Canceladas hoy</h3>
+    <p><%= summary.todayCancelled %></p>
+    <small>Incidencias en jornada actual</small>
+  </article>
+</section>
+
+<section class="admin-two-col dashboard-section-gap">
+  <article class="card dashboard-table-card">
+    <div class="section-title-wrap">
+      <h2>Carga por especialidad</h2>
+      <span class="table-count"><%= pendingBySpecialty.length %> especialidad(es)</span>
+    </div>
+
+    <% if (!pendingBySpecialty.length) { %>
+      <p class="helper">No hay carga pendiente para las proximas fechas.</p>
+    <% } else { %>
+      <div class="admin-specialty-list">
+        <% pendingBySpecialty.forEach((row, index) => { %>
+          <div class="admin-specialty-row">
+            <div>
+              <strong>#<%= index + 1 %> <%= row.specialty %></strong>
+              <small>Pendientes activos</small>
+            </div>
+            <span><%= row.total %></span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </article>
+
+  <article class="card dashboard-table-card">
+    <div class="section-title-wrap">
+      <h2>Pendientes de hoy</h2>
+      <span class="table-count"><%= todayPendingDetails.length %> en lista</span>
+    </div>
+
+    <% if (!todayPendingDetails.length) { %>
+      <p class="helper">No hay pacientes pendientes de atencion para hoy.</p>
+    <% } else { %>
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Medico</th>
+              <th>Especialidad</th>
+              <th>Consultorio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% todayPendingDetails.forEach((a) => { %>
+              <tr>
+                <td><%= a.start_time %> - <%= a.end_time %></td>
+                <td><%= a.patient_name %></td>
+                <td><%= a.doctor_name %></td>
+                <td><%= a.specialty %></td>
+                <td><%= a.doctor_office || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </article>
 </section>
 
 <section class="card dashboard-section-gap dashboard-table-card">
   <div class="section-title-wrap">
-    <h2>Próximas citas</h2>
-    <span class="table-count"><%= summary.upcoming.length %> en lista</span>
+    <h2>Proximas citas programadas</h2>
+    <span class="table-count"><%= upcoming.length %> en lista</span>
   </div>
 
-  <% if (!summary.upcoming.length) { %>
+  <% if (!upcoming.length) { %>
     <p class="helper">No hay citas próximas registradas por el momento.</p>
   <% } else { %>
     <div class="table-shell">
@@ -88,7 +206,7 @@
           </tr>
         </thead>
         <tbody>
-          <% summary.upcoming.forEach((a) => { %>
+          <% upcoming.forEach((a) => { %>
             <tr>
               <td><%= a.appointment_date %></td>
               <td><%= a.start_time %></td>

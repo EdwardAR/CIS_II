@@ -1243,6 +1243,30 @@ th, td {
   display: inline-block;
 }
 
+.appointments-table-shell {
+  overflow: visible;
+}
+
+.table-shell-scroller {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.appointments-table {
+  min-width: 1080px;
+}
+
+.appointments-actions-cell {
+  min-width: 270px;
+}
+
+.appointments-actions-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
 .status {
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
@@ -1277,8 +1301,7 @@ th, td {
 
 .appointment-edit-inline {
   display: inline-block;
-  position: relative;
-  margin-left: 0.25rem;
+  margin-left: 0.1rem;
 }
 
 .appointment-edit-inline summary {
@@ -1290,16 +1313,14 @@ th, td {
 }
 
 .appointment-edit-form {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.35rem);
-  width: 220px;
+  position: static;
+  margin-top: 0.35rem;
+  width: min(290px, 100%);
   border: 1px solid #cddfed;
   background: #ffffff;
   border-radius: 10px;
   padding: 0.6rem;
   box-shadow: 0 12px 20px rgba(14, 43, 62, 0.14);
-  z-index: 3;
 }
 
 .appointment-edit-form select,
@@ -2034,9 +2055,15 @@ th, td {
   }
 
   .appointment-edit-form {
-    right: auto;
-    left: 0;
-    width: min(86vw, 250px);
+    width: 100%;
+  }
+
+  .appointments-table {
+    min-width: 760px;
+  }
+
+  .appointments-actions-cell {
+    min-width: 240px;
   }
 
   .doctor-panel-kpis {

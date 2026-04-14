@@ -173,8 +173,9 @@
   <% if (!appointments.length) { %>
     <p class="helper">No hay citas para mostrar en este momento.</p>
   <% } else { %>
-    <div class="table-shell">
-      <table>
+    <div class="table-shell appointments-table-shell">
+      <div class="table-shell-scroller">
+      <table class="appointments-table">
         <thead>
           <tr>
             <th>Fecha</th>
@@ -197,7 +198,8 @@
               <td><%= a.specialty %></td>
               <td><%= a.doctor_office || '-' %></td>
               <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
-              <td>
+              <td class="appointments-actions-cell">
+                <div class="appointments-actions-stack">
                 <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
                   <form method="post" action="/citas/<%= a.id %>/completar" class="inline-form">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -242,11 +244,13 @@
                     </form>
                   </details>
                 <% } %>
+                </div>
               </td>
             </tr>
           <% }) %>
         </tbody>
       </table>
+      </div>
     </div>
   <% } %>
 </section>

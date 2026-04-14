@@ -70,11 +70,42 @@ const insertAppointmentStmt = db.prepare(
 
 const updateAppointmentStatusStmt = db.prepare('UPDATE appointments SET status = ? WHERE id = ?');
 const getAppointmentByIdStmt = db.prepare(
-  `SELECT a.id, a.status, p.user_id AS patient_user_id, d.user_id AS doctor_user_id
+  `SELECT a.id, a.patient_id, a.doctor_id, a.appointment_date, a.start_time, a.end_time, a.reason,
+          a.status, p.user_id AS patient_user_id, d.user_id AS doctor_user_id
    FROM appointments a
    INNER JOIN patients p ON p.id = a.patient_id
    INNER JOIN doctors d ON d.id = a.doctor_id
    WHERE a.id = ?`
+);
+
+const listDoctorSchedulesByDayStmt = db.prepare(
+  `SELECT day_of_week, start_time, end_time, slot_minutes
+   FROM doctor_schedules
+   WHERE doctor_id = ? AND is_active = 1
+   ORDER BY day_of_week ASC, start_time ASC`
+);
+
+const listBusySlotsByDateStmt = db.prepare(
+  `SELECT start_time
+   FROM appointments
+   WHERE doctor_id = ? AND appointment_date = ? AND status IN ('pendiente', 'solicitud_reprogramacion')`
+);
+
+const insertApprovedRescheduleStmt = db.prepare(
+  `INSERT INTO appointments (patient_id, doctor_id, appointment_date, start_time, end_time, status, reason, created_by_user_id)
+   VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)`
+);
+
+const insertRescheduleAuditStmt = db.prepare(
+  `INSERT INTO appointment_reschedule_audit (
+    original_appointment_id,
+    new_appointment_id,
+    requested_by_user_id,
+    approved_by_user_id,
+    old_status,
+    new_status,
+    note
+  ) VALUES (?, ?, ?, ?, ?, ?, ?)`
 );
 
 function getPatientByUser(userId) {
@@ -235,6 +266,59 @@ function requestAppointmentReschedule(appointmentId, currentUser) {
   updateAppointmentStatus(appointmentId, 'solicitud_reprogramacion');
 }
 
+function formatDateIso(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function toDateFromIso(isoDate) {
+  return new Date(`${isoDate}T00:00:00`);
+}
+
+function findNextAvailableSlot(doctorId, baseDate) {
+  const schedules = listDoctorSchedulesByDayStmt.all(doctorId);
+  if (!schedules.length) {
+    throw new Error('El medico no tiene horarios activos para reprogramar.');
+  }
+
+  const maxLookAheadDays = 90;
+  const base = toDateFromIso(baseDate);
+
+  for (let offset = 1; offset <= maxLookAheadDays; offset += 1) {
+    const candidate = new Date(base);
+    candidate.setDate(base.getDate() + offset);
+    const candidateDate = formatDateIso(candidate);
+    const day = candidate.getDay();
+
+    const daySchedules = schedules.filter((item) => item.day_of_week === day);
+    if (!daySchedules.length) {
+      continue;
+    }
+
+    const busyStarts = new Set(listBusySlotsByDateStmt.all(doctorId, candidateDate).map((item) => item.start_time));
+
+    for (const schedule of daySchedules) {
+      let start = schedule.start_time;
+
+      while (start < schedule.end_time) {
+        if (!busyStarts.has(start)) {
+          return {
+            appointmentDate: candidateDate,
+            startTime: start,
+            endTime: addMinutesToTime(start, schedule.slot_minutes)
+          };
+        }
+
+        start = addMinutesToTime(start, schedule.slot_minutes);
+      }
+    }
+  }
+
+  throw new Error('No se encontro un horario disponible para reprogramar en los proximos 90 dias.');
+}
+
 function approveAppointmentReschedule(appointmentId, currentUser) {
   if (!currentUser || !['admin', 'medico'].includes(currentUser.role)) {
     throw new Error('Solo medico o administrador pueden aprobar reprogramacion.');
@@ -253,7 +337,41 @@ function approveAppointmentReschedule(appointmentId, currentUser) {
     throw new Error('La cita no tiene una solicitud de reprogramacion pendiente.');
   }
 
-  updateAppointmentStatus(appointmentId, 'reprogramada');
+  const nextSlot = findNextAvailableSlot(appointment.doctor_id, appointment.appointment_date);
+
+  const runApproval = db.transaction(() => {
+    updateAppointmentStatusStmt.run('reprogramada', appointmentId);
+
+    const created = insertApprovedRescheduleStmt.run(
+      appointment.patient_id,
+      appointment.doctor_id,
+      nextSlot.appointmentDate,
+      nextSlot.startTime,
+      nextSlot.endTime,
+      appointment.reason,
+      currentUser.id
+    );
+
+    insertRescheduleAuditStmt.run(
+      appointmentId,
+      created.lastInsertRowid,
+      appointment.patient_user_id,
+      currentUser.id,
+      'solicitud_reprogramacion',
+      'reprogramada',
+      `Nueva cita automatica: ${nextSlot.appointmentDate} ${nextSlot.startTime}-${nextSlot.endTime}`
+    );
+
+    return {
+      originalAppointmentId: appointmentId,
+      newAppointmentId: Number(created.lastInsertRowid),
+      appointmentDate: nextSlot.appointmentDate,
+      startTime: nextSlot.startTime,
+      endTime: nextSlot.endTime
+    };
+  });
+
+  return runApproval();
 }
 
 module.exports = {

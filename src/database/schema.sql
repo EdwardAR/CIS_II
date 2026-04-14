@@ -56,3 +56,19 @@ CREATE TABLE IF NOT EXISTS appointments (
   FOREIGN KEY(created_by_user_id) REFERENCES users(id),
   UNIQUE(doctor_id, appointment_date, start_time)
 );
+
+CREATE TABLE IF NOT EXISTS appointment_reschedule_audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  original_appointment_id INTEGER NOT NULL,
+  new_appointment_id INTEGER,
+  requested_by_user_id INTEGER NOT NULL,
+  approved_by_user_id INTEGER NOT NULL,
+  old_status TEXT NOT NULL,
+  new_status TEXT NOT NULL,
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY(original_appointment_id) REFERENCES appointments(id),
+  FOREIGN KEY(new_appointment_id) REFERENCES appointments(id),
+  FOREIGN KEY(requested_by_user_id) REFERENCES users(id),
+  FOREIGN KEY(approved_by_user_id) REFERENCES users(id)
+);

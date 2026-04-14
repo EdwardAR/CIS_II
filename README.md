@@ -567,7 +567,7 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 | POST | `/citas/:id/completar` | Marcar cita completada | Admin/Médico | Cambia estado a "completada" |
 | POST | `/citas/:id/cancelar` | Cancelar cita | Admin/Médico/Paciente | Depende del estado |
 | POST | `/citas/:id/solicitar-reprogramacion` | Solicitar reprogramación | Paciente | Cambia estado a "solicitud_reprogramacion" |
-| POST | `/citas/:id/aprobar-reprogramacion` | Aprobar reprogramación | Admin/Médico | Cambia estado a "reprogramada" |
+| POST | `/citas/:id/aprobar-reprogramacion` | Aprobar reprogramación | Admin/Médico | Marca original como "reprogramada" y crea una nueva cita "pendiente" automática |
 
 **Características:**
 - ✅ Filtro dinámico por especialidad
@@ -580,7 +580,9 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 - El **paciente** solicita la reprogramación de una cita pendiente.
 - El sistema cambia la cita a estado `solicitud_reprogramacion`.
 - Un **médico** (de esa cita) o **administrador** revisa y aprueba.
-- Al aprobar, la cita pasa a estado `reprogramada` y queda lista para nueva reserva.
+- Al aprobar, la cita original pasa a estado `reprogramada`.
+- El sistema genera una **nueva cita automática** en el siguiente horario disponible del mismo médico.
+- Se registra trazabilidad en la tabla `appointment_reschedule_audit` (quién solicitó, quién aprobó, y detalle del cambio).
 
 **Archivo:** [`src/modules/citas/citas.routes.js`](src/modules/citas/citas.routes.js)
 
@@ -797,7 +799,7 @@ graph TD
 
 ## 12. Modelo de Datos
 
-La base de datos SQLite utiliza 4 tablas principales con relaciones normalizadas.
+La base de datos SQLite utiliza tablas principales para usuarios, horarios, citas, sesiones y auditoría de reprogramaciones.
 
 ### 12.1 Diagrama Entidad-Relación (ER)
 
@@ -808,6 +810,8 @@ erDiagram
     USUARIOS ||--o{ CITAS : reserva
     USUARIOS ||--o{ HORARIOS : registra
     USUARIOS ||--o{ SESIONES : tiene
+    USUARIOS ||--o{ AUDITORIA_REPROGRAMACION : solicita_o_aprueba
+    CITAS ||--o{ AUDITORIA_REPROGRAMACION : historial
     USUARIOS {
         int id PK
         string email UK
@@ -846,6 +850,18 @@ erDiagram
         string sid PK
         text sess
         datetime expire
+    }
+
+    AUDITORIA_REPROGRAMACION {
+        int id PK
+        int original_appointment_id FK
+        int new_appointment_id FK
+        int requested_by_user_id FK
+        int approved_by_user_id FK
+        string old_status
+        string new_status
+        text note
+        datetime created_at
     }
     
     ESPECIALIDADES {
@@ -916,6 +932,23 @@ Almacena sesiones activas (express-session con store SQLite).
 
 ---
 
+#### **APPOINTMENT_RESCHEDULE_AUDIT**
+Almacena trazabilidad de reprogramaciones aprobadas.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | INTEGER | Clave primaria |
+| `original_appointment_id` | INTEGER | Cita original que fue reprogramada |
+| `new_appointment_id` | INTEGER | Nueva cita creada automáticamente |
+| `requested_by_user_id` | INTEGER | Usuario paciente que solicitó |
+| `approved_by_user_id` | INTEGER | Usuario médico/admin que aprobó |
+| `old_status` | TEXT | Estado anterior (`solicitud_reprogramacion`) |
+| `new_status` | TEXT | Estado final de la cita original (`reprogramada`) |
+| `note` | TEXT | Detalle de fecha/hora asignada automáticamente |
+| `created_at` | DATETIME | Fecha de auditoría |
+
+---
+
 ### 12.3 Relaciones Principales
 
 ```
@@ -935,8 +968,9 @@ Usuario (Paciente)
 4. Se crea registro en CITAS con `estado='pendiente'`
 5. Se marca horario como `disponible=false`
 6. Paciente puede solicitar reprogramación (`solicitud_reprogramacion`)
-7. Médico/Admin aprueba y la cita pasa a `reprogramada`
-8. Médico completa o cancela la cita (actualiza estado)
+7. Médico/Admin aprueba: cita original pasa a `reprogramada` y se crea una nueva `pendiente`
+8. Se registra auditoría en `appointment_reschedule_audit`
+9. Médico completa o cancela la nueva cita (actualiza estado)
 
 ---
 
@@ -1016,6 +1050,7 @@ Usuario (Paciente)
 - 📝 **Validadores** reutilizables
 - 🔄 **Consultas optimizadas** con prepared statements
 - 📊 **Logging** de eventos importantes
+- 🧾 **Auditoría de reprogramaciones** (solicitante, aprobador y nueva cita generada)
 
 ---
 
@@ -1329,7 +1364,7 @@ Funcionalidades planeadas para versiones futuras:
 
 ### Corto Plazo (v1.1)
 
-- ⏰ **Reprogramación de citas** - Pacientes pueden cambiar fecha/hora
+- ✅ **Reprogramación de citas** - Implementada con aprobación médico/admin + generación automática de nueva cita
 - 🔔 **Recordatorios automáticos** - Email 24h antes
 - 📧 **Notificaciones** - Por correo o SMS
 - ⭐ **Calificación de citas** - Pacientes evalúan atención recibida

@@ -166,10 +166,10 @@ function approveReschedule(req, res) {
   const appointmentId = Number(req.params.id);
 
   try {
-    approveAppointmentReschedule(appointmentId, req.session.user);
+    const result = approveAppointmentReschedule(appointmentId, req.session.user);
     req.session.flash = {
       type: 'success',
-      message: 'Reprogramacion aprobada. La cita anterior queda como reprogramada.'
+      message: `Reprogramacion aprobada. Nueva cita #${result.newAppointmentId} agendada para ${result.appointmentDate} ${result.startTime}.`
     };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };

@@ -43,24 +43,32 @@
     <span class="table-count">Paciente</span>
   </div>
 
-  <form method="get" action="/citas/disponibilidad" class="grid-form two-cols register-form">
+  <form method="get" action="/citas/disponibilidad" class="grid-form two-cols register-form reservation-filter-form">
     <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Especialidad</label>
-    <select name="specialty">
-      <option value="">Todas</option>
+    <select name="specialty" id="booking-specialty" required>
+      <option value="">Seleccione especialidad</option>
       <% specialties.forEach((specialty) => { %>
         <option value="<%= specialty %>" <%= selectedSpecialty === specialty ? 'selected' : '' %>><%= specialty %></option>
       <% }) %>
     </select>
 
     <label><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Médico</label>
-    <select name="doctor_id" required>
-      <option value="">Seleccione</option>
+    <select name="doctor_id" id="booking-doctor" required>
+      <option value="">Seleccione un médico</option>
       <% doctors.forEach((doctor) => { %>
-        <option value="<%= doctor.id %>" <%= selectedDoctorId === doctor.id ? 'selected' : '' %>>
+        <option
+          value="<%= doctor.id %>"
+          data-specialty="<%= doctor.specialty %>"
+          <%= selectedDoctorId === doctor.id ? 'selected' : '' %>
+        >
           <%= doctor.full_name %> - <%= doctor.specialty %><%= doctor.office ? ` (Consultorio ${doctor.office})` : '' %>
         </option>
       <% }) %>
     </select>
+
+    <p class="helper booking-specialty-helper" id="booking-specialty-helper">
+      Elige una especialidad para ver solo los médicos correspondientes.
+    </p>
 
     <label><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Fecha</label>
     <input type="date" name="appointment_date" value="<%= selectedDate || '' %>" required />
@@ -112,6 +120,18 @@
   <% } %>
 
   <% if (slots.length) { %>
+    <div class="booking-flow-actions">
+      <a
+        href="/citas/disponibilidad?specialty=<%= encodeURIComponent(selectedSpecialty || '') %>"
+        class="btn btn-secondary"
+      >
+        <img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Cambiar especialidad o médico
+      </a>
+      <a href="/citas" class="btn btn-danger">
+        <img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar proceso
+      </a>
+    </div>
+
     <form method="post" action="/citas" class="grid-form two-cols register-form booking-confirm-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <input type="hidden" name="specialty" value="<%= selectedSpecialty || '' %>" />

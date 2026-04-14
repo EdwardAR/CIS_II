@@ -1,15 +1,27 @@
-<% if (flash) { %>
-  <div class="flash <%= flash.type === 'error' ? 'flash-error' : 'flash-success' %>">
-    <%= flash.message %>
-  </div>
-<% } %>
+<% if (flash || (formErrors && formErrors.length)) { %>
+  <div class="flash-stack" role="status" aria-live="polite" aria-atomic="true">
+    <% if (flash) { %>
+      <div class="flash flash-toast <%= flash.type === 'error' ? 'flash-error' : 'flash-success' %>" data-auto-dismiss="true" data-dismiss-ms="4300">
+        <div class="flash-content">
+          <p><%= flash.message %></p>
+        </div>
+        <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
+        <div class="flash-timer"></div>
+      </div>
+    <% } %>
 
-<% if (formErrors && formErrors.length) { %>
-  <div class="flash flash-error">
-    <ul>
-      <% formErrors.forEach((error) => { %>
-        <li><%= error.msg %></li>
-      <% }) %>
-    </ul>
+    <% if (formErrors && formErrors.length) { %>
+      <div class="flash flash-toast flash-error" data-auto-dismiss="true" data-dismiss-ms="5600">
+        <div class="flash-content">
+          <ul>
+            <% formErrors.forEach((error) => { %>
+              <li><%= error.msg %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
+        <div class="flash-timer"></div>
+      </div>
+    <% } %>
   </div>
 <% } %>

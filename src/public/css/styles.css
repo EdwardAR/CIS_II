@@ -748,52 +748,177 @@ button, .btn {
   font-size: 0.92rem;
 }
 
+.flash-stack {
+  position: fixed;
+  top: 1.15rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, calc(100% - 1.5rem));
+  display: grid;
+  gap: 0.7rem;
+  z-index: 1200;
+  pointer-events: none;
+}
+
 .flash {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  border-radius: 10px;
-  padding: 0.8rem 0.95rem;
-  margin-bottom: 1rem;
-  font-size: 0.96rem;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0;
+  font-size: 1.04rem;
 }
 
 .flash::before {
   content: '';
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
+.flash-toast {
+  position: relative;
+  align-items: flex-start;
+  box-shadow: 0 16px 30px rgba(13, 40, 58, 0.2);
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+  pointer-events: auto;
+  animation: flashIn 220ms ease-out;
+}
+
+.flash-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: 0.4rem;
+}
+
+.flash-content p {
+  margin: 0;
+  line-height: 1.36;
+  font-weight: 600;
+}
+
+.flash-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.62);
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.flash-close:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.flash-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  opacity: 0.55;
+  transform-origin: left center;
+}
+
+.flash-removing {
+  animation: flashOut 220ms ease-in forwards;
+}
+
 .flash-success {
-  background: #e8f6ee;
-  border: 1px solid #b8e0c8;
-  color: #215f39;
+  background: linear-gradient(135deg, #eefaf3 0%, #e3f6eb 100%);
+  border-color: #8dd1a8;
+  color: #1f5d37;
 }
 
 .flash-success::before {
   background: radial-gradient(circle at 35% 35%, #7fd0a0 0%, #2f8e57 80%);
 }
 
+.flash-success .flash-timer {
+  background: #2f8e57;
+}
+
 .flash-error {
-  background: #fbeaea;
-  border: 1px solid #f1c3c3;
-  color: #8f2525;
+  background: linear-gradient(135deg, #fff3f3 0%, #ffe7e7 100%);
+  border-color: #efb1b1;
+  color: #8a2424;
 }
 
 .flash-error::before {
   background: radial-gradient(circle at 35% 35%, #f4a2a2 0%, #c74b4b 80%);
 }
 
-.flash ul {
-  margin: 0;
-  padding-left: 1.1rem;
+.flash-error .flash-timer {
+  background: #c74b4b;
 }
 
+.flash ul {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.flash ul li + li {
+  margin-top: 0.3rem;
+}
+
+@keyframes flashIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes flashOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+}
+
+@keyframes flashTimerDrain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.table-shell table,
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.table-shell table thead th,
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, #f4f9ff 0%, #edf5fc 100%);
+  color: #1f3f55;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 th, td {
@@ -801,6 +926,15 @@ th, td {
   border-bottom: 1px solid var(--line);
   text-align: left;
   font-size: 0.93rem;
+}
+
+.table-shell table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+.table-shell table tbody tr:hover {
+  background: #eef7ff;
+  transition: background 120ms ease;
 }
 
 .inline-form {
@@ -907,6 +1041,16 @@ th, td {
 .table-shell {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid #d3e3f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.booking-specialty-helper {
+  margin: 0.1rem 0 0.2rem;
+  color: #466075;
+  font-size: 0.9rem;
+  grid-column: 1 / -1;
 }
 
 .booking-doctor-schedule {
@@ -929,6 +1073,18 @@ th, td {
 
 .schedule-day-selected {
   background: #eaf6ff;
+}
+
+.booking-flow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.8rem 0 0.75rem;
+}
+
+.booking-flow-actions .btn {
+  min-width: 220px;
 }
 
 .appointments-hero {

@@ -263,7 +263,7 @@ CIS_II/
 │        ├─ foot.ejs
 │        └─ flash.ejs
 │
-└─ 📁 tests/                       # 🧪 Base de pruebas (placeholders)
+└─ 📁 tests/                       # 🧪 Tests unitarios
    ├─ auth.test.js
    ├─ citas.test.js
    └─ pacientes.test.js
@@ -338,7 +338,7 @@ npm run db:init
 **¿Qué ocurre?**
 - ✅ Crea archivo `src/database/clinic.sqlite`
 - ✅ Ejecuta `schema.sql` (crea tablas)
-- ✅ Ejecuta `init-db.js` (siembra datos de referencia desde arreglos internos)
+- ✅ Ejecuta `seed.sql` (inserta datos de referencia)
 - ✅ Genera usuarios admin, médicos y pacientes de demo
 - ✅ Carga citas de ejemplo
 
@@ -356,10 +356,9 @@ npm start
 
 **Salida esperada:**
 ```
-Base de datos inicializada y datos de referencia cargados.
-Admin: admin@policlinico.pe / Admin123*
-Medicos y pacientes demo usan la contrasena: Admin123*
-Servidor iniciado en http://localhost:3000
+✓ Server running on http://localhost:3000
+✓ Database: ./src/database/clinic.sqlite
+✓ Environment: development
 ```
 
 Presione `Ctrl + C` para detener el servidor.
@@ -420,8 +419,9 @@ Definidos en `package.json`, ejecútelos con `npm run <nombre>`:
 | Script | Comando | Descripción |
 |--------|---------|-------------|
 | `start` | `node src/server.js` | Inicia servidor en producción |
-| `dev` | `node --watch src/server.js` | Modo desarrollo con reinicio automático |
+| `dev` | `nodemon src/server.js` | Modo desarrollo con reinicio automático |
 | `db:init` | `node src/database/init-db.js` | Inicializa/reinicia base de datos |
+| `test` | `jest` | Ejecuta suite de tests (si está configurado) |
 
 **Ejemplos de uso:**
 ```bash
@@ -616,7 +616,7 @@ Gestión de información personal del paciente.
 | Método | Ruta | Descripción | Acceso |
 |--------|------|------------|--------|
 | GET | `/pacientes/perfil` | Ver perfil | Paciente |
-| POST | `/pacientes/perfil` | Actualizar datos | Paciente |
+| POST | `/pacientes/actualizar` | Actualizar datos | Paciente |
 
 **Información disponible:**
 - 📋 Datos personales
@@ -799,7 +799,7 @@ graph TD
 
 ## 12. Modelo de Datos
 
-La base de datos SQLite se organiza en tablas normalizadas para usuarios, perfiles (médico/paciente), horarios, citas, sesiones y auditoría de reprogramaciones.
+La base de datos SQLite utiliza tablas principales para usuarios, horarios, citas, sesiones y auditoría de reprogramaciones.
 
 ### 12.1 Diagrama Entidad-Relación (ER)
 
@@ -807,75 +807,52 @@ La base de datos SQLite se organiza en tablas normalizadas para usuarios, perfil
 
 ```mermaid
 erDiagram
-    USERS ||--|| PATIENTS : perfil
-    USERS ||--o| DOCTORS : perfil
-    DOCTORS ||--o{ DOCTOR_SCHEDULES : define
-    PATIENTS ||--o{ APPOINTMENTS : reserva
-    DOCTORS ||--o{ APPOINTMENTS : atiende
-    USERS ||--o{ APPOINTMENTS : crea
-    USERS ||--o{ SESSIONS : tiene
-    APPOINTMENTS ||--o{ APPOINTMENT_RESCHEDULE_AUDIT : historial
-    USERS ||--o{ APPOINTMENT_RESCHEDULE_AUDIT : solicita_aprueba
-
-    USERS {
+    USUARIOS ||--o{ CITAS : reserva
+    USUARIOS ||--o{ HORARIOS : registra
+    USUARIOS ||--o{ SESIONES : tiene
+    USUARIOS ||--o{ AUDITORIA_REPROGRAMACION : solicita_o_aprueba
+    CITAS ||--o{ AUDITORIA_REPROGRAMACION : historial
+    USUARIOS {
         int id PK
-        string full_name
         string email UK
-        string password_hash
-        enum role "paciente|medico|admin"
-        boolean is_active
+        string password
+        string nombre
+        string apellido
+        enum rol "paciente|medico|admin"
+        string especialidad_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CITAS ||--o{ HORARIOS : utiliza
+    CITAS {
+        int id PK
+        int paciente_id FK
+        int medico_id FK
+        int horario_id FK
+        enum estado "pendiente|completada|cancelada|solicitud_reprogramacion|reprogramada"
+        text notas
+        datetime created_at
+        datetime updated_at
+    }
+    
+    HORARIOS {
+        int id PK
+        int medico_id FK
+        date fecha
+        time hora_inicio
+        time hora_fin
+        boolean disponible
         datetime created_at
     }
-
-    PATIENTS {
-        int id PK
-        int user_id UK_FK
-        string dni UK
-        string phone
-        date birth_date
-        string address
-        string emergency_contact
-    }
-
-    DOCTORS {
-        int id PK
-        int user_id UK_FK
-        string specialty
-        string license_number UK
-        string office
-    }
-
-    DOCTOR_SCHEDULES {
-        int id PK
-        int doctor_id FK
-        int day_of_week
-        time start_time
-        time end_time
-        int slot_minutes
-        boolean is_active
-    }
-
-    APPOINTMENTS {
-        int id PK
-        int patient_id FK
-        int doctor_id FK
-        date appointment_date
-        time start_time
-        time end_time
-        enum status "pendiente|completada|cancelada|solicitud_reprogramacion|reprogramada"
-        text reason
-        text notes
-        int created_by_user_id FK
-        datetime created_at
-    }
-
-    SESSIONS {
+    
+    SESIONES {
         string sid PK
         text sess
         datetime expire
     }
 
-    APPOINTMENT_RESCHEDULE_AUDIT {
+    AUDITORIA_REPROGRAMACION {
         int id PK
         int original_appointment_id FK
         int new_appointment_id FK
@@ -885,6 +862,12 @@ erDiagram
         string new_status
         text note
         datetime created_at
+    }
+    
+    ESPECIALIDADES {
+        int id PK
+        string nombre UK
+        text descripcion
     }
 ```
 
@@ -896,55 +879,14 @@ Almacena todos los usuarios del sistema (pacientes, médicos, administrador).
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
 | `id` | INTEGER | Clave primaria (autoincremento) |
-| `full_name` | TEXT | Nombre completo del usuario |
 | `email` | TEXT | Email único, usado para login |
-| `password_hash` | TEXT | Contraseña hasheada con bcrypt |
-| `role` | TEXT | `'paciente'` \| `'medico'` \| `'admin'` |
-| `is_active` | INTEGER | Estado del usuario (1 activo, 0 inactivo) |
+| `password` | TEXT | Contraseña hasheada con bcrypt |
+| `nombre` | TEXT | Nombre del usuario |
+| `apellido` | TEXT | Apellido |
+| `rol` | TEXT | `'paciente'` \| `'medico'` \| `'admin'` |
+| `especialidad_id` | INTEGER | Referencia a especialidad (solo médicos) |
 | `created_at` | DATETIME | Marca de inserción |
-
----
-
-#### **PATIENTS**
-Datos clínicos y de contacto de los usuarios con rol paciente.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `user_id` | INTEGER | Referencia única a `users.id` |
-| `dni` | TEXT | Documento nacional (único) |
-| `phone` | TEXT | Teléfono de contacto |
-| `birth_date` | TEXT | Fecha de nacimiento |
-| `address` | TEXT | Dirección |
-| `emergency_contact` | TEXT | Contacto de emergencia |
-
----
-
-#### **DOCTORS**
-Datos profesionales de los usuarios con rol médico.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `user_id` | INTEGER | Referencia única a `users.id` |
-| `specialty` | TEXT | Especialidad médica |
-| `license_number` | TEXT | Número de colegiatura/licencia (único) |
-| `office` | TEXT | Consultorio |
-
----
-
-#### **DOCTOR_SCHEDULES**
-Disponibilidad semanal de cada médico.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `doctor_id` | INTEGER | Referencia al médico |
-| `day_of_week` | INTEGER | Día de semana (`0` domingo ... `6` sábado) |
-| `start_time` | TEXT | Hora de inicio |
-| `end_time` | TEXT | Hora de fin |
-| `slot_minutes` | INTEGER | Duración de bloque de atención |
-| `is_active` | INTEGER | Horario activo/inactivo |
+| `updated_at` | DATETIME | Marca de última actualización |
 
 ---
 
@@ -954,16 +896,28 @@ Registra todas las citas reservadas entre pacientes y médicos.
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
 | `id` | INTEGER | Clave primaria |
-| `patient_id` | INTEGER | Referencia a `patients.id` |
-| `doctor_id` | INTEGER | Referencia a `doctors.id` |
-| `appointment_date` | TEXT | Fecha de la cita (`YYYY-MM-DD`) |
-| `start_time` | TEXT | Hora de inicio |
-| `end_time` | TEXT | Hora de fin |
-| `status` | TEXT | `'pendiente'` \| `'completada'` \| `'cancelada'` \| `'solicitud_reprogramacion'` \| `'reprogramada'` |
-| `reason` | TEXT | Motivo de consulta |
-| `notes` | TEXT | Observaciones (opcional) |
-| `created_by_user_id` | INTEGER | Usuario que creó la cita |
+| `paciente_id` | INTEGER | Referencia a usuario paciente |
+| `medico_id` | INTEGER | Referencia a usuario médico |
+| `horario_id` | INTEGER | Referencia al horario asignado |
+| `estado` | TEXT | `'pendiente'` \| `'completada'` \| `'cancelada'` \| `'solicitud_reprogramacion'` \| `'reprogramada'` |
+| `notas` | TEXT | Observaciones (opcional) |
 | `created_at` | DATETIME | Fecha de reserva |
+| `updated_at` | DATETIME | Última actualización |
+
+---
+
+#### **HORARIOS**
+Almacena disponibilidad de médicos (bloques de tiempo).
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | INTEGER | Clave primaria |
+| `medico_id` | INTEGER | Referencia al médico |
+| `fecha` | DATE | Fecha del horario |
+| `hora_inicio` | TIME | Hora inicio (ej: 09:00) |
+| `hora_fin` | TIME | Hora fin (ej: 17:00) |
+| `disponible` | BOOLEAN | `true` = disponible, `false` = ocupado |
+| `created_at` | DATETIME | Creación del registro |
 
 ---
 
@@ -998,7 +952,7 @@ Almacena trazabilidad de reprogramaciones aprobadas.
 ### 12.3 Relaciones Principales
 
 ```
-Usuario (Médico)
+Usuario (Médico) 
     ↓ registra
 Horarios 
     ↓ utiliza
@@ -1029,6 +983,7 @@ Usuario (Paciente)
 - ✅ **Sesiones persistentes** con express-session + SQLite
 - ✅ **Control de acceso por rol (RBAC)** - cada ruta valida el rol requerido
 - ✅ **Logout** con destrucción de sesión
+- ✅ **Recuperación de contraseña** (base ready, expandible)
 
 ### 13.2 Gestión de Citas
 
@@ -1084,14 +1039,14 @@ Usuario (Paciente)
 - 🍪 **Cookies seguras:** `httpOnly=true`, `sameSite=lax`
 - 🛡️ **PROTECCIÓN CSRF** en todos los formularios
 - ⚠️ **Validación de entrada** en servidor con express-validator
-- ⏱️ **Rate Limiting** en login (máx 10 intentos/10min)
+- ⏱️ **Rate Limiting** en login (máx 5 intentos/15min)
 - 🔑 **Headers de seguridad** con Helmet
 - 🔐 **Encriptación de sesión** con sesión secret
 
 ### 13.7 Calidad del Código
 
 - 📂 **Estructura modular** (MVC por funcionalidad)
-- 🧪 **Base de pruebas** con archivos placeholder en `tests/` (pendiente ampliar cobertura)
+- 🧪 **Tests unitarios** (auth, citas, pacientes)
 - 📝 **Validadores** reutilizables
 - 🔄 **Consultas optimizadas** con prepared statements
 - 📊 **Logging** de eventos importantes
@@ -1110,7 +1065,7 @@ El sistema implementa múltiples capas de protección:
 | 🔐 **bcrypt** | Hash seguro de contraseñas (10 rounds de salt) | `auth.service.js` |
 | 🍪 **Sesiones** | Almacenadas en SQLite, con cookie `httpOnly` | `config/session.js` |
 | 🔑 **Session Secret** | Secreto criptográfico para firmar sesiones | `.env` |
-| ⏱️ **Expiración** | Sesión expira en 8 horas de inactividad | `config/session.js` |
+| ⏱️ **Expiración** | Sesión expira en 24 horas de inactividad | `config/session.js` |
 
 ### 14.2 Protección de Solicitudes
 
@@ -1126,14 +1081,16 @@ El sistema implementa múltiples capas de protección:
 |--------|-------|----------|
 | `X-Content-Type-Options` | `nosniff` | Previene MIME sniffing |
 | `X-Frame-Options` | `DENY` | Evita clickjacking |
-| `Content-Security-Policy` | Deshabilitada en app (`contentSecurityPolicy: false`) | Evita bloqueos CSP durante desarrollo SSR |
+| `X-XSS-Protection` | `1; mode=block` | Protección XSS navegador |
+| `Strict-Transport-Security` | HTTPS solo | Fuerza HTTPS en producción |
 
 *Aplicados por* **Helmet.js** en `src/app.js`
 
 ### 14.4 Rate Limiting
 
 ```javascript
-login: máx 10 intentos fallidos cada 10 minutos
+login: máx 5 intentos fallidos cada 15 minutos
+registro: máx 3 nuevas cuentas cada hora
 ```
 
 Implementado con `express-rate-limit` en `auth.routes.js`
@@ -1288,7 +1245,7 @@ npm run db:init
 ```javascript
 // En src/config/session.js
 cookie: { 
-    maxAge: 1000 * 60 * 60 * 8  // 8 horas
+  maxAge: 24 * 60 * 60 * 1000  // 24 horas
 }
 ```
 
@@ -1365,7 +1322,7 @@ PRAGMA busy_timeout = 5000;
 ### 16.2 Consultas Optimizadas
 
 - 📊 **Prepared Statements:** Reutilizadas, evita recompilación
-- 🔍 **Restricciones e integridad:** claves únicas (email, dni, licencia) y foreign keys activas
+- 🔍 **Índices:** En columnas frecuentes (email, especialidad_id)
 - ⚡ **Transacciones:** Agrupa múltiples operaciones
 - 💾 **Caché:** Horarios disponibles con `Set` (búsqueda O(1))
 
@@ -1380,6 +1337,7 @@ PRAGMA busy_timeout = 5000;
 
 ```javascript
 // Morgan HTTP logger
+app.use(morgan('combined'));  // Producción
 app.use(morgan('dev'));       // Desarrollo
 
 // Logger personalizado

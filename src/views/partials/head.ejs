@@ -13,12 +13,48 @@
 <body>
   <div class="background-shape"></div>
   <header class="topbar">
-    <div class="brand-wrap">
-      <img src="/img/logo-mark.svg" alt="Logo Policlínico" class="brand-logo" />
-      <div>
-        <h1>Policlínico San Juan Bautista</h1>
-        <p>Sistema Web de Gestión de Citas</p>
+    <div class="topbar-inner">
+      <div class="brand-wrap">
+        <img src="/img/logo-mark.svg" alt="Logo Policlínico" class="brand-logo" />
+        <div>
+          <h1>Policlínico San Juan Bautista</h1>
+          <p>Sistema Web de Gestión de Citas</p>
+        </div>
       </div>
+      <% if (currentUser) {
+        const fullName = (currentUser.full_name || 'Usuario').trim();
+        const tokens = fullName.split(/\s+/).filter(Boolean);
+        const honorifics = new Set(['dr', 'dra', 'doctor', 'doctora', 'sr', 'sra', 'srta', 'lic', 'ing']);
+        let tokenIndex = 0;
+        while (tokenIndex < tokens.length && honorifics.has(tokens[tokenIndex].toLowerCase().replace(/[.,]/g, ''))) {
+          tokenIndex += 1;
+        }
+        const firstName = tokens[tokenIndex] || tokens[0] || 'Usuario';
+        const displayName = tokens.slice(tokenIndex, tokenIndex + 2).join(' ') || fullName;
+        const avatarLetter = firstName.charAt(0).toUpperCase();
+        const roleLabel = {
+          admin: 'Administrador',
+          medico: 'Médico',
+          paciente: 'Paciente'
+        };
+        const roleIcon = {
+          admin: '/img/icon-shield.svg',
+          medico: '/img/icon-doctor.svg',
+          paciente: '/img/icon-user.svg'
+        };
+      %>
+        <aside class="topbar-user-chip" aria-label="Usuario conectado">
+          <span class="topbar-user-avatar" aria-hidden="true"><%= avatarLetter %></span>
+          <div class="topbar-user-copy">
+            <span class="topbar-user-kicker">Sesión activa</span>
+            <strong class="topbar-user-name">Bienvenido, <%= displayName %></strong>
+            <small>
+              <img src="<%= roleIcon[currentUser.role] || '/img/icon-user.svg' %>" alt="" class="inline-icon" />
+              <%= roleLabel[currentUser.role] || 'Usuario' %>
+            </small>
+          </div>
+        </aside>
+      <% } %>
     </div>
   </header>
   <% if (currentUser) { %>

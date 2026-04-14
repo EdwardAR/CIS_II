@@ -11,7 +11,7 @@
 </section>
 
 <section class="card">
-  <h2>Horarios - <%= doctor.full_name %></h2>
+  <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios - <%= doctor.full_name %></h2>
   <form method="post" action="/medicos/<%= doctor.id %>/horarios" class="grid-form two-cols register-form">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
@@ -44,10 +44,10 @@
   <table>
     <thead>
       <tr>
-        <th>Día</th>
-        <th>Inicio</th>
-        <th>Fin</th>
-        <th>Bloque</th>
+        <th><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Día</th>
+        <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Inicio</th>
+        <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fin</th>
+        <th><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Bloque</th>
       </tr>
     </thead>
     <tbody>

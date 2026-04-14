@@ -4,6 +4,8 @@ const {
   getDoctorOptions,
   getDoctorSpecialties,
   getDoctorOptionsBySpecialty,
+  getDoctorById,
+  getDoctorSchedule,
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus
@@ -13,6 +15,16 @@ function buildViewData(user, options = {}) {
   const selectedSpecialty = options.selectedSpecialty || '';
   const doctors = selectedSpecialty ? getDoctorOptionsBySpecialty(selectedSpecialty) : getDoctorOptions();
   const appointments = listAppointmentsForRole(user);
+  const selectedDoctorId = Number(options.selectedDoctorId) || null;
+  const selectedDoctor = selectedDoctorId ? getDoctorById(selectedDoctorId) : null;
+  const selectedDoctorSchedule = selectedDoctorId ? getDoctorSchedule(selectedDoctorId) : [];
+
+  const selectedDate = options.selectedDate || null;
+  const selectedDayOfWeek = selectedDate ? new Date(`${selectedDate}T00:00:00`).getDay() : null;
+  const selectedDateHasShift =
+    selectedDayOfWeek === null
+      ? null
+      : selectedDoctorSchedule.some((slot) => slot.day_of_week === selectedDayOfWeek);
 
   return {
     pageTitle: 'Sistema de citas',
@@ -22,8 +34,12 @@ function buildViewData(user, options = {}) {
     specialties: getDoctorSpecialties(),
     slots: options.slots || [],
     selectedSpecialty,
-    selectedDoctorId: options.selectedDoctorId || null,
-    selectedDate: options.selectedDate || null,
+    selectedDoctorId,
+    selectedDoctor,
+    selectedDoctorSchedule,
+    selectedDate,
+    selectedDayOfWeek,
+    selectedDateHasShift,
     formErrors: options.formErrors || []
   };
 }

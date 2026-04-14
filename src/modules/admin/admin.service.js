@@ -22,7 +22,7 @@ function getSummary() {
   const upcoming = db
     .prepare(
       `SELECT a.id, a.appointment_date, a.start_time, a.status,
-              up.full_name AS patient_name, ud.full_name AS doctor_name, d.specialty
+              up.full_name AS patient_name, ud.full_name AS doctor_name, d.specialty, d.office AS doctor_office
        FROM appointments a
        INNER JOIN patients p ON p.id = a.patient_id
        INNER JOIN users up ON up.id = p.user_id

@@ -1,22 +1,37 @@
 const { validationResult } = require('express-validator');
-const { getPatientProfileByUserId, updatePatientProfile } = require('./pacientes.service');
+const { getPatientProfileByUserId, updatePatientProfile, getDoctorAvailabilitySnapshot } = require('./pacientes.service');
+
+function buildAvailabilitySummary(doctorsAvailability) {
+  const inShift = doctorsAvailability.filter((doctor) => doctor.is_in_shift).length;
+  return {
+    total: doctorsAvailability.length,
+    inShift,
+    outOfShift: doctorsAvailability.length - inShift
+  };
+}
 
 function profile(req, res) {
   const patient = getPatientProfileByUserId(req.session.user.id);
+  const doctorsAvailability = getDoctorAvailabilitySnapshot();
   return res.render('pacientes/profile', {
     pageTitle: 'Mi perfil',
-    patient
+    patient,
+    doctorsAvailability,
+    availabilitySummary: buildAvailabilitySummary(doctorsAvailability)
   });
 }
 
 function updateProfile(req, res) {
   const errors = validationResult(req);
   const patient = getPatientProfileByUserId(req.session.user.id);
+  const doctorsAvailability = getDoctorAvailabilitySnapshot();
 
   if (!errors.isEmpty()) {
     return res.status(400).render('pacientes/profile', {
       pageTitle: 'Mi perfil',
       patient,
+      doctorsAvailability,
+      availabilitySummary: buildAvailabilitySummary(doctorsAvailability),
       formErrors: errors.array()
     });
   }

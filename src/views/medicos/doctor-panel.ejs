@@ -20,7 +20,12 @@
     <div class="doctor-insight-strip">
       <div>
         <strong>Rendimiento de atención</strong>
-        <p><%= productivity %>% de citas completadas.</p>
+        <p>
+          <%= productivity %>% de citas completadas.
+          <% if (panel?.doctorOffice) { %>
+            Consultorio <%= panel.doctorOffice %>.
+          <% } %>
+        </p>
       </div>
       <div class="insight-progress" aria-hidden="true">
         <span style="width: <%= productivity %>%"></span>
@@ -78,6 +83,7 @@
           <th>Fecha</th>
           <th>Hora</th>
           <th>Paciente</th>
+          <th>Consultorio</th>
           <th>Estado</th>
         </tr>
       </thead>
@@ -87,12 +93,13 @@
             <td><%= a.appointment_date %></td>
             <td><%= a.start_time %> - <%= a.end_time %></td>
             <td><%= a.patient_name %></td>
+            <td><%= a.doctor_office || panel?.doctorOffice || '-' %></td>
             <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
           </tr>
         <% }) %>
         <% if (!appointments.length) { %>
           <tr>
-            <td colspan="4" class="helper">No hay citas registradas para mostrar.</td>
+            <td colspan="5" class="helper">No hay citas registradas para mostrar.</td>
           </tr>
         <% } %>
       </tbody>

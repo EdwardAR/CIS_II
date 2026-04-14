@@ -77,21 +77,22 @@ function createSchedule(doctorId, payload) {
 }
 
 function getDoctorPanelByUserId(userId) {
-  const doctor = db.prepare('SELECT id FROM doctors WHERE user_id = ?').get(userId);
+  const doctor = db.prepare('SELECT id, office FROM doctors WHERE user_id = ?').get(userId);
   if (!doctor) return null;
 
   const appointments = db
     .prepare(
-      `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status, u.full_name as patient_name
+      `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status, u.full_name as patient_name, d.office AS doctor_office
        FROM appointments a
        INNER JOIN patients p ON p.id = a.patient_id
        INNER JOIN users u ON u.id = p.user_id
+       INNER JOIN doctors d ON d.id = a.doctor_id
        WHERE a.doctor_id = ?
        ORDER BY a.appointment_date DESC, a.start_time DESC`
     )
     .all(doctor.id);
 
-  return { doctorId: doctor.id, appointments };
+  return { doctorId: doctor.id, doctorOffice: doctor.office, appointments };
 }
 
 module.exports = {

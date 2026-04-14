@@ -83,6 +83,7 @@
             <th>Paciente</th>
             <th>Médico</th>
             <th>Especialidad</th>
+            <th>Consultorio</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -94,6 +95,7 @@
               <td><%= a.patient_name %></td>
               <td><%= a.doctor_name %></td>
               <td><%= a.specialty %></td>
+              <td><%= a.doctor_office || '-' %></td>
               <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
             </tr>
           <% }) %>

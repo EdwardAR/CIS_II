@@ -57,7 +57,7 @@
       <option value="">Seleccione</option>
       <% doctors.forEach((doctor) => { %>
         <option value="<%= doctor.id %>" <%= selectedDoctorId === doctor.id ? 'selected' : '' %>>
-          <%= doctor.full_name %> - <%= doctor.specialty %>
+          <%= doctor.full_name %> - <%= doctor.specialty %><%= doctor.office ? ` (Consultorio ${doctor.office})` : '' %>
         </option>
       <% }) %>
     </select>
@@ -67,6 +67,49 @@
 
     <button type="submit" class="btn auth-submit">Consultar disponibilidad</button>
   </form>
+
+  <% if (selectedDoctor) { %>
+    <section class="booking-doctor-schedule">
+      <div class="section-title-wrap">
+        <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios de <%= selectedDoctor.full_name %></h3>
+        <span class="table-count"><%= selectedDoctor.office ? `Consultorio ${selectedDoctor.office}` : 'Consultorio no registrado' %></span>
+      </div>
+
+      <% if (selectedDateHasShift === false) { %>
+        <p class="helper schedule-warning">El médico no atiende en la fecha seleccionada. Elige otra fecha para ver turnos disponibles.</p>
+      <% } else if (selectedDateHasShift === true) { %>
+        <p class="helper schedule-ok">El médico atiende en la fecha seleccionada. Puedes continuar con la reserva.</p>
+      <% } %>
+
+      <% if (!selectedDoctorSchedule.length) { %>
+        <p class="helper">Este médico aún no tiene horarios activos configurados.</p>
+      <% } else { %>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th>Bloque</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; %>
+              <% selectedDoctorSchedule.forEach((slot) => { %>
+                <tr class="<%= selectedDayOfWeek === slot.day_of_week ? 'schedule-day-selected' : '' %>">
+                  <td><%= dayNames[slot.day_of_week] %></td>
+                  <td><%= slot.start_time %></td>
+                  <td><%= slot.end_time %></td>
+                  <td><%= slot.slot_minutes %> min</td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  <% } %>
 
   <% if (slots.length) { %>
     <form method="post" action="/citas" class="grid-form two-cols register-form booking-confirm-form">
@@ -111,6 +154,7 @@
             <th>Paciente</th>
             <th>Médico</th>
             <th>Especialidad</th>
+            <th>Consultorio</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -123,6 +167,7 @@
               <td><%= a.patient_name %></td>
               <td><%= a.doctor_name %></td>
               <td><%= a.specialty %></td>
+              <td><%= a.doctor_office || '-' %></td>
               <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
               <td>
                 <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>

@@ -20,6 +20,8 @@
 body {
   margin: 0;
   font-family: 'Work Sans', sans-serif;
+  font-size: 16.5px;
+  line-height: 1.45;
   color: var(--text-main);
   background: radial-gradient(circle at top right, #dff1ff 0%, var(--bg-0) 55%);
   min-height: 100vh;
@@ -747,9 +749,21 @@ button, .btn {
 }
 
 .flash {
-  border-radius: 8px;
-  padding: 0.7rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 10px;
+  padding: 0.8rem 0.95rem;
   margin-bottom: 1rem;
+  font-size: 0.96rem;
+}
+
+.flash::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .flash-success {
@@ -758,10 +772,23 @@ button, .btn {
   color: #215f39;
 }
 
+.flash-success::before {
+  background: radial-gradient(circle at 35% 35%, #7fd0a0 0%, #2f8e57 80%);
+}
+
 .flash-error {
   background: #fbeaea;
   border: 1px solid #f1c3c3;
   color: #8f2525;
+}
+
+.flash-error::before {
+  background: radial-gradient(circle at 35% 35%, #f4a2a2 0%, #c74b4b 80%);
+}
+
+.flash ul {
+  margin: 0;
+  padding-left: 1.1rem;
 }
 
 table {
@@ -800,6 +827,34 @@ th, td {
 .status-cancelada {
   background: #fde6e6;
   color: var(--danger);
+}
+
+.status-in-shift {
+  background: #e6f7eb;
+  color: #247043;
+}
+
+.status-out-shift {
+  background: #eef3f7;
+  color: #4a6173;
+}
+
+.availability-card .table-shell {
+  margin-top: 0.5rem;
+}
+
+.availability-notice {
+  border: 1px solid #cddfed;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef6fc 100%);
+  border-radius: 10px;
+  padding: 0.65rem 0.8rem;
+  margin-bottom: 0.65rem;
+}
+
+.availability-notice p {
+  margin: 0;
+  color: #355267;
+  font-size: 0.94rem;
 }
 
 .metrics-grid {
@@ -852,6 +907,28 @@ th, td {
 .table-shell {
   width: 100%;
   overflow-x: auto;
+}
+
+.booking-doctor-schedule {
+  margin-top: 1rem;
+  border: 1px solid #cfe0ee;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fbfdff 0%, #f1f8ff 100%);
+  padding: 0.9rem;
+}
+
+.schedule-warning {
+  color: #a56c17;
+  font-weight: 600;
+}
+
+.schedule-ok {
+  color: #2b7a48;
+  font-weight: 600;
+}
+
+.schedule-day-selected {
+  background: #eaf6ff;
 }
 
 .appointments-hero {

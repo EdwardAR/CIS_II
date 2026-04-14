@@ -37,4 +37,48 @@
   </form>
 </section>
 
+<section class="card availability-card">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Disponibilidad de médicos</h2>
+    <span class="table-count"><%= availabilitySummary.inShift %> en horario ahora</span>
+  </div>
+
+  <div class="availability-notice">
+    <p>
+      <strong><%= availabilitySummary.inShift %></strong> en horario,
+      <strong><%= availabilitySummary.outOfShift %></strong> fuera de horario.
+      Esta vista se calcula según los turnos activos registrados hoy.
+    </p>
+  </div>
+
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Médico</th>
+          <th><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Especialidad</th>
+          <th><img src="/img/icon-home.svg" alt="" class="inline-icon" />Consultorio</th>
+          <th><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Turno de hoy</th>
+          <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Estado actual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% doctorsAvailability.forEach((doctor) => { %>
+          <tr>
+            <td><%= doctor.full_name %></td>
+            <td><%= doctor.specialty %></td>
+            <td><%= doctor.office || '-' %></td>
+            <td><%= doctor.today_schedule %></td>
+            <td>
+              <span class="status <%= doctor.is_in_shift ? 'status-in-shift' : 'status-out-shift' %>">
+                <%= doctor.is_in_shift ? 'En horario' : 'Fuera de horario' %>
+              </span>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <%- include('../partials/foot') %>

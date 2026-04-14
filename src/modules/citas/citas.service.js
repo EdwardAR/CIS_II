@@ -5,7 +5,7 @@ const findPatientByUserStmt = db.prepare('SELECT id FROM patients WHERE user_id 
 const findDoctorByUserStmt = db.prepare('SELECT id FROM doctors WHERE user_id = ?');
 
 const listAppointmentsBase = `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status,
-                                     up.full_name AS patient_name, ud.full_name AS doctor_name, d.specialty
+                                     up.full_name AS patient_name, ud.full_name AS doctor_name, d.specialty, d.office AS doctor_office
                               FROM appointments a
                               INNER JOIN patients p ON p.id = a.patient_id
                               INNER JOIN users up ON up.id = p.user_id
@@ -41,6 +41,20 @@ const pendingAppointmentExistsStmt = db.prepare(
   'SELECT id FROM appointments WHERE doctor_id = ? AND appointment_date = ? AND start_time = ? AND status = ?'
 );
 
+const listDoctorSchedulesStmt = db.prepare(
+  `SELECT day_of_week, start_time, end_time, slot_minutes
+   FROM doctor_schedules
+   WHERE doctor_id = ? AND is_active = 1
+   ORDER BY day_of_week ASC, start_time ASC`
+);
+
+const getDoctorByIdStmt = db.prepare(
+  `SELECT d.id, u.full_name, d.specialty, d.office
+   FROM doctors d
+   INNER JOIN users u ON u.id = d.user_id
+   WHERE d.id = ?`
+);
+
 const insertAppointmentStmt = db.prepare(
   `INSERT INTO appointments (patient_id, doctor_id, appointment_date, start_time, end_time, status, reason, created_by_user_id)
    VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)`
@@ -73,6 +87,7 @@ function getDoctorOptions() {
   return db
     .prepare(
       `SELECT d.id, u.full_name, d.specialty
+              , d.office
        FROM doctors d
        INNER JOIN users u ON u.id = d.user_id
        ORDER BY u.full_name ASC`
@@ -100,6 +115,7 @@ function getDoctorOptionsBySpecialty(specialty) {
   return db
     .prepare(
       `SELECT d.id, u.full_name, d.specialty
+              , d.office
        FROM doctors d
        INNER JOIN users u ON u.id = d.user_id
        WHERE d.specialty = ?
@@ -131,6 +147,16 @@ function getAvailableSlots(doctorId, date) {
   }
 
   return slots;
+}
+
+function getDoctorSchedule(doctorId) {
+  if (!doctorId) return [];
+  return listDoctorSchedulesStmt.all(doctorId);
+}
+
+function getDoctorById(doctorId) {
+  if (!doctorId) return null;
+  return getDoctorByIdStmt.get(doctorId);
 }
 
 function createAppointment(payload, currentUser) {
@@ -178,6 +204,8 @@ module.exports = {
   getDoctorOptions,
   getDoctorSpecialties,
   getDoctorOptionsBySpecialty,
+  getDoctorById,
+  getDoctorSchedule,
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus

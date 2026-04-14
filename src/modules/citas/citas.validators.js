@@ -7,4 +7,10 @@ const createAppointmentValidator = [
   body('reason').trim().isLength({ min: 5 }).withMessage('Motivo demasiado corto.')
 ];
 
-module.exports = { createAppointmentValidator };
+const editAppointmentStatusValidator = [
+  body('status')
+    .isIn(['pendiente', 'completada', 'cancelada', 'reprogramada', 'solicitud_reprogramacion'])
+    .withMessage('Estado de cita invalido.')
+];
+
+module.exports = { createAppointmentValidator, editAppointmentStatusValidator };

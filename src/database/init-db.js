@@ -443,10 +443,79 @@ function ensureAppointment(appointment, adminUserId) {
   );
 }
 
+function ensureAppointmentsStatusSchema() {
+  const tableInfo = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'appointments'")
+    .get();
+
+  if (!tableInfo || !tableInfo.sql || tableInfo.sql.includes("'solicitud_reprogramacion'")) {
+    return;
+  }
+
+  const migrate = db.transaction(() => {
+    db.exec(`
+      ALTER TABLE appointments RENAME TO appointments_old;
+
+      CREATE TABLE appointments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_id INTEGER NOT NULL,
+        doctor_id INTEGER NOT NULL,
+        appointment_date TEXT NOT NULL,
+        start_time TEXT NOT NULL,
+        end_time TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pendiente' CHECK(status IN ('pendiente', 'completada', 'cancelada', 'reprogramada', 'solicitud_reprogramacion')),
+        reason TEXT,
+        notes TEXT,
+        created_by_user_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        FOREIGN KEY(patient_id) REFERENCES patients(id),
+        FOREIGN KEY(doctor_id) REFERENCES doctors(id),
+        FOREIGN KEY(created_by_user_id) REFERENCES users(id),
+        UNIQUE(doctor_id, appointment_date, start_time)
+      );
+
+      INSERT INTO appointments (
+        id,
+        patient_id,
+        doctor_id,
+        appointment_date,
+        start_time,
+        end_time,
+        status,
+        reason,
+        notes,
+        created_by_user_id,
+        created_at
+      )
+      SELECT
+        id,
+        patient_id,
+        doctor_id,
+        appointment_date,
+        start_time,
+        end_time,
+        CASE
+          WHEN status IN ('pendiente', 'completada', 'cancelada', 'reprogramada', 'solicitud_reprogramacion') THEN status
+          ELSE 'pendiente'
+        END,
+        reason,
+        notes,
+        created_by_user_id,
+        created_at
+      FROM appointments_old;
+
+      DROP TABLE appointments_old;
+    `);
+  });
+
+  migrate();
+}
+
 function initDatabase() {
   const schemaPath = path.resolve(__dirname, 'schema.sql');
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   db.exec(schemaSql);
+  ensureAppointmentsStatusSchema();
 
   const defaultPasswordHash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
 

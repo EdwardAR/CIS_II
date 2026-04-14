@@ -566,12 +566,21 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 | POST | `/citas` | Crear nueva cita | Paciente | Valida disponibilidad |
 | POST | `/citas/:id/completar` | Marcar cita completada | Admin/Médico | Cambia estado a "completada" |
 | POST | `/citas/:id/cancelar` | Cancelar cita | Admin/Médico/Paciente | Depende del estado |
+| POST | `/citas/:id/solicitar-reprogramacion` | Solicitar reprogramación | Paciente | Cambia estado a "solicitud_reprogramacion" |
+| POST | `/citas/:id/aprobar-reprogramacion` | Aprobar reprogramación | Admin/Médico | Cambia estado a "reprogramada" |
 
 **Características:**
 - ✅ Filtro dinámico por especialidad
 - ✅ Lista de médicos actualiza según especialidad
 - ✅ Validación de horarios disponibles
 - ✅ Prevención de doble reserva
+
+#### Flujo de reprogramación (nuevo)
+
+- El **paciente** solicita la reprogramación de una cita pendiente.
+- El sistema cambia la cita a estado `solicitud_reprogramacion`.
+- Un **médico** (de esa cita) o **administrador** revisa y aprueba.
+- Al aprobar, la cita pasa a estado `reprogramada` y queda lista para nueva reserva.
 
 **Archivo:** [`src/modules/citas/citas.routes.js`](src/modules/citas/citas.routes.js)
 
@@ -707,9 +716,14 @@ graph TD
     H --> I{¿Disponible?}
     I -->|✅ Sí| J["✅ Cita<br/>Guardada"]
     I -->|❌ No| G
+
+    C --> R["🕒 Solicitar<br/>reprogramación"]
+    R --> S["⏳ Estado:<br/>solicitud_reprogramacion"]
+    S --> T["⏱ Espera aprobación<br/>médico/admin"]
     
     J --> B
     D --> B
+    T --> B
     B --> K["🚪 Logout"]
     
     style A fill:#e1f5ff
@@ -754,10 +768,12 @@ graph TD
     I --> J
     J --> K["✓ Marcar como<br/>Completada"]
     J --> L["❌ Cancelar Cita"]
+    J --> N["🕒 Aprobar<br/>reprogramación"]
     
     D --> B
     K --> B
     L --> B
+    N --> B
     B --> M["🚪 Logout"]
     
     style A fill:#e1f5ff
@@ -810,7 +826,7 @@ erDiagram
         int paciente_id FK
         int medico_id FK
         int horario_id FK
-        enum estado "pendiente|completada|cancelada"
+        enum estado "pendiente|completada|cancelada|solicitud_reprogramacion|reprogramada"
         text notas
         datetime created_at
         datetime updated_at
@@ -867,7 +883,7 @@ Registra todas las citas reservadas entre pacientes y médicos.
 | `paciente_id` | INTEGER | Referencia a usuario paciente |
 | `medico_id` | INTEGER | Referencia a usuario médico |
 | `horario_id` | INTEGER | Referencia al horario asignado |
-| `estado` | TEXT | `'pendiente'` \| `'completada'` \| `'cancelada'` |
+| `estado` | TEXT | `'pendiente'` \| `'completada'` \| `'cancelada'` \| `'solicitud_reprogramacion'` \| `'reprogramada'` |
 | `notas` | TEXT | Observaciones (opcional) |
 | `created_at` | DATETIME | Fecha de reserva |
 | `updated_at` | DATETIME | Última actualización |
@@ -918,7 +934,9 @@ Usuario (Paciente)
 3. Sistema busca horarios `disponible=true` del médico
 4. Se crea registro en CITAS con `estado='pendiente'`
 5. Se marca horario como `disponible=false`
-6. Médico completa o cancela la cita (actualiza estado)
+6. Paciente puede solicitar reprogramación (`solicitud_reprogramacion`)
+7. Médico/Admin aprueba y la cita pasa a `reprogramada`
+8. Médico completa o cancela la cita (actualiza estado)
 
 ---
 
@@ -941,12 +959,14 @@ Usuario (Paciente)
 - 📅 **Consultar disponibilidad** en tiempo real
 - ⏱️ **Ver historial** de citas pasadas y próximas
 - ✏️ **Cancelar citas** (con restricciones según estado)
+- 🕒 **Solicitar reprogramación** de citas pendientes
 
 #### **Para Médicos:**
 - 📋 **Panel personal** con citas asignadas
 - 🗂️ **Filtrar citas** por estado (pendiente/completada/cancelada)
 - ✓ **Marcar como completada** cuando se atiende
 - ❌ **Cancelar** si es necesario
+- ✅ **Aprobar solicitudes de reprogramación** de pacientes
 - 📊 **Ver estadísticas** de citas atendidas
 
 #### **Para Administradores:**

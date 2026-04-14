@@ -8,7 +8,9 @@ const {
   getDoctorSchedule,
   getAvailableSlots,
   createAppointment,
-  updateAppointmentStatus
+  updateAppointmentStatus,
+  requestAppointmentReschedule,
+  approveAppointmentReschedule
 } = require('./citas.service');
 
 function buildViewData(user, options = {}) {
@@ -54,6 +56,8 @@ function buildAppointmentSummary(appointments) {
   const pending = appointments.filter((item) => item.status === 'pendiente').length;
   const completed = appointments.filter((item) => item.status === 'completada').length;
   const cancelled = appointments.filter((item) => item.status === 'cancelada').length;
+  const reprogrammed = appointments.filter((item) => item.status === 'reprogramada').length;
+  const rescheduleRequested = appointments.filter((item) => item.status === 'solicitud_reprogramacion').length;
   const todayCount = appointments.filter((item) => item.appointment_date === todayIso).length;
   const upcomingCount = appointments.filter((item) => item.appointment_date >= todayIso).length;
 
@@ -62,6 +66,8 @@ function buildAppointmentSummary(appointments) {
     pending,
     completed,
     cancelled,
+    reprogrammed,
+    rescheduleRequested,
     today: todayCount,
     upcoming: upcomingCount
   };
@@ -120,4 +126,56 @@ function cancel(req, res) {
   return res.redirect('/citas');
 }
 
-module.exports = { index, searchSlots, create, complete, cancel };
+function editStatus(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    req.session.flash = { type: 'error', message: errors.array()[0].msg };
+    return res.redirect('/citas');
+  }
+
+  const appointmentId = Number(req.params.id);
+  const status = req.body.status;
+
+  try {
+    updateAppointmentStatus(appointmentId, status);
+    req.session.flash = { type: 'success', message: `Cita actualizada a estado ${status}.` };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
+
+  return res.redirect('/citas');
+}
+
+function requestReschedule(req, res) {
+  const appointmentId = Number(req.params.id);
+
+  try {
+    requestAppointmentReschedule(appointmentId, req.session.user);
+    req.session.flash = {
+      type: 'success',
+      message: 'Solicitud de reprogramacion enviada. Un medico o administrador debe aprobarla.'
+    };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
+
+  return res.redirect('/citas');
+}
+
+function approveReschedule(req, res) {
+  const appointmentId = Number(req.params.id);
+
+  try {
+    approveAppointmentReschedule(appointmentId, req.session.user);
+    req.session.flash = {
+      type: 'success',
+      message: 'Reprogramacion aprobada. La cita anterior queda como reprogramada.'
+    };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
+
+  return res.redirect('/citas');
+}
+
+module.exports = { index, searchSlots, create, complete, cancel, editStatus, requestReschedule, approveReschedule };

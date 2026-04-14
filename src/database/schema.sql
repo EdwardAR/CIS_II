@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   appointment_date TEXT NOT NULL,
   start_time TEXT NOT NULL,
   end_time TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pendiente' CHECK(status IN ('pendiente', 'completada', 'cancelada')),
+  status TEXT NOT NULL DEFAULT 'pendiente' CHECK(status IN ('pendiente', 'completada', 'cancelada', 'reprogramada', 'solicitud_reprogramacion')),
   reason TEXT,
   notes TEXT,
   created_by_user_id INTEGER NOT NULL,

@@ -11,6 +11,9 @@
   --ok: #2b7a48;
   --warn: #a56c17;
   --shadow: 0 12px 24px rgba(18, 46, 66, 0.1);
+  --motion-fast: 180ms;
+  --motion-base: 300ms;
+  --motion-soft: 480ms;
 }
 
 * {
@@ -221,7 +224,7 @@ body::after {
   box-shadow: var(--shadow);
   padding: 1.35rem 1.45rem;
   margin-bottom: 1.1rem;
-  transition: box-shadow 160ms ease, transform 160ms ease;
+  transition: box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease;
 }
 
 .card:hover {
@@ -754,6 +757,8 @@ body::after {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #0f9ec3, #0d6f99);
+  transform-origin: left center;
+  animation: progressFill 880ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
 .quick-actions {
@@ -1012,6 +1017,30 @@ button, .btn {
   background: #56748a;
 }
 
+.btn-edit {
+  background: linear-gradient(135deg, #6a53a1 0%, #4f3a86 100%);
+}
+
+.btn-edit:hover {
+  background: linear-gradient(135deg, #5f4a95 0%, #453178 100%);
+}
+
+.btn-request {
+  background: linear-gradient(135deg, #b8741e 0%, #8e5710 100%);
+}
+
+.btn-request:hover {
+  background: linear-gradient(135deg, #a7681a 0%, #7d4d0d 100%);
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, #277c46 0%, #1f6538 100%);
+}
+
+.btn-approve:hover {
+  background: linear-gradient(135deg, #236f3f 0%, #1a5530 100%);
+}
+
 .btn-danger {
   background: var(--danger);
 }
@@ -1236,6 +1265,49 @@ th, td {
   color: var(--danger);
 }
 
+.status-reprogramada {
+  background: #eaf1ff;
+  color: #355eaf;
+}
+
+.status-solicitud_reprogramacion {
+  background: #fff3dd;
+  color: #8e5710;
+}
+
+.appointment-edit-inline {
+  display: inline-block;
+  position: relative;
+  margin-left: 0.25rem;
+}
+
+.appointment-edit-inline summary {
+  list-style: none;
+}
+
+.appointment-edit-inline summary::-webkit-details-marker {
+  display: none;
+}
+
+.appointment-edit-form {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  width: 220px;
+  border: 1px solid #cddfed;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.6rem;
+  box-shadow: 0 12px 20px rgba(14, 43, 62, 0.14);
+  z-index: 3;
+}
+
+.appointment-edit-form select,
+.appointment-edit-form button {
+  width: 100%;
+  margin-top: 0.3rem;
+}
+
 .status-in-shift {
   background: #e6f7eb;
   color: #247043;
@@ -1284,6 +1356,29 @@ th, td {
 
 .metric.card {
   padding: 1.15rem 1.25rem;
+}
+
+.metric.card:hover {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.motion-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--motion-soft) ease,
+    transform var(--motion-soft) cubic-bezier(0.2, 0.9, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.motion-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.motion-pop {
+  animation: popIn 540ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
 .metric small {
@@ -1706,6 +1801,26 @@ th, td {
   }
 }
 
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @media (max-width: 900px) {
   .doctor-panel-hero {
     grid-template-columns: 1fr;
@@ -1918,6 +2033,12 @@ th, td {
     grid-template-columns: 1fr;
   }
 
+  .appointment-edit-form {
+    right: auto;
+    left: 0;
+    width: min(86vw, 250px);
+  }
+
   .doctor-panel-kpis {
     grid-template-columns: 1fr;
   }
@@ -1958,5 +2079,20 @@ th, td {
     width: 62px;
     height: 62px;
     opacity: 0.08;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .motion-reveal,
+  .motion-reveal.is-revealed {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

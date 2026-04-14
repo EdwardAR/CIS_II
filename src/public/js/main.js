@@ -43,6 +43,58 @@ const specialtySelect = document.getElementById('booking-specialty');
 const doctorSelect = document.getElementById('booking-doctor');
 const specialtyHelper = document.getElementById('booking-specialty-helper');
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!prefersReducedMotion) {
+  const revealSelector = [
+    '.page-hero',
+    '.appointments-hero',
+    '.admin-hero-shell',
+    '.doctor-panel-hero',
+    '.metrics-grid .metric',
+    '.admin-ops-grid > .card',
+    '.doctor-alert-shell > .card',
+    '.dashboard-table-card',
+    '.booking-shell',
+    '.doctors-form-card',
+    '.doctors-list-card',
+    '.profile-form-card',
+    '.auth-card',
+    '.auth-register-pro'
+  ].join(',');
+
+  const revealTargets = Array.from(document.querySelectorAll(revealSelector));
+
+  revealTargets.forEach((element, index) => {
+    element.classList.add('motion-reveal');
+    const delay = Math.min(index * 45, 360);
+    element.style.setProperty('--reveal-delay', `${delay}ms`);
+  });
+
+  const observeReveal = (entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      entry.target.classList.add('is-revealed');
+      if (entry.target.classList.contains('metric')) {
+        entry.target.classList.add('motion-pop');
+      }
+      observer.unobserve(entry.target);
+    });
+  };
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(observeReveal, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -8% 0px'
+    });
+
+    revealTargets.forEach((element) => observer.observe(element));
+  } else {
+    revealTargets.forEach((element) => element.classList.add('is-revealed'));
+  }
+}
+
 if (specialtySelect && doctorSelect) {
   const doctorOptions = Array.from(doctorSelect.options).slice(1);
   const defaultOption = doctorSelect.options[0];

@@ -1,6 +1,14 @@
 const { db } = require('../../config/db');
 const { addMinutesToTime, getDayOfWeek } = require('../../utils/date');
 
+const ALLOWED_APPOINTMENT_STATUSES = new Set([
+  'pendiente',
+  'completada',
+  'cancelada',
+  'reprogramada',
+  'solicitud_reprogramacion'
+]);
+
 const findPatientByUserStmt = db.prepare('SELECT id FROM patients WHERE user_id = ?');
 const findDoctorByUserStmt = db.prepare('SELECT id FROM doctors WHERE user_id = ?');
 
@@ -61,6 +69,13 @@ const insertAppointmentStmt = db.prepare(
 );
 
 const updateAppointmentStatusStmt = db.prepare('UPDATE appointments SET status = ? WHERE id = ?');
+const getAppointmentByIdStmt = db.prepare(
+  `SELECT a.id, a.status, p.user_id AS patient_user_id, d.user_id AS doctor_user_id
+   FROM appointments a
+   INNER JOIN patients p ON p.id = a.patient_id
+   INNER JOIN doctors d ON d.id = a.doctor_id
+   WHERE a.id = ?`
+);
 
 function getPatientByUser(userId) {
   return findPatientByUserStmt.get(userId);
@@ -196,7 +211,49 @@ function createAppointment(payload, currentUser) {
 }
 
 function updateAppointmentStatus(appointmentId, status) {
+  if (!ALLOWED_APPOINTMENT_STATUSES.has(status)) {
+    throw new Error('Estado de cita no permitido.');
+  }
+
   updateAppointmentStatusStmt.run(status, appointmentId);
+}
+
+function requestAppointmentReschedule(appointmentId, currentUser) {
+  if (!currentUser || currentUser.role !== 'paciente') {
+    throw new Error('Solo el paciente puede solicitar reprogramacion.');
+  }
+
+  const appointment = getAppointmentByIdStmt.get(appointmentId);
+  if (!appointment || appointment.patient_user_id !== currentUser.id) {
+    throw new Error('No se encontro la cita para solicitar reprogramacion.');
+  }
+
+  if (appointment.status !== 'pendiente') {
+    throw new Error('Solo se pueden solicitar reprogramaciones en citas pendientes.');
+  }
+
+  updateAppointmentStatus(appointmentId, 'solicitud_reprogramacion');
+}
+
+function approveAppointmentReschedule(appointmentId, currentUser) {
+  if (!currentUser || !['admin', 'medico'].includes(currentUser.role)) {
+    throw new Error('Solo medico o administrador pueden aprobar reprogramacion.');
+  }
+
+  const appointment = getAppointmentByIdStmt.get(appointmentId);
+  if (!appointment) {
+    throw new Error('No se encontro la cita solicitada.');
+  }
+
+  if (currentUser.role === 'medico' && appointment.doctor_user_id !== currentUser.id) {
+    throw new Error('No tienes permiso para aprobar esta reprogramacion.');
+  }
+
+  if (appointment.status !== 'solicitud_reprogramacion') {
+    throw new Error('La cita no tiene una solicitud de reprogramacion pendiente.');
+  }
+
+  updateAppointmentStatus(appointmentId, 'reprogramada');
 }
 
 module.exports = {
@@ -208,5 +265,7 @@ module.exports = {
   getDoctorSchedule,
   getAvailableSlots,
   createAppointment,
-  updateAppointmentStatus
+  updateAppointmentStatus,
+  requestAppointmentReschedule,
+  approveAppointmentReschedule
 };

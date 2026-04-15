@@ -844,7 +844,7 @@ erDiagram
 
         PATIENTS {
             int id PK
-            int user_id UK FK
+            int user_id FK
             string dni UK
             string phone
             date birth_date
@@ -854,7 +854,7 @@ erDiagram
 
         DOCTORS {
             int id PK
-            int user_id UK FK
+            int user_id FK
             string specialty
             string license_number UK
             string office

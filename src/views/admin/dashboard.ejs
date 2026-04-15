@@ -78,57 +78,76 @@
   </article>
 </section>
 
-<section class="metrics-grid dashboard-section-gap admin-metrics-extended">
-  <article class="metric card">
-    <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total citas</h3>
-    <p><%= summary.total %></p>
-    <small>Registro global del sistema</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
-    <p><%= summary.today %></p>
-    <small>Citas programadas en fecha actual</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Pendientes</h3>
-    <p><%= summary.pending %></p>
-    <small>Atenciones por resolver (global)</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Completadas</h3>
-    <p><%= summary.completed %></p>
-    <small>Atenciones finalizadas</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Canceladas</h3>
-    <p><%= summary.cancelled %></p>
-    <small>Incidencias y ausencias</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Médicos</h3>
-    <p><%= summary.totalDoctors %></p>
-    <small>Especialistas activos</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Pacientes</h3>
-    <p><%= summary.totalPatients %></p>
-    <small>Usuarios registrados</small>
-  </article>
-  <article class="metric card metric-highlight">
-    <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Pendientes hoy</h3>
-    <p><%= summary.todayPending %></p>
-    <small>Objetivo principal del dia</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-clipboard.svg" alt="" class="metric-icon" />Completadas hoy</h3>
-    <p><%= summary.todayCompleted %></p>
-    <small>Atenciones finalizadas hoy</small>
-  </article>
-  <article class="metric card">
-    <h3><img src="/img/icon-shield.svg" alt="" class="metric-icon" />Canceladas hoy</h3>
-    <p><%= summary.todayCancelled %></p>
-    <small>Incidencias en jornada actual</small>
-  </article>
+<section class="card dashboard-section-gap admin-metrics-card" data-dashboard-metrics="overall">
+  <div class="section-title-wrap admin-metrics-toolbar">
+    <h2>Métricas del sistema</h2>
+    <div class="metrics-mode-switch" role="tablist" aria-label="Vista de métricas de citas">
+      <button type="button" class="metrics-mode-btn is-active" data-metrics-mode="overall" aria-pressed="true">General</button>
+      <button type="button" class="metrics-mode-btn" data-metrics-mode="today" aria-pressed="false">Hoy</button>
+    </div>
+  </div>
+
+  <div class="metrics-grid admin-metrics-extended">
+    <article class="metric card">
+      <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total citas</h3>
+      <p><%= summary.total %></p>
+      <small>Registro global del sistema</small>
+    </article>
+    <article class="metric card">
+      <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
+      <p><%= summary.today %></p>
+      <small>Citas programadas en fecha actual</small>
+    </article>
+    <article class="metric card metric-toggleable" data-metric-toggle>
+      <h3>
+        <img src="/img/icon-calendar.svg" alt="" class="metric-icon" />
+        <span data-metric-title-overall>Pendientes</span>
+        <span data-metric-title-today hidden>Pendientes hoy</span>
+      </h3>
+      <p>
+        <span data-metric-value-overall><%= summary.pending %></span>
+        <span data-metric-value-today hidden><%= summary.todayPending %></span>
+      </p>
+      <small data-metric-subtitle-overall>Atenciones por resolver (global)</small>
+      <small data-metric-subtitle-today hidden>Atenciones por resolver en la jornada</small>
+    </article>
+    <article class="metric card metric-toggleable" data-metric-toggle>
+      <h3>
+        <img src="/img/icon-user.svg" alt="" class="metric-icon" />
+        <span data-metric-title-overall>Completadas</span>
+        <span data-metric-title-today hidden>Completadas hoy</span>
+      </h3>
+      <p>
+        <span data-metric-value-overall><%= summary.completed %></span>
+        <span data-metric-value-today hidden><%= summary.todayCompleted %></span>
+      </p>
+      <small data-metric-subtitle-overall>Atenciones finalizadas</small>
+      <small data-metric-subtitle-today hidden>Atenciones finalizadas hoy</small>
+    </article>
+    <article class="metric card metric-toggleable" data-metric-toggle>
+      <h3>
+        <img src="/img/icon-doctor.svg" alt="" class="metric-icon" />
+        <span data-metric-title-overall>Canceladas</span>
+        <span data-metric-title-today hidden>Canceladas hoy</span>
+      </h3>
+      <p>
+        <span data-metric-value-overall><%= summary.cancelled %></span>
+        <span data-metric-value-today hidden><%= summary.todayCancelled %></span>
+      </p>
+      <small data-metric-subtitle-overall>Incidencias y ausencias</small>
+      <small data-metric-subtitle-today hidden>Incidencias en jornada actual</small>
+    </article>
+    <article class="metric card">
+      <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Médicos</h3>
+      <p><%= summary.totalDoctors %></p>
+      <small>Especialistas activos</small>
+    </article>
+    <article class="metric card">
+      <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Pacientes</h3>
+      <p><%= summary.totalPatients %></p>
+      <small>Usuarios registrados</small>
+    </article>
+  </div>
 </section>
 
 <section class="admin-two-col dashboard-section-gap">

@@ -108,25 +108,47 @@ const insertRescheduleAuditStmt = db.prepare(
   ) VALUES (?, ?, ?, ?, ?, ?, ?)`
 );
 
+const getRescheduleAuditByNewAppointmentStmt = db.prepare(
+  `SELECT original_appointment_id, new_appointment_id
+   FROM appointment_reschedule_audit
+   WHERE new_appointment_id = ?
+   LIMIT 1`
+);
+
 function getPatientByUser(userId) {
   return findPatientByUserStmt.get(userId);
 }
 
+function isAutoRescheduledAppointment(appointmentId) {
+  return !!getRescheduleAuditByNewAppointmentStmt.get(appointmentId);
+}
+
+function enrichAppointmentsWithRescheduleFlags(appointments) {
+  return appointments.map((appointment) => {
+    const audit = getRescheduleAuditByNewAppointmentStmt.get(appointment.id);
+    return {
+      ...appointment,
+      is_auto_rescheduled: !!audit,
+      reschedule_origin_appointment_id: audit ? audit.original_appointment_id : null
+    };
+  });
+}
+
 function listAppointmentsForRole(user) {
   if (user.role === 'admin') {
-    return listAppointmentsAdminStmt.all();
+    return enrichAppointmentsWithRescheduleFlags(listAppointmentsAdminStmt.all());
   }
 
   if (user.role === 'medico') {
     const doctor = findDoctorByUserStmt.get(user.id);
     if (!doctor) return [];
-    return listAppointmentsByDoctorStmt.all(doctor.id);
+    return enrichAppointmentsWithRescheduleFlags(listAppointmentsByDoctorStmt.all(doctor.id));
   }
 
   const patient = getPatientByUser(user.id);
   if (!patient) return [];
 
-  return listAppointmentsByPatientStmt.all(patient.id);
+  return enrichAppointmentsWithRescheduleFlags(listAppointmentsByPatientStmt.all(patient.id));
 }
 
 function getDoctorOptions() {
@@ -259,6 +281,10 @@ function requestAppointmentReschedule(appointmentId, currentUser) {
     throw new Error('No se encontro la cita para solicitar reprogramacion.');
   }
 
+  if (isAutoRescheduledAppointment(appointmentId)) {
+    throw new Error('Esta cita ya fue generada por una reprogramacion anterior y no puede volver a reprogramarse desde el paciente.');
+  }
+
   if (appointment.status !== 'pendiente') {
     throw new Error('Solo se pueden solicitar reprogramaciones en citas pendientes.');
   }
@@ -385,5 +411,6 @@ module.exports = {
   createAppointment,
   updateAppointmentStatus,
   requestAppointmentReschedule,
-  approveAppointmentReschedule
+  approveAppointmentReschedule,
+  isAutoRescheduledAppointment
 };

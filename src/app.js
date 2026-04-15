@@ -8,6 +8,7 @@ const { sessionMiddleware } = require('./config/session');
 const { csrfProtection } = require('./middlewares/csrf.middleware');
 const { errorHandler } = require('./middlewares/error.middleware');
 const { formatIsoDateToDmy } = require('./utils/date');
+const { getAutomaticReminders } = require('./modules/reminders/reminders.service');
 
 const authRoutes = require('./modules/auth/auth.routes');
 const pacientesRoutes = require('./modules/pacientes/pacientes.routes');
@@ -40,6 +41,9 @@ app.use((req, res, next) => {
   res.locals.formErrors = [];
   res.locals.flash = req.session.flash || null;
   res.locals.formatDateDmy = formatIsoDateToDmy;
+  const reminders = getAutomaticReminders(req.session.user || null);
+  res.locals.autoReminders = reminders;
+  res.locals.autoRemindersCount = reminders.length;
   delete req.session.flash;
   next();
 });

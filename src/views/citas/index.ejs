@@ -211,50 +211,62 @@
               <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
               <td class="appointments-actions-cell">
                 <div class="appointments-actions-stack">
-                <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                  <form method="post" action="/citas/<%= a.id %>/completar" class="inline-form">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <button type="submit" class="btn btn-secondary action-btn"><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar</button>
-                  </form>
-                <% } %>
+                  <div class="appointments-actions-badges">
+                    <% if (a.is_auto_rescheduled) { %>
+                      <span class="appointment-origin-badge">Generada automáticamente tras una reprogramación previa</span>
+                    <% } %>
 
-                <% if (a.status === 'pendiente') { %>
-                  <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <button type="submit" class="btn btn-danger action-btn"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar</button>
-                  </form>
-                <% } %>
+                    <% if (a.status === 'pendiente' && currentUser.role === 'paciente' && a.is_auto_rescheduled) { %>
+                      <span class="appointment-origin-note">Esta cita ya es la nueva fecha generada automáticamente. Si necesita otro cambio, contacte al médico o administrador.</span>
+                    <% } %>
+                  </div>
 
-                <% if (a.status === 'pendiente' && currentUser.role === 'paciente') { %>
-                  <form method="post" action="/citas/<%= a.id %>/solicitar-reprogramacion" class="inline-form">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <button type="submit" class="btn btn-request action-btn"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Solicitar reprogramación</button>
-                  </form>
-                <% } %>
+                  <div class="appointments-actions-row">
+                    <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
+                      <form method="post" action="/citas/<%= a.id %>/completar" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn btn-secondary action-btn"><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar</button>
+                      </form>
+                    <% } %>
 
-                <% if (a.status === 'solicitud_reprogramacion' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                  <form method="post" action="/citas/<%= a.id %>/aprobar-reprogramacion" class="inline-form">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <button type="submit" class="btn btn-approve action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar reprogramación</button>
-                  </form>
-                <% } %>
+                    <% if (a.status === 'pendiente' && currentUser.role === 'paciente' && !a.is_auto_rescheduled) { %>
+                      <form method="post" action="/citas/<%= a.id %>/solicitar-reprogramacion" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn btn-request action-btn"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Solicitar reprogramación</button>
+                      </form>
+                    <% } %>
 
-                <% if (currentUser.role === 'admin' || currentUser.role === 'medico') { %>
-                  <details class="appointment-edit-inline">
-                    <summary class="btn btn-edit action-btn"><img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Editar</summary>
-                    <form method="post" action="/citas/<%= a.id %>/editar" class="appointment-edit-form">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                      <label for="status-<%= a.id %>" class="helper">Nuevo estado</label>
-                      <select id="status-<%= a.id %>" name="status" required>
-                        <option value="pendiente" <%= a.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
-                        <option value="completada" <%= a.status === 'completada' ? 'selected' : '' %>>Completada</option>
-                        <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
-                        <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
-                      </select>
-                      <button type="submit" class="btn action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar</button>
-                    </form>
-                  </details>
-                <% } %>
+                    <% if (a.status === 'solicitud_reprogramacion' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
+                      <form method="post" action="/citas/<%= a.id %>/aprobar-reprogramacion" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn btn-approve action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar reprogramación</button>
+                      </form>
+                    <% } %>
+
+                    <% if (a.status === 'pendiente') { %>
+                      <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn btn-danger btn-danger-soft action-btn"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita</button>
+                      </form>
+                    <% } %>
+
+                    <% if (currentUser.role === 'admin' || currentUser.role === 'medico') { %>
+                      <details class="appointment-edit-inline">
+                        <summary class="btn btn-edit action-btn"><img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Editar</summary>
+                        <form method="post" action="/citas/<%= a.id %>/editar" class="appointment-edit-form">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                          <label for="status-<%= a.id %>" class="helper">Nuevo estado</label>
+                          <select id="status-<%= a.id %>" name="status" required>
+                            <option value="pendiente" <%= a.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
+                            <option value="completada" <%= a.status === 'completada' ? 'selected' : '' %>>Completada</option>
+                            <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
+                            <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
+                          </select>
+                          <button type="submit" class="btn action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar</button>
+                        </form>
+                      </details>
+                    <% } %>
+                  </div>
                 </div>
               </td>
             </tr>

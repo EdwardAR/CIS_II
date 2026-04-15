@@ -140,6 +140,54 @@ if (specialtySelect && doctorSelect) {
   syncDoctorOptions();
 }
 
+const dashboardMetrics = document.querySelector('[data-dashboard-metrics]');
+if (dashboardMetrics) {
+  const modeButtons = Array.from(dashboardMetrics.querySelectorAll('[data-metrics-mode]'));
+  const toggleCards = Array.from(dashboardMetrics.querySelectorAll('[data-metric-toggle]'));
+
+  const setMetricsMode = (mode) => {
+    dashboardMetrics.dataset.dashboardMetrics = mode;
+
+    modeButtons.forEach((button) => {
+      const isActive = button.dataset.metricsMode === mode;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', String(isActive));
+    });
+
+    toggleCards.forEach((card) => {
+      const overallTitle = card.querySelector('[data-metric-title-overall]');
+      const todayTitle = card.querySelector('[data-metric-title-today]');
+      const overallValue = card.querySelector('[data-metric-value-overall]');
+      const todayValue = card.querySelector('[data-metric-value-today]');
+      const overallSubtitle = card.querySelector('[data-metric-subtitle-overall]');
+      const todaySubtitle = card.querySelector('[data-metric-subtitle-today]');
+
+      const useToday = mode === 'today';
+
+      if (overallTitle && todayTitle) {
+        overallTitle.hidden = useToday;
+        todayTitle.hidden = !useToday;
+      }
+
+      if (overallValue && todayValue) {
+        overallValue.hidden = useToday;
+        todayValue.hidden = !useToday;
+      }
+
+      if (overallSubtitle && todaySubtitle) {
+        overallSubtitle.hidden = useToday;
+        todaySubtitle.hidden = !useToday;
+      }
+    });
+  };
+
+  modeButtons.forEach((button) => {
+    button.addEventListener('click', () => setMetricsMode(button.dataset.metricsMode || 'overall'));
+  });
+
+  setMetricsMode(dashboardMetrics.dataset.dashboardMetrics || 'overall');
+}
+
 const parseSortableValue = (rawValue) => {
   const value = String(rawValue || '').trim();
 

@@ -46,6 +46,7 @@ Este sistema digitaliza el proceso completo de gestión de citas médicas para t
 - ✅ Reserva inteligente de citas con validación de disponibilidad
 - ✅ Seguimiento del estado de atención
 - ✅ Panel administrativo con métricas
+- ✅ Recordatorios automáticos visibles para admin, médico y paciente
 - ✅ Control de acceso basado en roles (RBAC)
 
 ---
@@ -95,6 +96,7 @@ graph TD
     C --> D["🎯 Controladores<br/>por Módulo"]
     D --> E["💼 Servicios<br/>Lógica Negocio"]
     E --> F["🗄️ SQLite DB<br/>(better-sqlite3)"]
+    E --> H["⏰ Recordatorios automáticos<br/>(admin, médico, paciente)"]
     
     B -->|Session| G["🍪 Store Sesiones<br/>(SQLite)"]
     
@@ -146,6 +148,7 @@ graph LR
         ENV["Config<br/>Env.js"]
         DB["Database<br/>db.js"]
         SESSION["Session<br/>session.js"]
+        REM["Recordatorios<br/>reminders.service.js"]
     end
     
     subgraph Middleware["🔐 Middleware"]
@@ -165,6 +168,7 @@ graph LR
     
     Core -.-> Middleware
     Middleware --> Modules
+    REM --> Modules
     
     style Core fill:#f0f0f0
     style Modules fill:#fff9c4
@@ -189,7 +193,7 @@ CIS_II/
 │  │
 │  ├─ 📁 database/                 # 🗄️ Base de datos
 │  │  ├─ schema.sql                # Definición de tablas
-│  │  ├─ seed.sql                  # Datos de referencia iniciales
+│  │  ├─ seed.sql                  # Script legacy de referencia
 │  │  ├─ init-db.js                # Script de inicialización
 │  │  └─ clinic.sqlite             # Archivo BD (generado)
 │  │
@@ -211,6 +215,9 @@ CIS_II/
 │  │  │  ├─ citas.routes.js
 │  │  │  ├─ citas.service.js
 │  │  │  └─ citas.validators.js
+│  │  │
+│  │  ├─ 📁 reminders/
+│  │  │  └─ reminders.service.js    # Recordatorios automáticos por rol
 │  │  │
 │  │  ├─ 📁 medicos/
 │  │  │  ├─ medicos.controller.js  # Panel médico + gestión horarios
@@ -338,15 +345,15 @@ npm run db:init
 **¿Qué ocurre?**
 - ✅ Crea archivo `src/database/clinic.sqlite`
 - ✅ Ejecuta `schema.sql` (crea tablas)
-- ✅ Ejecuta `seed.sql` (inserta datos de referencia)
-- ✅ Genera usuarios admin, médicos y pacientes de demo
-- ✅ Carga citas de ejemplo
+- ✅ Inserta/actualiza datos demo desde `init-db.js` (usuarios, médicos, horarios, pacientes y citas)
+- ✅ Aplica migraciones de compatibilidad para estados de cita
+- ✅ Limpia datos demo de especialidades retiradas si existían en BD
 
 **Datos creados:**
 - 1 administrador
-- 11 médicos (con especialidades)
-- 11 pacientes
-- 20+ citas de ejemplo
+- 12 médicos (con especialidades)
+- 17 pacientes
+- 17 citas de ejemplo
 
 #### Paso 3: Iniciar Servidor
 
@@ -419,9 +426,8 @@ Definidos en `package.json`, ejecútelos con `npm run <nombre>`:
 | Script | Comando | Descripción |
 |--------|---------|-------------|
 | `start` | `node src/server.js` | Inicia servidor en producción |
-| `dev` | `nodemon src/server.js` | Modo desarrollo con reinicio automático |
+| `dev` | `node --watch src/server.js` | Modo desarrollo con reinicio automático |
 | `db:init` | `node src/database/init-db.js` | Inicializa/reinicia base de datos |
-| `test` | `jest` | Ejecuta suite de tests (si está configurado) |
 
 **Ejemplos de uso:**
 ```bash
@@ -492,7 +498,7 @@ Acceso completo al sistema, gestión de médicos y pacientes, métricas.
 
 **Acceso:** [`http://localhost:3000/auth/login`](http://localhost:3000/auth/login)
 
-### 9.2 Médicos (11 Especialidades)
+### 9.2 Médicos (12 Especialidades)
 
 Cada médico puede revisar sus citas y actualizar su disponibilidad.
 
@@ -509,8 +515,9 @@ Cada médico puede revisar sus citas y actualizar su disponibilidad.
 | `patricia.leon@policlinico.pe` | `Admin123*` | 👂 Otorrinolaringología |
 | `javier.molina@policlinico.pe` | `Admin123*` | 💧 Urología |
 | `elisa.romero@policlinico.pe` | `Admin123*` | 👁️ Oftalmología |
+| `camila.ponce@policlinico.pe` | `Admin123*` | 🫁 Neumología |
 
-### 9.3 Pacientes (11 Usuarios)
+### 9.3 Pacientes (17 Usuarios)
 
 Pueden reservar citas con médicos según disponibilidad.
 
@@ -527,6 +534,12 @@ Pueden reservar citas con médicos según disponibilidad.
 | `ricardo.vega@pacientes.pe` | `Admin123*` |
 | `luciana.soto@pacientes.pe` | `Admin123*` |
 | `fernando.aquino@pacientes.pe` | `Admin123*` |
+| `gabriela.fuentes@pacientes.pe` | `Admin123*` |
+| `hector.vilca@pacientes.pe` | `Admin123*` |
+| `milagros.tejada@pacientes.pe` | `Admin123*` |
+| `samuel.yupanqui@pacientes.pe` | `Admin123*` |
+| `paola.cuentas@pacientes.pe` | `Admin123*` |
+| `kevin.montoya@pacientes.pe` | `Admin123*` |
 
 ### 9.4 Citas de Ejemplo
 
@@ -562,7 +575,7 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 | Método | Ruta | Descripción | Acceso | Detalles |
 |--------|------|------------|--------|---------|
 | GET | `/citas` | Listar citas del usuario | Autenticado | Filtra por rol (paciente/médico/admin) |
-| GET | `/citas/disponibilidad` | Disponibilidad por médico/fecha | Paciente/Admin | Datos JSON para AJAX |
+| GET | `/citas/disponibilidad` | Disponibilidad por médico/fecha | Paciente/Admin | Renderiza la vista con slots disponibles |
 | POST | `/citas` | Crear nueva cita | Paciente | Valida disponibilidad |
 | POST | `/citas/:id/completar` | Marcar cita completada | Admin/Médico | Cambia estado a "completada" |
 | POST | `/citas/:id/cancelar` | Cancelar cita | Admin/Médico/Paciente | Depende del estado |
@@ -574,6 +587,7 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 - ✅ Lista de médicos actualiza según especialidad
 - ✅ Validación de horarios disponibles
 - ✅ Prevención de doble reserva
+- ✅ Bloqueo de reprogramación sobre citas que ya fueron generadas automáticamente por una reprogramación previa
 
 #### Flujo de reprogramación (nuevo)
 
@@ -583,6 +597,7 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 - Al aprobar, la cita original pasa a estado `reprogramada`.
 - El sistema genera una **nueva cita automática** en el siguiente horario disponible del mismo médico.
 - Se registra trazabilidad en la tabla `appointment_reschedule_audit` (quién solicitó, quién aprobó, y detalle del cambio).
+- La nueva cita automática no permite volver a solicitar reprogramación desde el paciente, para evitar bucles.
 
 **Archivo:** [`src/modules/citas/citas.routes.js`](src/modules/citas/citas.routes.js)
 
@@ -695,6 +710,7 @@ stateDiagram-v2
    - Marca citas como completadas
    - Cancela citas si es necesario
 5. 👥 Revisa **Pacientes** registrados
+6. ⏰ Recibe **recordatorios automáticos** de citas próximas y solicitudes de reprogramación
 
 ---
 
@@ -744,6 +760,8 @@ graph TD
 6. ✍️ **Confirmar reserva**
 7. 📧 Recibe confirmación de cita
 8. 👤 Puede ver su perfil y **historial de citas**
+9. 🔔 Recibe **recordatorios automáticos** de su próxima cita y reprogramaciones pendientes
+10. ⛔ Si la cita fue generada automáticamente tras una reprogramación, no verá la opción de volver a solicitarla
 
 ---
 
@@ -794,183 +812,106 @@ graph TD
 5. ✓ **Marca citas como completadas** cuando atiende
 6. ❌ Puede **cancelar** si es necesario
 7. 📊 Ve **estadísticas** personales
+8. 🔔 Recibe **notificaciones automáticas** de citas próximas y solicitudes de reprogramación
 
 ---
 
 ## 12. Modelo de Datos
 
-La base de datos SQLite utiliza tablas principales para usuarios, horarios, citas, sesiones y auditoría de reprogramaciones.
+La base SQLite del proyecto se define en `src/database/schema.sql` y se puebla desde `src/database/init-db.js`.
 
-### 12.1 Diagrama Entidad-Relación (ER)
-
-**Tipo de gráfico:** `Diagrama entidad-relación` (`erDiagram`)
+### 12.1 Diagrama ER (actual)
 
 ```mermaid
 erDiagram
-    USUARIOS ||--o{ CITAS : reserva
-    USUARIOS ||--o{ HORARIOS : registra
-    USUARIOS ||--o{ SESIONES : tiene
-    USUARIOS ||--o{ AUDITORIA_REPROGRAMACION : solicita_o_aprueba
-    CITAS ||--o{ AUDITORIA_REPROGRAMACION : historial
-    USUARIOS {
-        int id PK
-        string email UK
-        string password
-        string nombre
-        string apellido
-        enum rol "paciente|medico|admin"
-        string especialidad_id FK
-        datetime created_at
-        datetime updated_at
-    }
-    
-    CITAS ||--o{ HORARIOS : utiliza
-    CITAS {
-        int id PK
-        int paciente_id FK
-        int medico_id FK
-        int horario_id FK
-        enum estado "pendiente|completada|cancelada|solicitud_reprogramacion|reprogramada"
-        text notas
-        datetime created_at
-        datetime updated_at
-    }
-    
-    HORARIOS {
-        int id PK
-        int medico_id FK
-        date fecha
-        time hora_inicio
-        time hora_fin
-        boolean disponible
-        datetime created_at
-    }
-    
-    SESIONES {
-        string sid PK
-        text sess
-        datetime expire
-    }
+        USERS ||--o| PATIENTS : "1 a 1"
+        USERS ||--o| DOCTORS : "1 a 1"
+        DOCTORS ||--o{ DOCTOR_SCHEDULES : "define"
+        PATIENTS ||--o{ APPOINTMENTS : "reserva"
+        DOCTORS ||--o{ APPOINTMENTS : "atiende"
+        USERS ||--o{ APPOINTMENTS : "crea"
+        APPOINTMENTS ||--o{ APPOINTMENT_RESCHEDULE_AUDIT : "audita"
 
-    AUDITORIA_REPROGRAMACION {
-        int id PK
-        int original_appointment_id FK
-        int new_appointment_id FK
-        int requested_by_user_id FK
-        int approved_by_user_id FK
-        string old_status
-        string new_status
-        text note
-        datetime created_at
-    }
-    
-    ESPECIALIDADES {
-        int id PK
-        string nombre UK
-        text descripcion
-    }
+        USERS {
+            int id PK
+            string full_name
+            string email UK
+            string password_hash
+            string role "paciente|medico|admin"
+            int is_active
+            datetime created_at
+        }
+
+        PATIENTS {
+            int id PK
+            int user_id UK FK
+            string dni UK
+            string phone
+            date birth_date
+            string address
+            string emergency_contact
+        }
+
+        DOCTORS {
+            int id PK
+            int user_id UK FK
+            string specialty
+            string license_number UK
+            string office
+        }
+
+        DOCTOR_SCHEDULES {
+            int id PK
+            int doctor_id FK
+            int day_of_week
+            time start_time
+            time end_time
+            int slot_minutes
+            int is_active
+        }
+
+        APPOINTMENTS {
+            int id PK
+            int patient_id FK
+            int doctor_id FK
+            date appointment_date
+            time start_time
+            time end_time
+            string status "pendiente|completada|cancelada|reprogramada|solicitud_reprogramacion"
+            text reason
+            text notes
+            int created_by_user_id FK
+            datetime created_at
+        }
+
+        APPOINTMENT_RESCHEDULE_AUDIT {
+            int id PK
+            int original_appointment_id FK
+            int new_appointment_id FK
+            int requested_by_user_id FK
+            int approved_by_user_id FK
+            string old_status
+            string new_status
+            text note
+            datetime created_at
+        }
 ```
 
-### 12.2 Descripción de Tablas
+### 12.2 Reglas clave
 
-#### **USUARIOS**
-Almacena todos los usuarios del sistema (pacientes, médicos, administrador).
+- `appointments` tiene restricción única por `doctor_id + appointment_date + start_time`.
+- Los estados permitidos de cita incluyen `solicitud_reprogramacion` y `reprogramada`.
+- Los horarios médicos se definen por día de semana (`0` domingo a `6` sábado), no por fecha fija.
+- Las reprogramaciones aprobadas registran trazabilidad en `appointment_reschedule_audit`.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria (autoincremento) |
-| `email` | TEXT | Email único, usado para login |
-| `password` | TEXT | Contraseña hasheada con bcrypt |
-| `nombre` | TEXT | Nombre del usuario |
-| `apellido` | TEXT | Apellido |
-| `rol` | TEXT | `'paciente'` \| `'medico'` \| `'admin'` |
-| `especialidad_id` | INTEGER | Referencia a especialidad (solo médicos) |
-| `created_at` | DATETIME | Marca de inserción |
-| `updated_at` | DATETIME | Marca de última actualización |
+### 12.3 Flujo de cita (real)
 
----
-
-#### **CITAS**
-Registra todas las citas reservadas entre pacientes y médicos.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `paciente_id` | INTEGER | Referencia a usuario paciente |
-| `medico_id` | INTEGER | Referencia a usuario médico |
-| `horario_id` | INTEGER | Referencia al horario asignado |
-| `estado` | TEXT | `'pendiente'` \| `'completada'` \| `'cancelada'` \| `'solicitud_reprogramacion'` \| `'reprogramada'` |
-| `notas` | TEXT | Observaciones (opcional) |
-| `created_at` | DATETIME | Fecha de reserva |
-| `updated_at` | DATETIME | Última actualización |
-
----
-
-#### **HORARIOS**
-Almacena disponibilidad de médicos (bloques de tiempo).
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `medico_id` | INTEGER | Referencia al médico |
-| `fecha` | DATE | Fecha del horario |
-| `hora_inicio` | TIME | Hora inicio (ej: 09:00) |
-| `hora_fin` | TIME | Hora fin (ej: 17:00) |
-| `disponible` | BOOLEAN | `true` = disponible, `false` = ocupado |
-| `created_at` | DATETIME | Creación del registro |
-
----
-
-#### **SESIONES**
-Almacena sesiones activas (express-session con store SQLite).
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `sid` | TEXT | ID de sesión (único) |
-| `sess` | TEXT | Datos de sesión (JSON) |
-| `expire` | DATETIME | Expiración de la sesión |
-
----
-
-#### **APPOINTMENT_RESCHEDULE_AUDIT**
-Almacena trazabilidad de reprogramaciones aprobadas.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER | Clave primaria |
-| `original_appointment_id` | INTEGER | Cita original que fue reprogramada |
-| `new_appointment_id` | INTEGER | Nueva cita creada automáticamente |
-| `requested_by_user_id` | INTEGER | Usuario paciente que solicitó |
-| `approved_by_user_id` | INTEGER | Usuario médico/admin que aprobó |
-| `old_status` | TEXT | Estado anterior (`solicitud_reprogramacion`) |
-| `new_status` | TEXT | Estado final de la cita original (`reprogramada`) |
-| `note` | TEXT | Detalle de fecha/hora asignada automáticamente |
-| `created_at` | DATETIME | Fecha de auditoría |
-
----
-
-### 12.3 Relaciones Principales
-
-```
-Usuario (Médico) 
-    ↓ registra
-Horarios 
-    ↓ utiliza
-Citas 
-    ↓ requiere
-Usuario (Paciente)
-```
-
-**Flujo de creación de cita:**
-1. Médico registra sus horarios disponibles
-2. Paciente consulta disponibilidad
-3. Sistema busca horarios `disponible=true` del médico
-4. Se crea registro en CITAS con `estado='pendiente'`
-5. Se marca horario como `disponible=false`
-6. Paciente puede solicitar reprogramación (`solicitud_reprogramacion`)
-7. Médico/Admin aprueba: cita original pasa a `reprogramada` y se crea una nueva `pendiente`
-8. Se registra auditoría en `appointment_reschedule_audit`
-9. Médico completa o cancela la nueva cita (actualiza estado)
+1. Paciente selecciona especialidad, médico y fecha.
+2. El sistema calcula slots por horario activo (`doctor_schedules`) y cruza con citas existentes.
+3. Se crea cita `pendiente`.
+4. Paciente puede solicitar `solicitud_reprogramacion`.
+5. Médico/Admin aprueba: la cita original pasa a `reprogramada` y se crea una nueva `pendiente`.
+6. Se guarda auditoría de la operación.
 
 ---
 
@@ -994,6 +935,7 @@ Usuario (Paciente)
 - ⏱️ **Ver historial** de citas pasadas y próximas
 - ✏️ **Cancelar citas** (con restricciones según estado)
 - 🕒 **Solicitar reprogramación** de citas pendientes
+- 🔔 **Ver recordatorios automáticos** y entender cuándo una cita ya no puede volver a reprogramarse
 
 #### **Para Médicos:**
 - 📋 **Panel personal** con citas asignadas
@@ -1002,12 +944,17 @@ Usuario (Paciente)
 - ❌ **Cancelar** si es necesario
 - ✅ **Aprobar solicitudes de reprogramación** de pacientes
 - 📊 **Ver estadísticas** de citas atendidas
+- 🔔 **Recibir notificaciones automáticas** de citas próximas y solicitudes de reprogramación
 
 #### **Para Administradores:**
 - 👁️ **Supervisar todas** las citas del sistema
 - 🔧 **Completar/Cancelar** citas en cualquier momento
 - 📊 **Métricas** en dashboard (total citas, estados, próximas)
 - 🔍 **Buscar** citas por paciente o médico
+- ↕️ **Ordenar tablas** por columnas (fecha, hora, estado, paciente, médico, etc.)
+- 🗓️ **Ver fechas** en formato visual `DD-MM-AAAA`
+- ⏰ **Recibir recordatorios automáticos** de citas próximas y solicitudes de reprogramación
+- 🔒 **No reprogramar de nuevo** una cita que ya fue generada automáticamente por una reprogramación previa
 
 ### 13.3 Gestión de Médicos
 
@@ -1016,6 +963,7 @@ Usuario (Paciente)
 - 🔄 **Actualizar horarios** de disponibilidad
 - 🏷️ **Filtrar por especialidad** (admin)
 - 👁️ **Vista médico** de su panel personal
+- 🔔 **Ver notificaciones automáticas** de pacientes próximos a atender
 
 ### 13.4 Gestión de Pacientes
 
@@ -1023,6 +971,7 @@ Usuario (Paciente)
 - 📋 **Historial de citas** completo
 - ✏️ **Actualizar información** personal
 - 📊 **Estadísticas** (citas completadas, pendientes, etc.)
+- 🔔 **Recibir recordatorios automáticos** de su próxima cita
 
 ### 13.5 Panel Administrativo
 
@@ -1032,6 +981,7 @@ Usuario (Paciente)
 - 📈 **Próximas citas a atender** (próximas 2 semanas)
 - 🔍 **Búsqueda rápida** de citas/pacientes
 - 📱 **Vista responsive** para dispositivos
+- ⏰ **Recordatorios automáticos** visibles en la misma interfaz
 
 ### 13.6 Seguridad
 
@@ -1039,18 +989,19 @@ Usuario (Paciente)
 - 🍪 **Cookies seguras:** `httpOnly=true`, `sameSite=lax`
 - 🛡️ **PROTECCIÓN CSRF** en todos los formularios
 - ⚠️ **Validación de entrada** en servidor con express-validator
-- ⏱️ **Rate Limiting** en login (máx 5 intentos/15min)
+- ⏱️ **Rate Limiting** en login (máx 10 intentos/10min)
 - 🔑 **Headers de seguridad** con Helmet
 - 🔐 **Encriptación de sesión** con sesión secret
 
 ### 13.7 Calidad del Código
 
 - 📂 **Estructura modular** (MVC por funcionalidad)
-- 🧪 **Tests unitarios** (auth, citas, pacientes)
+- 🧪 **Archivos base de pruebas** en `tests/` (sin script `test` activo en `package.json`)
 - 📝 **Validadores** reutilizables
 - 🔄 **Consultas optimizadas** con prepared statements
 - 📊 **Logging** de eventos importantes
 - 🧾 **Auditoría de reprogramaciones** (solicitante, aprobador y nueva cita generada)
+- ⏰ **Servicio central de recordatorios** compartido por todas las vistas autenticadas
 
 ---
 
@@ -1089,11 +1040,10 @@ El sistema implementa múltiples capas de protección:
 ### 14.4 Rate Limiting
 
 ```javascript
-login: máx 5 intentos fallidos cada 15 minutos
-registro: máx 3 nuevas cuentas cada hora
+login: máx 10 intentos fallidos cada 10 minutos
 ```
 
-Implementado con `express-rate-limit` en `auth.routes.js`
+Implementado con `express-rate-limit` sobre rutas de autenticación (enfocado en `POST /auth/login`).
 
 ### 14.5 Datos Sensibles
 
@@ -1365,7 +1315,7 @@ Funcionalidades planeadas para versiones futuras:
 ### Corto Plazo (v1.1)
 
 - ✅ **Reprogramación de citas** - Implementada con aprobación médico/admin + generación automática de nueva cita
-- 🔔 **Recordatorios automáticos** - Email 24h antes
+- ✅ **Recordatorios automáticos** - Implementados en la interfaz para admin, médico y paciente
 - 📧 **Notificaciones** - Por correo o SMS
 - ⭐ **Calificación de citas** - Pacientes evalúan atención recibida
 - 📝 **Notas clínicas** - Médicos registran observaciones

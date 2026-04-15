@@ -10,7 +10,8 @@ const {
   createAppointment,
   updateAppointmentStatus,
   requestAppointmentReschedule,
-  approveAppointmentReschedule
+  approveAppointmentReschedule,
+  isAutoRescheduledAppointment
 } = require('./citas.service');
 const { formatIsoDateToDmy } = require('../../utils/date');
 
@@ -29,10 +30,15 @@ function buildViewData(user, options = {}) {
       ? null
       : selectedDoctorSchedule.some((slot) => slot.day_of_week === selectedDayOfWeek);
 
+  const appointmentsWithFlags = appointments.map((appointment) => ({
+    ...appointment,
+    is_auto_rescheduled: isAutoRescheduledAppointment(appointment.id)
+  }));
+
   return {
     pageTitle: 'Sistema de citas',
-    appointments,
-    appointmentSummary: buildAppointmentSummary(appointments),
+    appointments: appointmentsWithFlags,
+    appointmentSummary: buildAppointmentSummary(appointmentsWithFlags),
     doctors,
     specialties: getDoctorSpecialties(),
     slots: options.slots || [],

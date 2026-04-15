@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const { db } = require('../config/db');
 
 const DEFAULT_PASSWORD = 'Admin123*';
+const DEPRECATED_SPECIALTIES = ['Medicina Familiar', 'Medicina Interna'];
 
 const DEFAULT_DOCTORS = [
   {
@@ -66,7 +67,10 @@ const DEFAULT_DOCTORS = [
     office: 'Consultorio 206',
     schedules: [
       { day: 1, start: '09:00', end: '13:00', slot: 30 },
-      { day: 3, start: '15:00', end: '19:00', slot: 30 }
+      { day: 1, start: '18:00', end: '22:00', slot: 30 },
+      { day: 3, start: '15:00', end: '19:00', slot: 30 },
+      { day: 3, start: '19:00', end: '22:00', slot: 30 },
+      { day: 5, start: '18:00', end: '22:00', slot: 30 }
     ]
   },
   {
@@ -122,6 +126,18 @@ const DEFAULT_DOCTORS = [
     schedules: [
       { day: 1, start: '08:30', end: '12:30', slot: 30 },
       { day: 4, start: '14:00', end: '18:00', slot: 30 }
+    ]
+  },
+  {
+    fullName: 'Dra. Camila Ponce',
+    email: 'camila.ponce@policlinico.pe',
+    specialty: 'Neumologia',
+    licenseNumber: 'CMP-02402',
+    office: 'Consultorio 402',
+    schedules: [
+      { day: 2, start: '18:00', end: '22:00', slot: 30 },
+      { day: 4, start: '18:00', end: '22:00', slot: 30 },
+      { day: 6, start: '18:00', end: '22:00', slot: 30 }
     ]
   }
 ];
@@ -225,6 +241,60 @@ const DEFAULT_PATIENTS = [
     birthDate: '1981-06-14',
     address: 'Urb. Santa Ana Mz B Lt 9',
     emergencyContact: 'Silvia Aquino - 973660077'
+  },
+  {
+    fullName: 'Gabriela Fuentes',
+    email: 'gabriela.fuentes@pacientes.pe',
+    dni: '78934012',
+    phone: '984201155',
+    birthDate: '1991-08-09',
+    address: 'Av. Los Eucaliptos 457',
+    emergencyContact: 'Mario Fuentes - 965778811'
+  },
+  {
+    fullName: 'Hector Vilca',
+    email: 'hector.vilca@pacientes.pe',
+    dni: '79105548',
+    phone: '981234567',
+    birthDate: '1984-01-22',
+    address: 'Jr. Lima Norte 211',
+    emergencyContact: 'Rocio Vilca - 986554433'
+  },
+  {
+    fullName: 'Milagros Tejada',
+    email: 'milagros.tejada@pacientes.pe',
+    dni: '78561234',
+    phone: '989771122',
+    birthDate: '1997-10-31',
+    address: 'Calle Aurora 91',
+    emergencyContact: 'Luis Tejada - 977889944'
+  },
+  {
+    fullName: 'Samuel Yupanqui',
+    email: 'samuel.yupanqui@pacientes.pe',
+    dni: '79667781',
+    phone: '983456710',
+    birthDate: '1978-03-17',
+    address: 'Av. Universitaria 654',
+    emergencyContact: 'Nelly Yupanqui - 969441122'
+  },
+  {
+    fullName: 'Paola Cuentas',
+    email: 'paola.cuentas@pacientes.pe',
+    dni: '78442219',
+    phone: '980665544',
+    birthDate: '1990-12-11',
+    address: 'Jr. Miraflores 308',
+    emergencyContact: 'Ruben Cuentas - 973114455'
+  },
+  {
+    fullName: 'Kevin Montoya',
+    email: 'kevin.montoya@pacientes.pe',
+    dni: '79351126',
+    phone: '987334455',
+    birthDate: '2001-05-06',
+    address: 'Pasaje Central 145',
+    emergencyContact: 'Dora Montoya - 981337799'
   }
 ];
 
@@ -338,6 +408,66 @@ const DEFAULT_APPOINTMENTS = [
     status: 'completada',
     reason: 'Dolor en hombro derecho',
     notes: 'Se indica terapia fisica'
+  },
+  {
+    patientEmail: 'gabriela.fuentes@pacientes.pe',
+    doctorEmail: 'diego.paredes@policlinico.pe',
+    date: '2026-04-20',
+    start: '18:30',
+    end: '19:00',
+    status: 'pendiente',
+    reason: 'Control de gastritis en horario nocturno',
+    notes: 'Paciente trabaja en turno dia'
+  },
+  {
+    patientEmail: 'hector.vilca@pacientes.pe',
+    doctorEmail: 'camila.ponce@policlinico.pe',
+    date: '2026-04-21',
+    start: '19:00',
+    end: '19:30',
+    status: 'pendiente',
+    reason: 'Tos persistente por mas de dos semanas',
+    notes: 'Solicita consulta despues del trabajo'
+  },
+  {
+    patientEmail: 'milagros.tejada@pacientes.pe',
+    doctorEmail: 'diego.paredes@policlinico.pe',
+    date: '2026-04-22',
+    start: '20:00',
+    end: '20:30',
+    status: 'pendiente',
+    reason: 'Chequeo general nocturno',
+    notes: 'Disponibilidad solo en noche'
+  },
+  {
+    patientEmail: 'samuel.yupanqui@pacientes.pe',
+    doctorEmail: 'camila.ponce@policlinico.pe',
+    date: '2026-04-23',
+    start: '21:00',
+    end: '21:30',
+    status: 'pendiente',
+    reason: 'Control respiratorio por alergias',
+    notes: 'Evaluacion en horario extendido'
+  },
+  {
+    patientEmail: 'paola.cuentas@pacientes.pe',
+    doctorEmail: 'diego.paredes@policlinico.pe',
+    date: '2026-04-24',
+    start: '18:00',
+    end: '18:30',
+    status: 'pendiente',
+    reason: 'Control general en horario nocturno',
+    notes: 'Prefiere cita nocturna'
+  },
+  {
+    patientEmail: 'kevin.montoya@pacientes.pe',
+    doctorEmail: 'camila.ponce@policlinico.pe',
+    date: '2026-04-25',
+    start: '20:30',
+    end: '21:00',
+    status: 'pendiente',
+    reason: 'Consulta por malestar general',
+    notes: 'Atencion sabado en noche'
   }
 ];
 
@@ -511,6 +641,43 @@ function ensureAppointmentsStatusSchema() {
   migrate();
 }
 
+function purgeDeprecatedSpecialties() {
+  const specialtyPlaceholders = DEPRECATED_SPECIALTIES.map(() => '?').join(', ');
+  const doctorsToPurge = db
+    .prepare(`SELECT id, user_id FROM doctors WHERE specialty IN (${specialtyPlaceholders})`)
+    .all(...DEPRECATED_SPECIALTIES);
+
+  if (!doctorsToPurge.length) return;
+
+  const doctorIds = doctorsToPurge.map((row) => row.id);
+  const doctorPlaceholders = doctorIds.map(() => '?').join(', ');
+  const appointmentsToPurge = db
+    .prepare(`SELECT id FROM appointments WHERE doctor_id IN (${doctorPlaceholders})`)
+    .all(...doctorIds)
+    .map((row) => row.id);
+
+  if (appointmentsToPurge.length) {
+    const appointmentPlaceholders = appointmentsToPurge.map(() => '?').join(', ');
+
+    db.prepare(
+      `DELETE FROM appointment_reschedule_audit
+       WHERE original_appointment_id IN (${appointmentPlaceholders})
+          OR new_appointment_id IN (${appointmentPlaceholders})`
+    ).run(...appointmentsToPurge, ...appointmentsToPurge);
+
+    db.prepare(`DELETE FROM appointments WHERE id IN (${appointmentPlaceholders})`).run(...appointmentsToPurge);
+  }
+
+  db.prepare(`DELETE FROM doctor_schedules WHERE doctor_id IN (${doctorPlaceholders})`).run(...doctorIds);
+  db.prepare(`DELETE FROM doctors WHERE id IN (${doctorPlaceholders})`).run(...doctorIds);
+
+  const doctorUserIds = doctorsToPurge.map((row) => row.user_id).filter(Boolean);
+  if (!doctorUserIds.length) return;
+
+  const userPlaceholders = doctorUserIds.map(() => '?').join(', ');
+  db.prepare(`DELETE FROM users WHERE id IN (${userPlaceholders}) AND role = 'medico'`).run(...doctorUserIds);
+}
+
 function initDatabase() {
   const schemaPath = path.resolve(__dirname, 'schema.sql');
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
@@ -520,6 +687,8 @@ function initDatabase() {
   const defaultPasswordHash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
 
   const seedDefaults = db.transaction(() => {
+    purgeDeprecatedSpecialties();
+
     const insertUser = db.prepare('INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, ?)');
 
     const adminId = ensureUser(

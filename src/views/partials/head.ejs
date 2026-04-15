@@ -61,6 +61,10 @@
     <%- include('nav') %>
   <% } %>
   <main class="container">
+    <%
+      const reminderItems = Array.isArray(typeof autoReminders === 'undefined' ? [] : autoReminders) ? (typeof autoReminders === 'undefined' ? [] : autoReminders) : [];
+      const reminderCount = typeof autoRemindersCount === 'number' ? autoRemindersCount : reminderItems.length;
+    %>
     <% if (
       currentUser &&
       pageTitle !== 'Panel administrativo' &&
@@ -84,6 +88,22 @@
           <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Sesión activa</span>
           <h2><%= greetingByRole[currentUser.role] || 'Bienvenido' %>, <%= userName %></h2>
           <p>Te encuentras en <%= roleLabelMap[currentUser.role] || 'el sistema' %>. Aquí tienes un acceso rápido y ordenado a tus funciones.</p>
+        </div>
+      </section>
+    <% } %>
+    <% if (reminderCount) { %>
+      <section class="card auto-reminders-shell">
+        <div class="section-title-wrap">
+          <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Recordatorios automáticos</h2>
+          <span class="table-count"><%= reminderCount %> próximos</span>
+        </div>
+        <div class="auto-reminders-list">
+          <% reminderItems.forEach((reminder) => { %>
+            <article class="auto-reminder-card auto-reminder-<%= reminder.urgency %>">
+              <span class="auto-reminder-pill"><%= reminder.title %></span>
+              <p><%= reminder.message %></p>
+            </article>
+          <% }) %>
         </div>
       </section>
     <% } %>

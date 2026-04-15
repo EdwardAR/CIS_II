@@ -1223,6 +1223,39 @@ th {
   letter-spacing: 0.01em;
 }
 
+th.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+
+th.sortable-header::after {
+  content: ' \21C5';
+  opacity: 0.38;
+  font-size: 0.78em;
+}
+
+th.sortable-header:hover,
+th.sortable-header:focus-visible {
+  background: linear-gradient(180deg, #edf6ff 0%, #e1effb 100%);
+  color: #12384f;
+  outline: none;
+}
+
+th.sortable-header.sortable-active {
+  color: #0f5672;
+}
+
+th.sortable-header.sortable-active[data-sort-dir='asc']::after {
+  content: ' \2191';
+  opacity: 0.95;
+}
+
+th.sortable-header.sortable-active[data-sort-dir='desc']::after {
+  content: ' \2193';
+  opacity: 0.95;
+}
+
 th, td {
   padding: 0.65rem;
   border-bottom: 1px solid var(--line);

@@ -1,5 +1,16 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
+<%
+  const dmy =
+    typeof formatDateDmy === 'function'
+      ? formatDateDmy
+      : (value) => {
+          if (!value || typeof value !== 'string') return value;
+          const [year, month, day] = value.split('-');
+          if (!year || !month || !day) return value;
+          return `${day}-${month}-${year}`;
+        };
+%>
 
 <section class="card appointments-hero">
   <div class="appointments-hero-copy">
@@ -191,7 +202,7 @@
         <tbody>
           <% appointments.forEach((a) => { %>
             <tr>
-              <td><%= a.appointment_date %></td>
+              <td><%= dmy(a.appointment_date) %></td>
               <td><%= a.start_time %> - <%= a.end_time %></td>
               <td><%= a.patient_name %></td>
               <td><%= a.doctor_name %></td>

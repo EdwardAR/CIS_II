@@ -7,6 +7,7 @@ const { validationResult } = require('express-validator');
 const { sessionMiddleware } = require('./config/session');
 const { csrfProtection } = require('./middlewares/csrf.middleware');
 const { errorHandler } = require('./middlewares/error.middleware');
+const { formatIsoDateToDmy } = require('./utils/date');
 
 const authRoutes = require('./modules/auth/auth.routes');
 const pacientesRoutes = require('./modules/pacientes/pacientes.routes');
@@ -38,6 +39,7 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.formErrors = [];
   res.locals.flash = req.session.flash || null;
+  res.locals.formatDateDmy = formatIsoDateToDmy;
   delete req.session.flash;
   next();
 });

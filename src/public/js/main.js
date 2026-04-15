@@ -139,3 +139,120 @@ if (specialtySelect && doctorSelect) {
   specialtySelect.addEventListener('change', syncDoctorOptions);
   syncDoctorOptions();
 }
+
+const parseSortableValue = (rawValue) => {
+  const value = String(rawValue || '').trim();
+
+  if (!value) {
+    return { type: 'text', value: '' };
+  }
+
+  const dmyMatch = value.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (dmyMatch) {
+    const [, day, month, year] = dmyMatch;
+    const parsed = Date.UTC(Number(year), Number(month) - 1, Number(day));
+    return { type: 'number', value: parsed };
+  }
+
+  const isoDateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    const parsed = Date.UTC(Number(year), Number(month) - 1, Number(day));
+    return { type: 'number', value: parsed };
+  }
+
+  const timeMatch = value.match(/^(\d{1,2}):(\d{2})(?:\s*-\s*(\d{1,2}):(\d{2}))?/);
+  if (timeMatch) {
+    const hour = Number(timeMatch[1]);
+    const minute = Number(timeMatch[2]);
+    return { type: 'number', value: hour * 60 + minute };
+  }
+
+  const numericCandidate = value
+    .replace(/\s+/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.')
+    .replace(/[^\d.-]/g, '');
+
+  if (numericCandidate && !Number.isNaN(Number(numericCandidate))) {
+    return { type: 'number', value: Number(numericCandidate) };
+  }
+
+  return { type: 'text', value: value.toLowerCase() };
+};
+
+const compareSortableValues = (left, right) => {
+  if (left.type === 'number' && right.type === 'number') {
+    return left.value - right.value;
+  }
+
+  return String(left.value).localeCompare(String(right.value), 'es', {
+    sensitivity: 'base',
+    numeric: true
+  });
+};
+
+const setSortIndicators = (headers, activeHeader, direction) => {
+  headers.forEach((header) => {
+    const isActive = header === activeHeader;
+    header.classList.toggle('sortable-active', isActive);
+    header.dataset.sortDir = isActive ? direction : '';
+    header.setAttribute('aria-sort', isActive ? (direction === 'asc' ? 'ascending' : 'descending') : 'none');
+  });
+};
+
+document.querySelectorAll('table').forEach((table) => {
+  const headRow = table.querySelector('thead tr');
+  const body = table.querySelector('tbody');
+  if (!headRow || !body) return;
+
+  const headers = Array.from(headRow.children).filter((cell) => cell.tagName === 'TH');
+  if (!headers.length) return;
+
+  headers.forEach((header, index) => {
+    const normalizedHeader = header.textContent.trim().toLowerCase();
+    if (normalizedHeader === 'acciones') {
+      return;
+    }
+
+    header.classList.add('sortable-header');
+    header.tabIndex = 0;
+    header.setAttribute('role', 'button');
+    header.setAttribute('aria-sort', 'none');
+
+    let direction = 'asc';
+
+    const sortByHeader = () => {
+      const rows = Array.from(body.querySelectorAll('tr'));
+      const sortableRows = rows
+        .map((row, originalIndex) => ({ row, originalIndex }))
+        .filter(({ row }) => row.children[index]);
+
+      sortableRows.sort((left, right) => {
+        const leftCell = left.row.children[index];
+        const rightCell = right.row.children[index];
+        const leftValue = parseSortableValue(leftCell ? leftCell.textContent : '');
+        const rightValue = parseSortableValue(rightCell ? rightCell.textContent : '');
+        const compared = compareSortableValues(leftValue, rightValue);
+
+        if (compared !== 0) {
+          return direction === 'asc' ? compared : -compared;
+        }
+
+        return left.originalIndex - right.originalIndex;
+      });
+
+      sortableRows.forEach(({ row }) => body.appendChild(row));
+      setSortIndicators(headers, header, direction);
+      direction = direction === 'asc' ? 'desc' : 'asc';
+    };
+
+    header.addEventListener('click', sortByHeader);
+    header.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        sortByHeader();
+      }
+    });
+  });
+});

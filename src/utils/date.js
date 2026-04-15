@@ -11,4 +11,13 @@ function addMinutesToTime(time, minutesToAdd) {
   return `${hh}:${mm}`;
 }
 
-module.exports = { getDayOfWeek, addMinutesToTime };
+function formatIsoDateToDmy(value) {
+  if (!value || typeof value !== 'string') return value;
+
+  const [year, month, day] = value.split('-');
+  if (!year || !month || !day) return value;
+
+  return `${day}-${month}-${year}`;
+}
+
+module.exports = { getDayOfWeek, addMinutesToTime, formatIsoDateToDmy };

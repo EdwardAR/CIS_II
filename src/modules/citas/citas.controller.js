@@ -12,6 +12,7 @@ const {
   requestAppointmentReschedule,
   approveAppointmentReschedule
 } = require('./citas.service');
+const { formatIsoDateToDmy } = require('../../utils/date');
 
 function buildViewData(user, options = {}) {
   const selectedSpecialty = options.selectedSpecialty || '';
@@ -169,7 +170,7 @@ function approveReschedule(req, res) {
     const result = approveAppointmentReschedule(appointmentId, req.session.user);
     req.session.flash = {
       type: 'success',
-      message: `Reprogramacion aprobada. Nueva cita #${result.newAppointmentId} agendada para ${result.appointmentDate} ${result.startTime}.`
+      message: `Reprogramacion aprobada. Nueva cita #${result.newAppointmentId} agendada para ${formatIsoDateToDmy(result.appointmentDate)} ${result.startTime}.`
     };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };

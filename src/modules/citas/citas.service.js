@@ -88,7 +88,7 @@ const listDoctorSchedulesByDayStmt = db.prepare(
 const listBusySlotsByDateStmt = db.prepare(
   `SELECT start_time
    FROM appointments
-   WHERE doctor_id = ? AND appointment_date = ? AND status IN ('pendiente', 'solicitud_reprogramacion')`
+  WHERE doctor_id = ? AND appointment_date = ?`
 );
 
 const insertApprovedRescheduleStmt = db.prepare(

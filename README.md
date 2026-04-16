@@ -976,7 +976,7 @@ erDiagram
 
         APPOINTMENT_RATINGS {
             int id PK
-            int appointment_id FK UK
+            int appointment_id FK
             int patient_user_id FK
             int doctor_user_id FK
             int rating "1..5"

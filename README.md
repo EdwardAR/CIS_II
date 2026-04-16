@@ -100,8 +100,12 @@ graph TD
     D --> E["💼 Servicios<br/>Lógica Negocio"]
     E --> F["🗄️ SQLite DB<br/>(better-sqlite3)"]
     E --> H["⏰ Recordatorios automáticos<br/>(admin, médico, paciente)"]
+    E --> I["🔔 Notificaciones clínicas<br/>persistentes"]
+    E --> J["⭐ Calificaciones y<br/>métricas de satisfacción"]
     
     B -->|Session| G["🍪 Store Sesiones<br/>(SQLite)"]
+    I --> F
+    J --> F
     
     style A fill:#e1f5ff
     style B fill:#fff3e0
@@ -122,6 +126,7 @@ sequenceDiagram
     participant Controller
     participant Service
     participant DB as SQLite DB
+    participant Notify as Notificaciones
     
     User->>Browser: Acción (click)
     Browser->>Express: HTTP Request
@@ -130,6 +135,10 @@ sequenceDiagram
         Middleware->>Controller: Procesar
         Controller->>Service: Ejecutar lógica
         Service->>DB: Query/Update
+        opt Evento clínico (cancelar/completar/calificar)
+            Service->>Notify: Crear notificación por rol
+            Notify->>DB: Guardar notificación
+        end
         DB-->>Service: Resultado
         Service-->>Controller: Datos procesados
         Controller-->>Express: Render EJS
@@ -163,17 +172,18 @@ graph LR
     
     subgraph Modules["📦 Módulos"]
         AUTH_MOD["<b>Auth</b><br/>login/register"]
-        CITAS["<b>Citas</b><br/>reservar/completar"]
+        CITAS["<b>Citas</b><br/>reservar/completar/calificar"]
         NOTI["<b>Notificaciones</b><br/>bandeja clínica"]
         MEDICOS["<b>Médicos</b><br/>horarios/panel"]
         PACIENTES["<b>Pacientes</b><br/>perfil"]
-        ADMIN["<b>Admin</b><br/>dashboard"]
+        ADMIN["<b>Admin</b><br/>dashboard + satisfacción"]
     end
     
     Core -.-> Middleware
     Middleware --> Modules
     REM --> Modules
     CITAS --> NOTI
+    CITAS --> ADMIN
     NOTI --> ADMIN
     
     style Core fill:#f0f0f0
@@ -707,6 +717,8 @@ stateDiagram-v2
     Dashboard --> Medicos
     Dashboard --> Citas
     Dashboard --> Pacientes
+    Dashboard --> Notificaciones["Bandeja de notificaciones"]
+    Dashboard --> Satisfaccion["Panel de satisfacción"]
     
     Medicos --> RegistrarMedico["Registrar Médico"]
     Medicos --> AsignarHorarios["Asignar Horarios"]
@@ -715,6 +727,8 @@ stateDiagram-v2
     Citas --> CompletarCita["Marcar completada"]
     Citas --> CancelarCita["Cancelar cita"]
     Citas --> VerProximas["Ver próximas citas"]
+    CompletarCita --> EsperaCalificacion["Paciente notificado para calificar"]
+    EsperaCalificacion --> Satisfaccion
     
     Pacientes --> VerPacientes["Listar pacientes"]
     
@@ -722,6 +736,8 @@ stateDiagram-v2
     AsignarHorarios --> Dashboard
     CompletarCita --> Dashboard
     ListarMedicos --> Dashboard
+    Notificaciones --> Dashboard
+    Satisfaccion --> Dashboard
     
     Dashboard --> Logout
     Logout --> [*]
@@ -768,10 +784,18 @@ graph TD
     C --> R["🕒 Solicitar<br/>reprogramación"]
     R --> S["⏳ Estado:<br/>solicitud_reprogramacion"]
     S --> T["⏱ Espera aprobación<br/>médico/admin"]
+
+    J --> L["🔔 Cita completada<br/>notifica al paciente"]
+    L --> M["⭐ Calificar atención<br/>(1 a 5 estrellas)"]
+    M --> N["✅ Feedback enviado<br/>admin notificado"]
+    C --> O["❌ Cancelar cita"]
+    O --> P["🔔 Médico notificado"]
     
     J --> B
     D --> B
     T --> B
+    N --> B
+    P --> B
     B --> K["🚪 Logout"]
     
     style A fill:#e1f5ff
@@ -808,6 +832,7 @@ graph TD
     B --> C["📋 Ver Citas<br/>Asignadas"]
     B --> D["📅 Ver Horarios"]
     B --> E["📊 Estadísticas"]
+    B --> O["🔔 Notificaciones<br/>clínicas"]
     
     C --> F{¿Filtro?}
     F -->|⏳ Pendientes| G["Mostrar<br/>Pendientes"]
@@ -820,11 +845,14 @@ graph TD
     J --> K["✓ Marcar como<br/>Completada"]
     J --> L["❌ Cancelar Cita"]
     J --> N["🕒 Aprobar<br/>reprogramación"]
+    O --> Q["Paciente canceló cita"]
+    Q --> C
     
     D --> B
     K --> B
     L --> B
     N --> B
+    O --> B
     B --> M["🚪 Logout"]
     
     style A fill:#e1f5ff
@@ -859,11 +887,13 @@ erDiagram
         USERS ||--o| PATIENTS : "1 a 1"
         USERS ||--o| DOCTORS : "1 a 1"
         USERS ||--o{ NOTIFICATIONS : "recibe"
+    USERS ||--o{ APPOINTMENT_RATINGS : "participa"
         DOCTORS ||--o{ DOCTOR_SCHEDULES : "define"
         PATIENTS ||--o{ APPOINTMENTS : "reserva"
         DOCTORS ||--o{ APPOINTMENTS : "atiende"
         USERS ||--o{ APPOINTMENTS : "crea"
         APPOINTMENTS ||--o{ APPOINTMENT_RESCHEDULE_AUDIT : "audita"
+    APPOINTMENTS ||--o{ NOTIFICATIONS : "genera alertas"
         APPOINTMENTS ||--o| APPOINTMENT_RATINGS : "califica"
 
         USERS {
@@ -966,6 +996,28 @@ erDiagram
 - `notifications` almacena alertas persistentes por usuario con estado de lectura.
 
 ### 12.3 Flujo de cita (real)
+
+```mermaid
+graph TD
+    A["Paciente reserva cita"] --> B["Estado: pendiente"]
+    B --> C{Evento}
+
+    C -->|Médico/Admin completa| D["Estado: completada"]
+    D --> E["Notificar paciente para calificar"]
+    E --> F["Paciente califica 1..5"]
+    F --> G["Guardar en appointment_ratings"]
+    G --> H["Notificar admin"]
+    H --> I["Actualizar panel de satisfacción"]
+
+    C -->|Paciente cancela| J["Estado: cancelada"]
+    J --> K["Notificar médico"]
+
+    C -->|Paciente solicita reprogramación| L["Estado: solicitud_reprogramacion"]
+    L --> M["Médico/Admin aprueba"]
+    M --> N["Original: reprogramada"]
+    N --> O["Nueva cita: pendiente"]
+    O --> P["Registrar en audit"]
+```
 
 1. Paciente selecciona especialidad, médico y fecha.
 2. El sistema calcula slots por horario activo (`doctor_schedules`) y cruza con citas existentes.

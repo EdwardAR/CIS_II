@@ -1,9 +1,24 @@
 document.querySelectorAll('form').forEach((form) => {
-  form.addEventListener('submit', () => {
+  form.addEventListener('submit', (event) => {
+    if (form.dataset.confirm && form.dataset.confirmed !== 'true') {
+      const accepted = window.confirm(form.dataset.confirm);
+      if (!accepted) {
+        event.preventDefault();
+        return;
+      }
+
+      form.dataset.confirmed = 'true';
+    }
+
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) {
+      const loadingText = submitButton.dataset.loadingText || 'Procesando...';
+
+      submitButton.dataset.originalHtml = submitButton.dataset.originalHtml || submitButton.innerHTML;
       submitButton.disabled = true;
-      submitButton.textContent = 'Procesando...';
+      submitButton.classList.add('is-loading');
+      submitButton.setAttribute('aria-busy', 'true');
+      submitButton.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span><span class="btn-label">${loadingText}</span>`;
     }
   });
 });
@@ -25,6 +40,7 @@ document.querySelectorAll('.flash-toast').forEach((toast) => {
   const dismissMs = Number(toast.dataset.dismissMs || 4300);
   const closeButton = toast.querySelector('.flash-close');
   const timerBar = toast.querySelector('.flash-timer');
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
 
   if (timerBar) {
     timerBar.style.animation = `flashTimerDrain ${dismissMs}ms linear forwards`;

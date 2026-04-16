@@ -151,7 +151,12 @@
       </a>
     </div>
 
-    <form method="post" action="/citas" class="grid-form two-cols register-form booking-confirm-form">
+    <form
+      method="post"
+      action="/citas"
+      class="grid-form two-cols register-form booking-confirm-form"
+      data-confirm="¿Desea confirmar y registrar esta cita?"
+    >
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <input type="hidden" name="specialty" value="<%= selectedSpecialty || '' %>" />
       <input type="hidden" name="doctor_id" value="<%= selectedDoctorId %>" />
@@ -167,11 +172,55 @@
       <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Motivo de consulta</label>
       <input type="text" name="reason" required />
 
-      <button type="submit" class="btn auth-submit">Confirmar cita</button>
+      <button type="submit" class="btn auth-submit" data-loading-text="Confirmando cita...">Confirmar cita</button>
     </form>
   <% } else if (selectedDoctorId && selectedDate) { %>
     <p class="helper">No hay horarios disponibles para la fecha seleccionada.</p>
   <% } %>
+</section>
+<% } %>
+
+<% if (currentUser.role === 'paciente' && pendingRatings.length) { %>
+<section class="card satisfaction-shell">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Calificaciones pendientes</h2>
+    <span class="table-count"><%= pendingRatings.length %> por valorar</span>
+  </div>
+  <p class="helper">Tu experiencia ayuda a mejorar la atención médica. Califica cada consulta completada una sola vez.</p>
+
+  <div class="satisfaction-grid">
+    <% pendingRatings.forEach((appointment) => { %>
+      <article class="satisfaction-card" id="calificacion-<%= appointment.id %>">
+        <div class="satisfaction-card-header">
+          <div>
+            <span class="appointment-origin-badge">Atención completada</span>
+            <strong><%= appointment.doctor_name %></strong>
+            <p><%= dmy(appointment.appointment_date) %> - <%= appointment.start_time %><%= appointment.specialty ? ` · ${appointment.specialty}` : '' %></p>
+          </div>
+          <span class="rating-chip">Pendiente de calificación</span>
+        </div>
+
+        <form
+          method="post"
+          action="/citas/<%= appointment.id %>/calificar"
+          class="rating-form"
+        >
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="star-rating" role="radiogroup" aria-label="Calificación de la atención">
+            <% for (let star = 5; star >= 1; star -= 1) { %>
+              <input id="rating-<%= appointment.id %>-<%= star %>" type="radio" name="rating" value="<%= star %>" required />
+              <label for="rating-<%= appointment.id %>-<%= star %>" title="<%= star %> estrella<%= star === 1 ? '' : 's' %>">★</label>
+            <% } %>
+          </div>
+
+          <label for="comment-<%= appointment.id %>" class="helper">Comentario opcional</label>
+          <textarea id="comment-<%= appointment.id %>" name="comment" rows="3" maxlength="250" placeholder="Cuéntanos cómo fue la atención..."></textarea>
+
+          <button type="submit" class="btn auth-submit" data-loading-text="Enviando calificación...">Enviar calificación</button>
+        </form>
+      </article>
+    <% }) %>
+  </div>
 </section>
 <% } %>
 
@@ -223,37 +272,61 @@
 
                   <div class="appointments-actions-row">
                     <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                      <form method="post" action="/citas/<%= a.id %>/completar" class="inline-form">
+                      <form
+                        method="post"
+                        action="/citas/<%= a.id %>/completar"
+                        class="inline-form"
+                        data-confirm="¿Marcar esta cita como completada?"
+                      >
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-secondary action-btn"><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar</button>
+                        <button type="submit" class="btn btn-secondary action-btn" data-loading-text="Marcando..."><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar</button>
                       </form>
                     <% } %>
 
                     <% if (a.status === 'pendiente' && currentUser.role === 'paciente' && !a.is_auto_rescheduled) { %>
-                      <form method="post" action="/citas/<%= a.id %>/solicitar-reprogramacion" class="inline-form">
+                      <form
+                        method="post"
+                        action="/citas/<%= a.id %>/solicitar-reprogramacion"
+                        class="inline-form"
+                        data-confirm="¿Enviar una solicitud de reprogramación para esta cita?"
+                      >
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-request action-btn"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Solicitar reprogramación</button>
+                        <button type="submit" class="btn btn-request action-btn" data-loading-text="Enviando solicitud..."><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Solicitar reprogramación</button>
                       </form>
                     <% } %>
 
                     <% if (a.status === 'solicitud_reprogramacion' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                      <form method="post" action="/citas/<%= a.id %>/aprobar-reprogramacion" class="inline-form">
+                      <form
+                        method="post"
+                        action="/citas/<%= a.id %>/aprobar-reprogramacion"
+                        class="inline-form"
+                        data-confirm="¿Aprobar esta reprogramación y generar una nueva cita automática?"
+                      >
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-approve action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar reprogramación</button>
+                        <button type="submit" class="btn btn-approve action-btn" data-loading-text="Aprobando..."><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar reprogramación</button>
                       </form>
                     <% } %>
 
                     <% if (a.status === 'pendiente') { %>
-                      <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form">
+                      <form
+                        method="post"
+                        action="/citas/<%= a.id %>/cancelar"
+                        class="inline-form"
+                      >
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-danger btn-danger-soft action-btn"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita</button>
+                        <button type="submit" class="btn btn-danger btn-danger-soft action-btn" data-loading-text="Cancelando..."><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita</button>
                       </form>
                     <% } %>
 
                     <% if (currentUser.role === 'admin' || currentUser.role === 'medico') { %>
                       <details class="appointment-edit-inline">
                         <summary class="btn btn-edit action-btn"><img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Editar</summary>
-                        <form method="post" action="/citas/<%= a.id %>/editar" class="appointment-edit-form">
+                        <form
+                          method="post"
+                          action="/citas/<%= a.id %>/editar"
+                          class="appointment-edit-form"
+                          data-confirm="¿Guardar el nuevo estado de la cita?"
+                        >
                           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                           <label for="status-<%= a.id %>" class="helper">Nuevo estado</label>
                           <select id="status-<%= a.id %>" name="status" required>
@@ -262,7 +335,7 @@
                             <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
                             <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
                           </select>
-                          <button type="submit" class="btn action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar</button>
+                          <button type="submit" class="btn action-btn" data-loading-text="Guardando..."><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar</button>
                         </form>
                       </details>
                     <% } %>

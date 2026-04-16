@@ -64,7 +64,37 @@
     <%
       const reminderItems = Array.isArray(typeof autoReminders === 'undefined' ? [] : autoReminders) ? (typeof autoReminders === 'undefined' ? [] : autoReminders) : [];
       const reminderCount = typeof autoRemindersCount === 'number' ? autoRemindersCount : reminderItems.length;
+      const notificationItems = Array.isArray(typeof systemNotifications === 'undefined' ? [] : systemNotifications) ? (typeof systemNotifications === 'undefined' ? [] : systemNotifications) : [];
+      const notificationCount = typeof systemNotificationsCount === 'number' ? systemNotificationsCount : notificationItems.length;
     %>
+    <% if (notificationCount) { %>
+      <section class="card system-notifications-shell">
+        <div class="section-title-wrap">
+          <h2><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Notificaciones clínicas</h2>
+          <span class="table-count"><%= notificationCount %> sin leer</span>
+        </div>
+        <div class="system-notifications-list">
+          <% notificationItems.forEach((notification) => { %>
+            <article class="system-notification-card notification-<%= notification.tone %>">
+              <div class="system-notification-copy">
+                <span class="system-notification-pill"><%= notification.badge %></span>
+                <strong><%= notification.title %></strong>
+                <p><%= notification.message %></p>
+              </div>
+              <div class="system-notification-actions">
+                <% if (notification.action_url) { %>
+                  <a href="<%= notification.action_url %>" class="btn btn-secondary action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" /><%= notification.actionLabel %></a>
+                <% } %>
+                <form method="post" action="/notificaciones/<%= notification.id %>/leer" class="inline-form">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button type="submit" class="btn btn-edit action-btn" data-loading-text="Marcando..."><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Marcar como leída</button>
+                </form>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
     <% if (
       currentUser &&
       pageTitle !== 'Panel administrativo' &&

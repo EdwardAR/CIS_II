@@ -13,4 +13,9 @@ const editAppointmentStatusValidator = [
     .withMessage('Estado de cita invalido.')
 ];
 
-module.exports = { createAppointmentValidator, editAppointmentStatusValidator };
+const rateAppointmentValidator = [
+  body('rating').isInt({ min: 1, max: 5 }).withMessage('La calificacion debe estar entre 1 y 5 estrellas.'),
+  body('comment').optional({ checkFalsy: true }).trim().isLength({ max: 250 }).withMessage('El comentario no puede superar 250 caracteres.')
+];
+
+module.exports = { createAppointmentValidator, editAppointmentStatusValidator, rateAppointmentValidator };

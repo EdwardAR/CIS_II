@@ -73,6 +73,49 @@ function getSummary() {
     )
     .get(todayIso).total;
 
+  const satisfactionTotals = db
+    .prepare(
+      `SELECT
+         COUNT(*) AS totalRatings,
+         ROUND(AVG(r.rating), 2) AS averageRating,
+         SUM(CASE WHEN r.rating >= 4 THEN 1 ELSE 0 END) AS satisfiedRatings,
+         SUM(CASE WHEN r.rating <= 2 THEN 1 ELSE 0 END) AS lowRatings
+       FROM appointment_ratings r`
+    )
+    .get();
+
+  const ratingsByDoctor = db
+    .prepare(
+      `SELECT d.id AS doctor_id,
+              u.full_name AS doctor_name,
+              d.specialty,
+              COUNT(r.id) AS totalRatings,
+              ROUND(AVG(r.rating), 2) AS averageRating,
+              SUM(CASE WHEN r.rating >= 4 THEN 1 ELSE 0 END) AS satisfiedRatings
+       FROM doctors d
+       INNER JOIN users u ON u.id = d.user_id
+       LEFT JOIN appointment_ratings r ON r.doctor_user_id = d.user_id
+       GROUP BY d.id, u.full_name, d.specialty
+       HAVING totalRatings > 0
+       ORDER BY averageRating DESC, totalRatings DESC
+       LIMIT 5`
+    )
+    .all();
+
+  const pendingRatings = db
+    .prepare(
+      `SELECT COUNT(*) AS total
+       FROM appointments a
+       LEFT JOIN appointment_ratings r ON r.appointment_id = a.id
+       WHERE a.status = 'completada' AND r.id IS NULL`
+    )
+    .get().total;
+
+  const averageRating = Number(satisfactionTotals?.averageRating || 0);
+  const satisfiedRatings = satisfactionTotals?.satisfiedRatings || 0;
+  const totalRatings = satisfactionTotals?.totalRatings || 0;
+  const satisfactionRate = totalRatings ? Math.round((satisfiedRatings / totalRatings) * 100) : 0;
+
   const pendingBySpecialty = db
     .prepare(
       `SELECT d.specialty, COUNT(*) AS total
@@ -124,6 +167,15 @@ function getSummary() {
     nextAppointment,
     doctorsInShiftNow,
     doctorsWithAppointmentsToday,
+    satisfaction: {
+      totalRatings,
+      averageRating,
+      satisfactionRate,
+      satisfiedRatings,
+      lowRatings: satisfactionTotals?.lowRatings || 0,
+      pendingRatings,
+      ratingsByDoctor
+    },
     pendingBySpecialty,
     todayPendingDetails
   };

@@ -1,5 +1,9 @@
 const { db } = require('../../config/db');
-const { addMinutesToTime, getDayOfWeek } = require('../../utils/date');
+const { addMinutesToTime, getDayOfWeek, formatIsoDateToDmy } = require('../../utils/date');
+const {
+  createNotificationForUser,
+  createNotificationsForRole
+} = require('../notificaciones/notificaciones.service');
 
 const ALLOWED_APPOINTMENT_STATUSES = new Set([
   'pendiente',
@@ -71,11 +75,52 @@ const insertAppointmentStmt = db.prepare(
 const updateAppointmentStatusStmt = db.prepare('UPDATE appointments SET status = ? WHERE id = ?');
 const getAppointmentByIdStmt = db.prepare(
   `SELECT a.id, a.patient_id, a.doctor_id, a.appointment_date, a.start_time, a.end_time, a.reason,
-          a.status, p.user_id AS patient_user_id, d.user_id AS doctor_user_id
+          a.status, p.user_id AS patient_user_id, d.user_id AS doctor_user_id,
+          up.full_name AS patient_name, ud.full_name AS doctor_name, d.office AS doctor_office
    FROM appointments a
    INNER JOIN patients p ON p.id = a.patient_id
    INNER JOIN doctors d ON d.id = a.doctor_id
+   INNER JOIN users up ON up.id = p.user_id
+   INNER JOIN users ud ON ud.id = d.user_id
    WHERE a.id = ?`
+);
+
+const getAppointmentRatingStmt = db.prepare(
+  `SELECT id, appointment_id, patient_user_id, doctor_user_id, rating, comment
+   FROM appointment_ratings
+   WHERE appointment_id = ?
+   LIMIT 1`
+);
+
+const upsertAppointmentRatingStmt = db.prepare(
+  `INSERT INTO appointment_ratings (
+    appointment_id,
+    patient_user_id,
+    doctor_user_id,
+    rating,
+    comment,
+    updated_at
+  ) VALUES (?, ?, ?, ?, ?, datetime('now'))
+   ON CONFLICT(appointment_id) DO UPDATE SET
+     patient_user_id = excluded.patient_user_id,
+     doctor_user_id = excluded.doctor_user_id,
+     rating = excluded.rating,
+     comment = excluded.comment,
+     updated_at = datetime('now')`
+);
+
+const listPendingRatingsForPatientStmt = db.prepare(
+  `SELECT a.id, a.appointment_date, a.start_time, a.end_time,
+          ud.full_name AS doctor_name, d.specialty, d.office AS doctor_office
+   FROM appointments a
+   INNER JOIN patients p ON p.id = a.patient_id
+   INNER JOIN doctors d ON d.id = a.doctor_id
+   INNER JOIN users ud ON ud.id = d.user_id
+   LEFT JOIN appointment_ratings ar ON ar.appointment_id = a.id
+   WHERE p.user_id = ?
+     AND a.status = 'completada'
+     AND ar.id IS NULL
+   ORDER BY a.appointment_date DESC, a.start_time DESC`
 );
 
 const listDoctorSchedulesByDayStmt = db.prepare(
@@ -227,6 +272,17 @@ function getDoctorById(doctorId) {
   return getDoctorByIdStmt.get(doctorId);
 }
 
+function getPendingRatingsForPatient(currentUser) {
+  if (!currentUser || currentUser.role !== 'paciente') {
+    return [];
+  }
+
+  return listPendingRatingsForPatientStmt.all(currentUser.id).map((item) => ({
+    ...item,
+    appointment_label: `${formatIsoDateToDmy(item.appointment_date)} - ${item.start_time}`
+  }));
+}
+
 function createAppointment(payload, currentUser) {
   const patient = getPatientByUser(currentUser.id);
   if (!patient) {
@@ -271,6 +327,107 @@ function updateAppointmentStatus(appointmentId, status) {
   updateAppointmentStatusStmt.run(status, appointmentId);
 }
 
+function completeAppointment(appointmentId, currentUser) {
+  if (!currentUser || !['admin', 'medico'].includes(currentUser.role)) {
+    throw new Error('No tienes permisos para completar esta cita.');
+  }
+
+  const appointment = getAppointmentByIdStmt.get(appointmentId);
+  if (!appointment) {
+    throw new Error('No se encontro la cita solicitada.');
+  }
+
+  if (currentUser.role === 'medico' && appointment.doctor_user_id !== currentUser.id) {
+    throw new Error('No tienes permiso para completar esta cita.');
+  }
+
+  if (appointment.status !== 'pendiente') {
+    throw new Error('Solo se pueden completar citas pendientes.');
+  }
+
+  const appointmentLabel = `${formatIsoDateToDmy(appointment.appointment_date)} a las ${appointment.start_time}`;
+
+  const runCompletion = db.transaction(() => {
+    updateAppointmentStatusStmt.run('completada', appointmentId);
+
+    createNotificationForUser(appointment.patient_user_id, {
+      appointmentId,
+      type: 'success',
+      title: 'Tu cita fue completada',
+      message: `Tu cita con ${appointment.doctor_name} del ${appointmentLabel} fue marcada como completada. Califica la atención de 1 a 5 estrellas.`,
+      actionUrl: `/citas#calificacion-${appointment.id}`,
+      actionLabel: 'Calificar ahora'
+    });
+
+    createNotificationsForRole('admin', {
+      appointmentId,
+      type: 'info',
+      title: 'Atención completada, espera de calificación',
+      message: `${appointment.patient_name} con ${appointment.doctor_name} completó su cita del ${appointmentLabel}. Revisa la satisfacción del servicio.`,
+      actionUrl: '/admin#satisfaccion',
+      actionLabel: 'Ver satisfacción'
+    });
+
+    return {
+      appointmentId,
+      patientName: appointment.patient_name,
+      doctorName: appointment.doctor_name,
+      appointmentDate: appointment.appointment_date,
+      startTime: appointment.start_time
+    };
+  });
+
+  return runCompletion();
+}
+
+function cancelAppointment(appointmentId, currentUser) {
+  if (!currentUser || !['admin', 'medico', 'paciente'].includes(currentUser.role)) {
+    throw new Error('No tienes permisos para cancelar esta cita.');
+  }
+
+  const appointment = getAppointmentByIdStmt.get(appointmentId);
+  if (!appointment) {
+    throw new Error('No se encontro la cita solicitada.');
+  }
+
+  if (appointment.status !== 'pendiente') {
+    throw new Error('Solo se pueden cancelar citas pendientes.');
+  }
+
+  const appointmentLabel = `${formatIsoDateToDmy(appointment.appointment_date)} a las ${appointment.start_time}`;
+
+  const runCancellation = db.transaction(() => {
+    updateAppointmentStatusStmt.run('cancelada', appointmentId);
+
+    const notifyDoctor = currentUser.role !== 'medico' || currentUser.id !== appointment.doctor_user_id;
+    if (notifyDoctor) {
+      const cancelMessage =
+        currentUser.role === 'paciente'
+          ? `El paciente ${appointment.patient_name} canceló la cita del ${appointmentLabel}.`
+          : `La cita de ${appointment.patient_name} con ${appointment.doctor_name} fue cancelada para el ${appointmentLabel}.`;
+
+      createNotificationForUser(appointment.doctor_user_id, {
+        appointmentId,
+        type: 'warning',
+        title: 'Cita cancelada',
+        message: cancelMessage,
+        actionUrl: '/citas',
+        actionLabel: 'Revisar agenda'
+      });
+    }
+
+    return {
+      appointmentId,
+      patientName: appointment.patient_name,
+      doctorName: appointment.doctor_name,
+      appointmentDate: appointment.appointment_date,
+      startTime: appointment.start_time
+    };
+  });
+
+  return runCancellation();
+}
+
 function requestAppointmentReschedule(appointmentId, currentUser) {
   if (!currentUser || currentUser.role !== 'paciente') {
     throw new Error('Solo el paciente puede solicitar reprogramacion.');
@@ -290,6 +447,59 @@ function requestAppointmentReschedule(appointmentId, currentUser) {
   }
 
   updateAppointmentStatus(appointmentId, 'solicitud_reprogramacion');
+}
+
+function rateAppointment(appointmentId, currentUser, rating, comment = '') {
+  if (!currentUser || currentUser.role !== 'paciente') {
+    throw new Error('Solo el paciente puede calificar una cita.');
+  }
+
+  const appointment = getAppointmentByIdStmt.get(appointmentId);
+  if (!appointment || appointment.patient_user_id !== currentUser.id) {
+    throw new Error('No se encontro la cita para calificar.');
+  }
+
+  if (appointment.status !== 'completada') {
+    throw new Error('Solo se pueden calificar citas completadas.');
+  }
+
+  const existingRating = getAppointmentRatingStmt.get(appointmentId);
+  const cleanComment = String(comment || '').trim();
+
+  const runRating = db.transaction(() => {
+    upsertAppointmentRatingStmt.run(
+      appointmentId,
+      currentUser.id,
+      appointment.doctor_user_id,
+      rating,
+      cleanComment || null
+    );
+
+    if (!existingRating) {
+      const satisfactionType = rating >= 4 ? 'success' : rating === 3 ? 'warning' : 'danger';
+
+      createNotificationsForRole('admin', {
+        appointmentId,
+        type: satisfactionType,
+        title: 'Nueva calificación de atención',
+        message: `${appointment.patient_name} calificó con ${rating} estrella(s) la atención de ${appointment.doctor_name} para la cita del ${formatIsoDateToDmy(appointment.appointment_date)} a las ${appointment.start_time}.`,
+        actionUrl: '/admin#satisfaccion',
+        actionLabel: 'Revisar satisfacción'
+      });
+    }
+
+    return {
+      appointmentId,
+      rating,
+      doctorName: appointment.doctor_name,
+      patientName: appointment.patient_name,
+      appointmentDate: appointment.appointment_date,
+      startTime: appointment.start_time,
+      isUpdate: !!existingRating
+    };
+  });
+
+  return runRating();
 }
 
 function formatDateIso(date) {
@@ -406,11 +616,15 @@ module.exports = {
   getDoctorSpecialties,
   getDoctorOptionsBySpecialty,
   getDoctorById,
+  getPendingRatingsForPatient,
   getDoctorSchedule,
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus,
+  completeAppointment,
+  cancelAppointment,
   requestAppointmentReschedule,
   approveAppointmentReschedule,
-  isAutoRescheduledAppointment
+  isAutoRescheduledAppointment,
+  rateAppointment
 };

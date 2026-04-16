@@ -9,9 +9,13 @@ const {
   getAvailableSlots,
   createAppointment,
   updateAppointmentStatus,
+  completeAppointment,
+  cancelAppointment,
   requestAppointmentReschedule,
   approveAppointmentReschedule,
-  isAutoRescheduledAppointment
+  isAutoRescheduledAppointment,
+  getPendingRatingsForPatient,
+  rateAppointment
 } = require('./citas.service');
 const { formatIsoDateToDmy } = require('../../utils/date');
 
@@ -39,6 +43,7 @@ function buildViewData(user, options = {}) {
     pageTitle: 'Sistema de citas',
     appointments: appointmentsWithFlags,
     appointmentSummary: buildAppointmentSummary(appointmentsWithFlags),
+    pendingRatings: user.role === 'paciente' ? getPendingRatingsForPatient(user) : [],
     doctors,
     specialties: getDoctorSpecialties(),
     slots: options.slots || [],
@@ -122,14 +127,25 @@ function create(req, res) {
 }
 
 function complete(req, res) {
-  updateAppointmentStatus(Number(req.params.id), 'completada');
-  req.session.flash = { type: 'success', message: 'Cita marcada como completada.' };
+  try {
+    completeAppointment(Number(req.params.id), req.session.user);
+    req.session.flash = {
+      type: 'success',
+      message: 'Cita marcada como completada. El paciente y el administrador recibiran la notificacion correspondiente.'
+    };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
   return res.redirect('/citas');
 }
 
 function cancel(req, res) {
-  updateAppointmentStatus(Number(req.params.id), 'cancelada');
-  req.session.flash = { type: 'success', message: 'Cita cancelada.' };
+  try {
+    cancelAppointment(Number(req.params.id), req.session.user);
+    req.session.flash = { type: 'success', message: 'Cita cancelada. Se envio la notificacion al medico correspondiente.' };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
   return res.redirect('/citas');
 }
 
@@ -185,4 +201,24 @@ function approveReschedule(req, res) {
   return res.redirect('/citas');
 }
 
-module.exports = { index, searchSlots, create, complete, cancel, editStatus, requestReschedule, approveReschedule };
+function rate(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    req.session.flash = { type: 'error', message: errors.array()[0].msg };
+    return res.redirect('/citas');
+  }
+
+  try {
+    const result = rateAppointment(Number(req.params.id), req.session.user, Number(req.body.rating), req.body.comment);
+    req.session.flash = {
+      type: 'success',
+      message: `Gracias por calificar la atencion de ${result.doctorName} con ${result.rating} estrella(s).`
+    };
+  } catch (error) {
+    req.session.flash = { type: 'error', message: error.message };
+  }
+
+  return res.redirect('/citas');
+}
+
+module.exports = { index, searchSlots, create, complete, cancel, editStatus, requestReschedule, approveReschedule, rate };

@@ -1,17 +1,35 @@
 <% if (flash || (formErrors && formErrors.length)) { %>
   <div class="flash-stack" role="status" aria-live="polite" aria-atomic="true">
     <% if (flash) { %>
-      <div class="flash flash-toast <%= flash.type === 'error' ? 'flash-error' : 'flash-success' %>" data-auto-dismiss="true" data-dismiss-ms="4300">
+      <div
+        class="flash flash-toast <%= flash.type === 'error' ? 'flash-error' : 'flash-success' %>"
+        role="<%= flash.type === 'error' ? 'alert' : 'status' %>"
+        data-auto-dismiss="true"
+        data-dismiss-ms="4300"
+      >
+        <div class="flash-header">
+          <div class="flash-header-copy">
+            <span class="flash-badge"><%= flash.type === 'error' ? 'Error' : 'Éxito' %></span>
+            <strong class="flash-title"><%= flash.type === 'error' ? 'No se pudo completar' : 'Operación registrada' %></strong>
+          </div>
+          <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
+        </div>
         <div class="flash-content">
           <p><%= flash.message %></p>
         </div>
-        <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
         <div class="flash-timer"></div>
       </div>
     <% } %>
 
     <% if (formErrors && formErrors.length) { %>
-      <div class="flash flash-toast flash-error" data-auto-dismiss="true" data-dismiss-ms="5600">
+      <div class="flash flash-toast flash-error" role="alert" data-auto-dismiss="true" data-dismiss-ms="5600">
+        <div class="flash-header">
+          <div class="flash-header-copy">
+            <span class="flash-badge">Revisar</span>
+            <strong class="flash-title">Hay datos que corregir</strong>
+          </div>
+          <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
+        </div>
         <div class="flash-content">
           <ul>
             <% formErrors.forEach((error) => { %>
@@ -19,7 +37,6 @@
             <% }) %>
           </ul>
         </div>
-        <button type="button" class="flash-close" aria-label="Cerrar notificación">×</button>
         <div class="flash-timer"></div>
       </div>
     <% } %>

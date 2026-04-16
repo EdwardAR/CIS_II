@@ -9,11 +9,13 @@ const { csrfProtection } = require('./middlewares/csrf.middleware');
 const { errorHandler } = require('./middlewares/error.middleware');
 const { formatIsoDateToDmy } = require('./utils/date');
 const { getAutomaticReminders } = require('./modules/reminders/reminders.service');
+const { getUnreadNotificationsForUser, getUnreadNotificationCount } = require('./modules/notificaciones/notificaciones.service');
 
 const authRoutes = require('./modules/auth/auth.routes');
 const pacientesRoutes = require('./modules/pacientes/pacientes.routes');
 const medicosRoutes = require('./modules/medicos/medicos.routes');
 const citasRoutes = require('./modules/citas/citas.routes');
+const notificacionesRoutes = require('./modules/notificaciones/notificaciones.routes');
 const adminRoutes = require('./modules/admin/admin.routes');
 
 const app = express();
@@ -44,6 +46,9 @@ app.use((req, res, next) => {
   const reminders = getAutomaticReminders(req.session.user || null);
   res.locals.autoReminders = reminders;
   res.locals.autoRemindersCount = reminders.length;
+  const notifications = req.session.user ? getUnreadNotificationsForUser(req.session.user.id) : [];
+  res.locals.systemNotifications = notifications;
+  res.locals.systemNotificationsCount = req.session.user ? getUnreadNotificationCount(req.session.user.id) : 0;
   delete req.session.flash;
   next();
 });
@@ -59,6 +64,7 @@ app.use('/auth', authLimiter, authRoutes);
 app.use('/pacientes', pacientesRoutes);
 app.use('/medicos', medicosRoutes);
 app.use('/citas', citasRoutes);
+app.use('/notificaciones', notificacionesRoutes);
 app.use('/admin', adminRoutes);
 
 app.get('/', (req, res) => {

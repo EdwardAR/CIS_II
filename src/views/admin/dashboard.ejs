@@ -150,6 +150,70 @@
   </div>
 </section>
 
+<section class="card dashboard-section-gap satisfaction-shell" id="satisfaccion">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Satisfacción de atención</h2>
+    <span class="table-count"><%= summary.satisfaction.totalRatings %> calificación(es)</span>
+  </div>
+
+  <div class="satisfaction-summary-grid">
+    <article class="satisfaction-summary-card">
+      <span class="satisfaction-summary-label">Promedio general</span>
+      <strong><%= summary.satisfaction.averageRating.toFixed(2) %>/5</strong>
+      <small><%= summary.satisfaction.totalRatings %> respuestas registradas</small>
+    </article>
+    <article class="satisfaction-summary-card">
+      <span class="satisfaction-summary-label">Atenciones satisfechas</span>
+      <strong><%= summary.satisfaction.satisfactionRate %>%</strong>
+      <small><%= summary.satisfaction.satisfiedRatings %> calificaciones de 4 o 5 estrellas</small>
+    </article>
+    <article class="satisfaction-summary-card">
+      <span class="satisfaction-summary-label">Pendientes por valorar</span>
+      <strong><%= summary.satisfaction.pendingRatings %></strong>
+      <small>Citas completadas sin calificación</small>
+    </article>
+  </div>
+
+  <div class="satisfaction-progress-shell">
+    <div class="satisfaction-progress-head">
+      <strong>Lectura rápida</strong>
+      <span><%= summary.satisfaction.lowRatings %> calificación(es) bajas</span>
+    </div>
+    <div class="insight-progress satisfaction-progress" aria-hidden="true">
+      <span style="width: <%= Math.min(summary.satisfaction.satisfactionRate, 100) %>%"></span>
+    </div>
+  </div>
+
+  <% if (!summary.satisfaction.ratingsByDoctor.length) { %>
+    <p class="helper">Aún no hay suficientes calificaciones para medir satisfacción por médico.</p>
+  <% } else { %>
+    <div class="table-shell satisfaction-table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Promedio</th>
+            <th>Calificaciones</th>
+            <th>Satisfechas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% summary.satisfaction.ratingsByDoctor.forEach((doctor) => { %>
+            <tr>
+              <td><%= doctor.doctor_name %></td>
+              <td><%= doctor.specialty %></td>
+              <td><%= doctor.averageRating.toFixed(2) %>/5</td>
+              <td><%= doctor.totalRatings %></td>
+              <td><%= doctor.satisfiedRatings %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
 <section class="admin-two-col dashboard-section-gap">
   <article class="card dashboard-table-card">
     <div class="section-title-wrap">

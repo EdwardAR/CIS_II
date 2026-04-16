@@ -47,6 +47,9 @@ Este sistema digitaliza el proceso completo de gestión de citas médicas para t
 - ✅ Seguimiento del estado de atención
 - ✅ Panel administrativo con métricas
 - ✅ Recordatorios automáticos visibles para admin, médico y paciente
+- ✅ Notificaciones clínicas persistentes por rol (paciente, médico y admin)
+- ✅ Calificación post-atención (1 a 5 estrellas) por parte del paciente
+- ✅ Apartado de satisfacción en dashboard administrativo
 - ✅ Control de acceso basado en roles (RBAC)
 
 ---
@@ -161,6 +164,7 @@ graph LR
     subgraph Modules["📦 Módulos"]
         AUTH_MOD["<b>Auth</b><br/>login/register"]
         CITAS["<b>Citas</b><br/>reservar/completar"]
+        NOTI["<b>Notificaciones</b><br/>bandeja clínica"]
         MEDICOS["<b>Médicos</b><br/>horarios/panel"]
         PACIENTES["<b>Pacientes</b><br/>perfil"]
         ADMIN["<b>Admin</b><br/>dashboard"]
@@ -169,6 +173,8 @@ graph LR
     Core -.-> Middleware
     Middleware --> Modules
     REM --> Modules
+    CITAS --> NOTI
+    NOTI --> ADMIN
     
     style Core fill:#f0f0f0
     style Modules fill:#fff9c4
@@ -218,6 +224,11 @@ CIS_II/
 │  │  │
 │  │  ├─ 📁 reminders/
 │  │  │  └─ reminders.service.js    # Recordatorios automáticos por rol
+│  │  │
+│  │  ├─ 📁 notificaciones/
+│  │  │  ├─ notificaciones.controller.js  # Marcar notificación como leída
+│  │  │  ├─ notificaciones.routes.js      # Endpoints de bandeja
+│  │  │  └─ notificaciones.service.js     # Lógica de notificaciones persistentes
 │  │  │
 │  │  ├─ 📁 medicos/
 │  │  │  ├─ medicos.controller.js  # Panel médico + gestión horarios
@@ -347,6 +358,7 @@ npm run db:init
 - ✅ Ejecuta `schema.sql` (crea tablas)
 - ✅ Inserta/actualiza datos demo desde `init-db.js` (usuarios, médicos, horarios, pacientes y citas)
 - ✅ Aplica migraciones de compatibilidad para estados de cita
+- ✅ Garantiza tablas de notificaciones y calificaciones (`notifications`, `appointment_ratings`)
 - ✅ Limpia datos demo de especialidades retiradas si existían en BD
 
 **Datos creados:**
@@ -581,6 +593,7 @@ Reserva, consulta disponibilidad y marca de completitud de citas.
 | POST | `/citas/:id/cancelar` | Cancelar cita | Admin/Médico/Paciente | Depende del estado |
 | POST | `/citas/:id/solicitar-reprogramacion` | Solicitar reprogramación | Paciente | Cambia estado a "solicitud_reprogramacion" |
 | POST | `/citas/:id/aprobar-reprogramacion` | Aprobar reprogramación | Admin/Médico | Marca original como "reprogramada" y crea una nueva cita "pendiente" automática |
+| POST | `/citas/:id/calificar` | Calificar cita completada | Paciente | Valoración de 1 a 5 estrellas + comentario opcional |
 
 **Características:**
 - ✅ Filtro dinámico por especialidad
@@ -631,7 +644,7 @@ Gestión de información personal del paciente.
 | Método | Ruta | Descripción | Acceso |
 |--------|------|------------|--------|
 | GET | `/pacientes/perfil` | Ver perfil | Paciente |
-| POST | `/pacientes/actualizar` | Actualizar datos | Paciente |
+| POST | `/pacientes/perfil` | Actualizar datos | Paciente |
 
 **Información disponible:**
 - 📋 Datos personales
@@ -639,6 +652,23 @@ Gestión de información personal del paciente.
 - 📋 Historial de citas
 
 **Archivo:** [`src/modules/pacientes/pacientes.routes.js`](src/modules/pacientes/pacientes.routes.js)
+
+---
+
+### 10.6 🔔 Módulo Notificaciones (Bandeja Clínica)
+
+Gestiona notificaciones persistentes dentro del sistema (no correo/SMS), visibles por rol en la interfaz.
+
+| Método | Ruta | Descripción | Acceso |
+|--------|------|------------|--------|
+| POST | `/notificaciones/:id/leer` | Marcar notificación como leída | Autenticado |
+
+**Escenarios principales cubiertos:**
+- Cuando un **paciente cancela** una cita, el **médico** recibe notificación clínica.
+- Cuando un **médico/admin completa** una cita, el **paciente** recibe notificación para calificar.
+- Cuando el paciente califica, el **administrador** recibe notificación para seguimiento de satisfacción.
+
+**Archivo:** [`src/modules/notificaciones/notificaciones.routes.js`](src/modules/notificaciones/notificaciones.routes.js)
 
 ---
 
@@ -762,6 +792,7 @@ graph TD
 8. 👤 Puede ver su perfil y **historial de citas**
 9. 🔔 Recibe **recordatorios automáticos** de su próxima cita y reprogramaciones pendientes
 10. ⛔ Si la cita fue generada automáticamente tras una reprogramación, no verá la opción de volver a solicitarla
+11. ⭐ Cuando su cita está `completada`, recibe una notificación para **calificar de 1 a 5 estrellas**
 
 ---
 
@@ -812,7 +843,8 @@ graph TD
 5. ✓ **Marca citas como completadas** cuando atiende
 6. ❌ Puede **cancelar** si es necesario
 7. 📊 Ve **estadísticas** personales
-8. 🔔 Recibe **notificaciones automáticas** de citas próximas y solicitudes de reprogramación
+8. 🔔 Recibe **recordatorios automáticos** y **notificaciones clínicas**
+9. ⚠️ Si un paciente cancela una cita, recibe una notificación con detalle (paciente, fecha y hora)
 
 ---
 
@@ -826,11 +858,13 @@ La base SQLite del proyecto se define en `src/database/schema.sql` y se puebla d
 erDiagram
         USERS ||--o| PATIENTS : "1 a 1"
         USERS ||--o| DOCTORS : "1 a 1"
+        USERS ||--o{ NOTIFICATIONS : "recibe"
         DOCTORS ||--o{ DOCTOR_SCHEDULES : "define"
         PATIENTS ||--o{ APPOINTMENTS : "reserva"
         DOCTORS ||--o{ APPOINTMENTS : "atiende"
         USERS ||--o{ APPOINTMENTS : "crea"
         APPOINTMENTS ||--o{ APPOINTMENT_RESCHEDULE_AUDIT : "audita"
+        APPOINTMENTS ||--o| APPOINTMENT_RATINGS : "califica"
 
         USERS {
             int id PK
@@ -895,6 +929,31 @@ erDiagram
             text note
             datetime created_at
         }
+
+        NOTIFICATIONS {
+            int id PK
+            int recipient_user_id FK
+            int appointment_id FK
+            string type "info|success|warning|danger"
+            string title
+            string message
+            string action_url
+            string action_label
+            int is_read
+            datetime read_at
+            datetime created_at
+        }
+
+        APPOINTMENT_RATINGS {
+            int id PK
+            int appointment_id FK UK
+            int patient_user_id FK
+            int doctor_user_id FK
+            int rating "1..5"
+            text comment
+            datetime created_at
+            datetime updated_at
+        }
 ```
 
 ### 12.2 Reglas clave
@@ -903,6 +962,8 @@ erDiagram
 - Los estados permitidos de cita incluyen `solicitud_reprogramacion` y `reprogramada`.
 - Los horarios médicos se definen por día de semana (`0` domingo a `6` sábado), no por fecha fija.
 - Las reprogramaciones aprobadas registran trazabilidad en `appointment_reschedule_audit`.
+- Cada cita completada puede tener **una sola calificación** (`appointment_ratings.appointment_id` único).
+- `notifications` almacena alertas persistentes por usuario con estado de lectura.
 
 ### 12.3 Flujo de cita (real)
 
@@ -936,6 +997,8 @@ erDiagram
 - ✏️ **Cancelar citas** (con restricciones según estado)
 - 🕒 **Solicitar reprogramación** de citas pendientes
 - 🔔 **Ver recordatorios automáticos** y entender cuándo una cita ya no puede volver a reprogramarse
+- ⭐ **Calificar citas completadas** con valoración de 1 a 5 estrellas
+- 📝 **Agregar comentario opcional** sobre la atención
 
 #### **Para Médicos:**
 - 📋 **Panel personal** con citas asignadas
@@ -945,6 +1008,7 @@ erDiagram
 - ✅ **Aprobar solicitudes de reprogramación** de pacientes
 - 📊 **Ver estadísticas** de citas atendidas
 - 🔔 **Recibir notificaciones automáticas** de citas próximas y solicitudes de reprogramación
+- 🔔 **Recibir notificación clínica** cuando un paciente cancela una cita
 
 #### **Para Administradores:**
 - 👁️ **Supervisar todas** las citas del sistema
@@ -955,6 +1019,8 @@ erDiagram
 - 🗓️ **Ver fechas** en formato visual `DD-MM-AAAA`
 - ⏰ **Recibir recordatorios automáticos** de citas próximas y solicitudes de reprogramación
 - 🔒 **No reprogramar de nuevo** una cita que ya fue generada automáticamente por una reprogramación previa
+- ⭐ **Recibir notificación** cuando un paciente califica una atención
+- 📉 **Monitorear satisfacción** por promedio general, tasa de satisfacción y ranking por médico
 
 ### 13.3 Gestión de Médicos
 
@@ -982,6 +1048,19 @@ erDiagram
 - 🔍 **Búsqueda rápida** de citas/pacientes
 - 📱 **Vista responsive** para dispositivos
 - ⏰ **Recordatorios automáticos** visibles en la misma interfaz
+- ⭐ **Apartado de satisfacción** con:
+    - Promedio general de calificación
+    - Porcentaje de atenciones satisfechas (4-5 estrellas)
+    - Citas completadas pendientes de valorar
+    - Ranking de médicos por promedio y volumen de calificaciones
+
+### 13.8 Notificaciones Clínicas Persistentes
+
+- 🔔 Bandeja global de notificaciones por usuario autenticado
+- 👨‍⚕️ Notificación al médico cuando paciente/admin cancela cita
+- 👤 Notificación al paciente al completar cita para pedir calificación
+- 👨‍💼 Notificación al administrador cuando llega nueva calificación
+- ✅ Acción de "Marcar como leída" por cada notificación
 
 ### 13.6 Seguridad
 
@@ -1316,8 +1395,9 @@ Funcionalidades planeadas para versiones futuras:
 
 - ✅ **Reprogramación de citas** - Implementada con aprobación médico/admin + generación automática de nueva cita
 - ✅ **Recordatorios automáticos** - Implementados en la interfaz para admin, médico y paciente
-- 📧 **Notificaciones** - Por correo o SMS
-- ⭐ **Calificación de citas** - Pacientes evalúan atención recibida
+- ✅ **Notificaciones clínicas internas** - Implementadas de forma persistente por rol
+- ✅ **Calificación de citas** - Implementada con estrellas (1-5) y comentario opcional
+- 📧 **Notificaciones externas** - Extender a correo y/o SMS
 - 📝 **Notas clínicas** - Médicos registran observaciones
 
 ### Mediano Plazo (v1.2)

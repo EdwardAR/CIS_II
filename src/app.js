@@ -68,12 +68,11 @@ app.use('/notificaciones', notificacionesRoutes);
 app.use('/admin', adminRoutes);
 
 app.get('/', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  if (req.session.user.role === 'admin') return res.redirect('/admin');
-  if (req.session.user.role === 'medico') return res.redirect('/medicos/mi-panel');
-  return res.redirect('/citas');
+  return res.render('home', {
+    pageTitle: 'Inicio',
+    pageClass: 'home-page',
+    pageDescription: 'Inicio informativo del Policlínico San Juan Bautista con accesos rápidos, beneficios y rutas de atención.'
+  });
 });
 
 app.use((req, res) => {

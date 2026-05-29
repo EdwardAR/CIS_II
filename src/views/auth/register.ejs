@@ -1,48 +1,99 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="page-hero card page-hero-register">
-  <img src="/img/hero-register.svg" alt="Ilustracion de registro de paciente" />
-  <div class="page-hero-copy">
+<section class="register-shell">
+  <article class="card register-visual-card">
+    <div class="register-visual-main">
+      <img src="/img/clinic-hero-1.jpg" alt="Equipo clínico coordinando atención y registros" />
+      <div class="register-visual-overlay">
+        <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Alta guiada</span>
+        <h2>Registrar un paciente debe sentirse claro, confiable y rápido</h2>
+        <p>La pantalla de alta está pensada para orientar al paciente con una lectura limpia y visualmente cuidada.</p>
+      </div>
+    </div>
+
+    <div class="register-visual-grid">
+      <article class="register-mini-card">
+        <img src="/img/clinic-team-2.jpg" alt="Personal médico atendiendo a un paciente" />
+        <div>
+          <strong>Atención humana</strong>
+          <p>Conecta el registro con la experiencia clínica real.</p>
+        </div>
+      </article>
+
+      <article class="register-mini-card">
+        <img src="/img/clinic-tools-1.jpg" alt="Instrumental clínico y cuidado profesional" />
+        <div>
+          <strong>Proceso ordenado</strong>
+          <p>Refuerza el tono profesional del sistema.</p>
+        </div>
+      </article>
+    </div>
+  </article>
+
+  <article class="card auth-card auth-card-wide auth-register-pro auth-register-panel">
+    <div class="auth-header-actions">
+      <a href="/" class="auth-home-link">
+        <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver al inicio
+      </a>
+    </div>
+
     <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Alta de paciente</span>
-    <h2>Registre su cuenta y acceda al sistema de citas</h2>
-    <p>Un proceso simple, ordenado y orientado a que el paciente llegue rápido a su atención.</p>
-  </div>
-</section>
+    <h2>Registro de Paciente</h2>
+    <p>Complete sus datos para reservar citas médicas en línea.</p>
 
-<section class="card auth-card auth-card-wide auth-register-pro">
-  <h2>Registro de Paciente</h2>
-  <p>Complete sus datos para reservar citas médicas en línea.</p>
-  <form method="post" action="/auth/register" class="grid-form two-cols register-form">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <div class="register-promo-strip">
+      <article>
+        <strong>Acceso simple</strong>
+        <span>Formulario claro y directo</span>
+      </article>
+      <article>
+        <strong>Datos seguros</strong>
+        <span>Información centralizada</span>
+      </article>
+      <article>
+        <strong>Listo para citas</strong>
+        <span>Alta conectada al flujo clínico</span>
+      </article>
+    </div>
 
-    <label><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre completo</label>
-    <input type="text" name="full_name" placeholder="Nombre y apellidos" required />
+    <form method="post" action="/auth/register" class="grid-form two-cols register-form register-form-pro">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-    <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>
-    <input type="email" name="email" placeholder="usuario@correo.com" required />
+      <label><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre completo</label>
+      <input type="text" name="full_name" placeholder="Nombre y apellidos" required />
 
-    <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña</label>
-    <input type="password" name="password" placeholder="Cree una contraseña segura" required />
+      <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>
+      <input type="email" name="email" placeholder="usuario@correo.com" required />
 
-    <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />DNI</label>
-    <input type="text" name="dni" placeholder="Número de documento" required />
+      <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña</label>
+      <input type="password" name="password" placeholder="Cree una contraseña segura" required />
 
-    <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Teléfono</label>
-    <input type="text" name="phone" placeholder="Número de contacto" required />
+      <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />DNI</label>
+      <input type="text" name="dni" placeholder="Número de documento" required />
 
-    <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fecha de nacimiento</label>
-    <input type="date" name="birth_date" />
+      <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Teléfono</label>
+      <input type="text" name="phone" placeholder="Número de contacto" required />
 
-    <label><img src="/img/icon-home.svg" alt="" class="inline-icon" />Dirección</label>
-    <input type="text" name="address" placeholder="Dirección domiciliaria" />
+      <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fecha de nacimiento</label>
+      <input type="date" name="birth_date" />
 
-    <label><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Contacto de emergencia</label>
-    <input type="text" name="emergency_contact" placeholder="Nombre y teléfono" />
+      <label><img src="/img/icon-home.svg" alt="" class="inline-icon" />Dirección</label>
+      <input type="text" name="address" placeholder="Dirección domiciliaria" />
 
-    <button type="submit" class="btn auth-submit">Crear cuenta</button>
-  </form>
-  <p class="helper">¿Ya tiene cuenta? <a href="/auth/login">Inicie sesión</a>.</p>
+      <label><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Contacto de emergencia</label>
+      <input type="text" name="emergency_contact" placeholder="Nombre y teléfono" />
+
+      <button type="submit" class="btn auth-submit register-submit">Crear cuenta</button>
+    </form>
+
+    <div class="auth-register-cta auth-login-cta">
+      <span class="helper">¿Ya tiene cuenta?</span>
+      <a href="/auth/login" class="btn btn-secondary auth-register-link auth-login-link">
+        <img src="/img/icon-lock.svg" alt="" class="inline-icon" />Inicie sesión
+      </a>
+    </div>
+  </article>
 </section>
 
 <%- include('../partials/foot') %>

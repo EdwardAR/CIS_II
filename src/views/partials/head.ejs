@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= pageTitle %> | Policlínico San Juan Bautista</title>
+  <meta name="description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Sistema web de gestión clínica para citas, pacientes, médicos y administración.' %>" />
   <link rel="icon" type="image/svg+xml" href="/img/logo-mark.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
-<body>
+<body class="<%= typeof pageClass !== 'undefined' ? pageClass : '' %>">
   <div class="background-shape"></div>
   <header class="topbar">
     <div class="topbar-inner">
@@ -21,6 +22,12 @@
           <p>Sistema Web de Gestión de Citas</p>
         </div>
       </div>
+      <% if (!currentUser && typeof pageClass !== 'undefined' && pageClass === 'home-page') { %>
+        <div class="public-topbar-actions" aria-label="Accesos rápidos">
+          <a href="/auth/login" class="topbar-action-link">Iniciar sesión</a>
+          <a href="/auth/register" class="topbar-action-link topbar-action-link-accent">Crear paciente</a>
+        </div>
+      <% } %>
       <% if (currentUser) {
         const fullName = (currentUser.full_name || 'Usuario').trim();
         const tokens = fullName.split(/\s+/).filter(Boolean);

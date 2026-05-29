@@ -1,0 +1,5 @@
+src/database/*.sqlite-wal
+src/database/*.sqlite-shm
+src/database/sessions.sqlite
+src/database/sessions.sqlite-wal
+src/database/sessions.sqlite-shm

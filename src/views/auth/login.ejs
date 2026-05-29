@@ -4,7 +4,10 @@
 <section class="login-shell">
   <article class="login-visual card login-visual-pro">
     <div class="login-visual-media-wrap">
-      <img src="/img/hero-login.svg" alt="Ilustracion de acceso al sistema clinico" />
+      <img
+        src="/img/clinic-hero-1.jpg"
+        alt="Profesionales revisando informacion clinica"
+      />
       <span class="login-badge">Acceso protegido</span>
     </div>
 
@@ -12,6 +15,18 @@
       <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Plataforma clinica</span>
       <h2>Gestione su policlinico con una experiencia profesional</h2>
       <p>Inicie sesion para administrar agenda, atenciones y flujo medico con seguridad y trazabilidad.</p>
+
+      <div class="login-gallery" aria-label="Imagenes relacionadas con el contexto clinico">
+        <img
+          src="/img/clinic-team-2.jpg"
+          alt="Equipo medico en consulta"
+        />
+        <img
+          src="/img/clinic-tools-1.jpg"
+          alt="Instrumental y cuidado clinico"
+        />
+      </div>
+
       <div class="login-tags">
         <span>Agenda inteligente</span>
         <span>Control por roles</span>
@@ -36,6 +51,12 @@
   </article>
 
   <article class="card auth-card auth-card-elevated auth-login-pro">
+    <div class="auth-header-actions">
+      <a href="/" class="auth-home-link">
+        <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver al inicio
+      </a>
+    </div>
+
     <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Inicio de sesion</span>
     <h2>Bienvenido de nuevo</h2>
     <p>Ingrese con su cuenta institucional para continuar en el sistema de gestion de citas.</p>
@@ -56,7 +77,12 @@
 
       <button type="submit" class="btn auth-submit">Ingresar al sistema</button>
     </form>
-    <p class="helper">¿No tiene cuenta? <a href="/auth/register">Regístrese aquí</a>.</p>
+    <div class="auth-register-cta">
+      <span class="helper">¿No tiene cuenta?</span>
+      <a href="/auth/register" class="btn btn-secondary auth-register-link">
+        <img src="/img/icon-user.svg" alt="" class="inline-icon" />Regístrese aquí
+      </a>
+    </div>
   </article>
 </section>
 

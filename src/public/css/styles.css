@@ -3562,9 +3562,22 @@ th, td {
     justify-content: flex-start;
   }
 
+  .public-topbar-actions,
+  .auth-register-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .topbar-action-link {
     min-height: 38px;
     padding: 0.4rem 0.8rem;
+  }
+
+  .topbar-action-link,
+  .auth-register-link,
+  .auth-login-link {
+    width: 100%;
+    justify-content: center;
   }
 
   .home-path-action {
@@ -3701,6 +3714,218 @@ th, td {
 
   .site-footer-inner {
     width: calc(100% - 0.9rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .background-shape {
+    display: none;
+  }
+
+  .topbar {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .topbar-inner {
+    gap: 0.75rem;
+  }
+
+  .brand-wrap {
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .brand-logo,
+  .site-footer-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .topbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .topbar-user-chip {
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-user-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.88rem;
+  }
+
+  .topbar-user-copy strong {
+    font-size: 0.98rem;
+  }
+
+  .topbar-user-chip small {
+    font-size: 0.72rem;
+  }
+
+  .container {
+    width: calc(100% - 0.6rem);
+  }
+
+  .card {
+    padding: 0.8rem 0.75rem;
+    border-radius: 16px;
+  }
+
+  .home-hero,
+  .page-hero,
+  .appointments-hero,
+  .doctor-panel-hero,
+  .admin-hero-shell,
+  .login-shell,
+  .register-shell {
+    padding: 0.8rem;
+  }
+
+  .home-hero-copy h2,
+  .page-hero-copy h2,
+  .appointments-hero-copy h2,
+  .doctor-panel-hero-copy h2,
+  .admin-hero-copy h2 {
+    font-size: 1.45rem;
+    line-height: 1.1;
+  }
+
+  .page-hero-copy p,
+  .appointments-hero-copy p,
+  .doctor-panel-hero-copy p,
+  .admin-hero-copy p,
+  .home-hero-copy p {
+    font-size: 0.96rem;
+  }
+
+  .home-hero-actions,
+  .home-cta-actions,
+  .quick-actions,
+  .admin-metrics-toolbar,
+  .system-notification-actions,
+  .booking-flow-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-hero-actions .btn,
+  .home-cta-actions .btn,
+  .quick-actions .btn,
+  .system-notification-actions .btn,
+  .booking-flow-actions .btn {
+    width: 100%;
+  }
+
+  .home-mosaic-card,
+  .register-mini-card,
+  .login-gallery,
+  .register-visual-grid,
+  .register-promo-strip,
+  .home-path-grid,
+  .home-info-grid,
+  .home-photo-grid,
+  .home-image-grid-large,
+  .home-trust-strip,
+  .metrics-grid,
+  .admin-metrics-extended,
+  .doctor-panel-kpis,
+  .appointments-kpis,
+  .admin-ops-grid,
+  .admin-ops-shift-grid,
+  .home-layout-split,
+  .home-hero,
+  .page-hero,
+  .appointments-hero,
+  .doctor-panel-hero,
+  .admin-hero-shell,
+  .login-shell,
+  .register-shell,
+  .system-notifications-list,
+  .auto-reminders-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-mosaic-main,
+  .home-mosaic-card,
+  .page-hero img,
+  .appointments-hero-media,
+  .doctor-panel-hero-media,
+  .admin-hero-media,
+  .login-visual-media-wrap img,
+  .register-visual-main,
+  .register-visual-main img {
+    min-height: unset;
+    height: auto;
+  }
+
+  .system-notification-card {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+
+  .system-notification-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .system-notification-copy,
+  .system-notification-actions,
+  .system-notification-actions .btn,
+  .system-notification-actions .action-btn,
+  .system-notification-actions .inline-form {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .system-notification-actions .action-btn {
+    width: 100%;
+  }
+
+  .table-shell {
+    border-radius: 12px;
+  }
+
+  .table-shell table {
+    min-width: 480px;
+  }
+
+  .appointments-table {
+    min-width: 720px;
+  }
+
+  .appointments-actions-cell {
+    min-width: 220px;
+  }
+
+  .auth-register-cta,
+  .auth-login-cta {
+    margin-top: 0.9rem;
+    padding-top: 0.85rem;
+  }
+
+  .auth-register-link,
+  .auth-login-link {
+    min-height: 2.8rem;
+  }
+
+  .site-footer {
+    padding-inline: 0.65rem;
+  }
+
+  .site-footer-inner {
+    width: calc(100% - 0.3rem);
+    padding: 0.9rem;
+    gap: 0.8rem;
   }
 }
 

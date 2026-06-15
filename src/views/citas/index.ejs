@@ -15,40 +15,46 @@
 <section class="card appointments-hero">
   <div class="appointments-hero-copy">
     <span class="page-kicker"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Citas</span>
-    <h2>Agenda clínica con foco operativo</h2>
-    <p>Gestiona reservas, seguimiento y estados de atención desde una vista central para todo el equipo.</p>
 
-    <div class="appointments-insight">
-      <strong>Resumen rápido</strong>
-      <p><%= appointmentSummary.today %> citas para hoy y <%= appointmentSummary.upcoming %> próximas por atender.</p>
-    </div>
+    <% if (currentUser.role === 'paciente') { %>
+      <h2>Mis Citas</h2>
+      <p>Consulta tus citas programadas o agenda una nueva atención.</p>
+    <% } else { %>
+      <h2>Agenda de citas</h2>
+      <p>Gestiona reservas, seguimiento y estados de atención desde una vista central.</p>
 
-    <div class="appointments-kpis">
-      <article class="appointment-kpi">
-        <span>Total</span>
-        <strong><%= appointmentSummary.total %></strong>
-      </article>
-      <article class="appointment-kpi">
-        <span>Pendientes</span>
-        <strong><%= appointmentSummary.pending %></strong>
-      </article>
-      <article class="appointment-kpi">
-        <span>Completadas</span>
-        <strong><%= appointmentSummary.completed %></strong>
-      </article>
-      <article class="appointment-kpi">
-        <span>Canceladas</span>
-        <strong><%= appointmentSummary.cancelled %></strong>
-      </article>
-      <article class="appointment-kpi">
-        <span>Reprogramadas</span>
-        <strong><%= appointmentSummary.reprogrammed %></strong>
-      </article>
-      <article class="appointment-kpi">
-        <span>Solicitudes</span>
-        <strong><%= appointmentSummary.rescheduleRequested %></strong>
-      </article>
-    </div>
+      <div class="appointments-insight">
+        <strong>Resumen rápido</strong>
+        <p><%= appointmentSummary.today %> citas para hoy y <%= appointmentSummary.upcoming %> próximas por atender.</p>
+      </div>
+
+      <div class="appointments-kpis">
+        <article class="appointment-kpi">
+          <span>Total</span>
+          <strong><%= appointmentSummary.total %></strong>
+        </article>
+        <article class="appointment-kpi">
+          <span>Pendientes</span>
+          <strong><%= appointmentSummary.pending %></strong>
+        </article>
+        <article class="appointment-kpi">
+          <span>Completadas</span>
+          <strong><%= appointmentSummary.completed %></strong>
+        </article>
+        <article class="appointment-kpi">
+          <span>Canceladas</span>
+          <strong><%= appointmentSummary.cancelled %></strong>
+        </article>
+        <article class="appointment-kpi">
+          <span>Reprogramadas</span>
+          <strong><%= appointmentSummary.reprogrammed %></strong>
+        </article>
+        <article class="appointment-kpi">
+          <span>Solicitudes</span>
+          <strong><%= appointmentSummary.rescheduleRequested %></strong>
+        </article>
+      </div>
+    <% } %>
   </div>
   <div class="appointments-hero-media">
     <img src="/img/hero-appointments.svg" alt="Ilustracion de agenda y reserva de citas" />
@@ -240,7 +246,9 @@
           <tr>
             <th>Fecha</th>
             <th>Hora</th>
-            <th>Paciente</th>
+            <% if (currentUser.role !== 'paciente') { %>
+              <th>Paciente</th>
+            <% } %>
             <th>Médico</th>
             <th>Especialidad</th>
             <th>Consultorio</th>
@@ -253,7 +261,9 @@
             <tr>
               <td><%= dmy(a.appointment_date) %></td>
               <td><%= a.start_time %> - <%= a.end_time %></td>
-              <td><%= a.patient_name %></td>
+              <% if (currentUser.role !== 'paciente') { %>
+                <td><%= a.patient_name %></td>
+              <% } %>
               <td><%= a.doctor_name %></td>
               <td><%= a.specialty %></td>
               <td><%= a.doctor_office || '-' %></td>

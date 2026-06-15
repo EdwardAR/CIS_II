@@ -60,29 +60,45 @@
     <form method="post" action="/auth/register" class="grid-form two-cols register-form register-form-pro">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
+      <%
+        function fieldError(field) {
+          if (!formErrors || !formErrors.length) return '';
+          const e = formErrors.find(function(err) { return err.path === field; });
+          return e ? e.msg : '';
+        }
+        function hasError(field) { return fieldError(field) ? 'field-invalid' : ''; }
+      %>
+
       <label><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre completo</label>
-      <input type="text" name="full_name" placeholder="Nombre y apellidos" required minlength="5" title="Debe contener solo letras y espacios, mínimo 5 caracteres." />
+      <input type="text" name="full_name" placeholder="Nombre y apellidos" class="<%= hasError('full_name') %>" required minlength="5" title="Debe contener solo letras y espacios, mínimo 5 caracteres." />
+      <% if (fieldError('full_name')) { %><span class="field-error"><%= fieldError('full_name') %></span><% } %>
 
       <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>
-      <input type="email" name="email" placeholder="usuario@correo.com" required title="Ingrese un correo válido, ejemplo: usuario@correo.com" />
+      <input type="email" name="email" placeholder="usuario@correo.com" class="<%= hasError('email') %>" required title="Ingrese un correo válido, ejemplo: usuario@correo.com" />
+      <% if (fieldError('email')) { %><span class="field-error"><%= fieldError('email') %></span><% } %>
 
       <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña</label>
-      <input type="password" name="password" placeholder="Cree una contraseña segura" required minlength="8" title="Mínimo 8 caracteres, debe incluir mayúscula, número y carácter especial." autocomplete="new-password" />
+      <input type="password" name="password" placeholder="Cree una contraseña segura" class="<%= hasError('password') %>" required minlength="8" title="Mínimo 8 caracteres, debe incluir mayúscula, número y carácter especial." autocomplete="new-password" />
+      <% if (fieldError('password')) { %><span class="field-error"><%= fieldError('password') %></span><% } %>
 
       <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />DNI</label>
-      <input type="text" name="dni" placeholder="Número de documento" required pattern="\d{8}" inputmode="numeric" maxlength="8" minlength="8" title="Debe tener exactamente 8 dígitos numéricos." />
+      <input type="text" name="dni" placeholder="Número de documento" class="<%= hasError('dni') %>" required pattern="\d{8}" inputmode="numeric" maxlength="8" minlength="8" title="Debe tener exactamente 8 dígitos numéricos." />
+      <% if (fieldError('dni')) { %><span class="field-error"><%= fieldError('dni') %></span><% } %>
 
       <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Teléfono</label>
-      <input type="tel" name="phone" placeholder="Número de contacto" required pattern="9\d{8}" inputmode="numeric" maxlength="9" title="Debe tener 9 dígitos y comenzar con 9." />
+      <input type="tel" name="phone" placeholder="Número de contacto" class="<%= hasError('phone') %>" required pattern="9\d{8}" inputmode="numeric" maxlength="9" title="Debe tener 9 dígitos y comenzar con 9." />
+      <% if (fieldError('phone')) { %><span class="field-error"><%= fieldError('phone') %></span><% } %>
 
       <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fecha de nacimiento</label>
-      <input type="date" name="birth_date" />
+      <input type="date" name="birth_date" class="<%= hasError('birth_date') %>" />
+      <% if (fieldError('birth_date')) { %><span class="field-error"><%= fieldError('birth_date') %></span><% } %>
 
       <label><img src="/img/icon-home.svg" alt="" class="inline-icon" />Dirección</label>
       <input type="text" name="address" placeholder="Dirección domiciliaria" />
 
       <label><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Contacto de emergencia</label>
-      <input type="text" name="emergency_contact" placeholder="Nombre y teléfono" />
+      <input type="text" name="emergency_contact" placeholder="Nombre y teléfono" class="<%= hasError('emergency_contact') %>" />
+      <% if (fieldError('emergency_contact')) { %><span class="field-error"><%= fieldError('emergency_contact') %></span><% } %>
 
       <button type="submit" class="btn auth-submit register-submit">Crear cuenta</button>
     </form>

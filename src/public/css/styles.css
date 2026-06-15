@@ -2303,6 +2303,20 @@ textarea {
   font-family: inherit;
 }
 
+input.field-invalid, select.field-invalid {
+  border-color: #c74b4b;
+  background: #fff8f8;
+}
+
+.field-error {
+  display: block;
+  font-size: 0.8rem;
+  color: #c74b4b;
+  margin-top: -0.3rem;
+  padding-left: 0.2rem;
+  line-height: 1.3;
+}
+
 button, .btn {
   display: inline-flex;
   justify-content: center;

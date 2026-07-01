@@ -19,12 +19,12 @@
 <section class="card admin-hero-shell">
   <div class="admin-hero-copy">
     <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Panel administrativo</span>
-    <h2>Centro de control clinico</h2>
-    <p>Monitorea la operacion diaria, detecta cuellos de botella y ejecuta acciones concretas con contexto completo.</p>
+    <h2>Centro de control clínico</h2>
+    <p>Monitorea la operación diaria, detecta cuellos de botella y ejecuta acciones concretas con contexto completo.</p>
 
     <div class="admin-insight-strip">
       <div>
-        <strong>Efectividad de atencion</strong>
+        <strong>Efectividad de atención</strong>
         <p>
           <%= summary.completionRate %>% de citas completadas.
           <%= summary.todayPending %> pendiente(s) para hoy.
@@ -36,7 +36,7 @@
     </div>
 
     <div class="quick-actions">
-      <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar medicos</a>
+      <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar médicos</a>
       <a href="/citas" class="btn btn-secondary action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Revisar agenda</a>
     </div>
   </div>
@@ -48,13 +48,13 @@
 <section class="admin-ops-grid dashboard-section-gap">
   <article class="card admin-ops-alert <%= hasOperationalLoad ? 'admin-ops-alert-busy' : 'admin-ops-alert-clear' %>">
     <div class="admin-ops-head">
-      <span class="admin-ops-pill"><%= hasOperationalLoad ? 'Operacion activa' : 'Operacion estable' %></span>
+      <span class="admin-ops-pill"><%= hasOperationalLoad ? 'Operación activa' : 'Operación estable' %></span>
       <strong><%= hasOperationalLoad ? 'Hay pacientes por atender hoy' : 'No hay citas pendientes para hoy' %></strong>
     </div>
 
     <% if (hasOperationalLoad && summary.nextAppointment) { %>
       <p>
-        Proxima atencion: <b><%= summary.nextAppointment.patient_name %></b> con
+        Próxima atención: <b><%= summary.nextAppointment.patient_name %></b> con
         <b><%= summary.nextAppointment.doctor_name %></b> a las <b><%= summary.nextAppointment.start_time %></b>.
       </p>
     <% } else { %>
@@ -63,18 +63,18 @@
   </article>
 
   <article class="card admin-ops-shift">
-    <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Cobertura medica actual</h3>
+    <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Cobertura médica actual</h3>
     <div class="admin-ops-shift-grid">
       <div>
-        <span>Medicos en turno ahora</span>
+        <span>Médicos en turno ahora</span>
         <strong><%= summary.doctorsInShiftNow %></strong>
       </div>
       <div>
-        <span>Medicos con pendientes hoy</span>
+        <span>Médicos con pendientes hoy</span>
         <strong><%= summary.doctorsWithAppointmentsToday %></strong>
       </div>
     </div>
-    <p class="helper">Referencia operativa en tiempo real para coordinar derivaciones y redistribucion de carga.</p>
+    <p class="helper">Referencia operativa en tiempo real para coordinar derivaciones y redistribución de carga.</p>
   </article>
 </section>
 
@@ -88,64 +88,64 @@
   </div>
 
   <div class="metrics-grid admin-metrics-extended">
-    <article class="metric card">
-      <h3><img src="/img/icon-calendar.svg" alt="" class="metric-icon" />Total citas</h3>
-      <p><%= summary.total %></p>
-      <small>Registro global del sistema</small>
+    <article class="metric card metric-card-total">
+      <span class="metric-label"><img src="/img/icon-calendar.svg" alt="" class="metric-icon" /> Total citas</span>
+      <p class="metric-num"><%= summary.total %></p>
+      <span class="metric-sub">Registro global del sistema</span>
     </article>
-    <article class="metric card">
-      <h3><img src="/img/icon-clock.svg" alt="" class="metric-icon" />Hoy</h3>
-      <p><%= summary.today %></p>
-      <small>Citas programadas en fecha actual</small>
+    <article class="metric card metric-card-total">
+      <span class="metric-label"><img src="/img/icon-clock.svg" alt="" class="metric-icon" /> Hoy</span>
+      <p class="metric-num"><%= summary.today %></p>
+      <span class="metric-sub">Citas programadas hoy</span>
     </article>
-    <article class="metric card metric-toggleable" data-metric-toggle>
-      <h3>
+    <article class="metric card metric-card-pending metric-toggleable" data-metric-toggle>
+      <span class="metric-label">
         <img src="/img/icon-calendar.svg" alt="" class="metric-icon" />
         <span data-metric-title-overall>Pendientes</span>
         <span data-metric-title-today hidden>Pendientes hoy</span>
-      </h3>
-      <p>
+      </span>
+      <p class="metric-num">
         <span data-metric-value-overall><%= summary.pending %></span>
         <span data-metric-value-today hidden><%= summary.todayPending %></span>
       </p>
-      <small data-metric-subtitle-overall>Atenciones por resolver (global)</small>
-      <small data-metric-subtitle-today hidden>Atenciones por resolver en la jornada</small>
+      <span class="metric-sub" data-metric-subtitle-overall>Por resolver (global)</span>
+      <span class="metric-sub" data-metric-subtitle-today hidden>Por resolver hoy</span>
     </article>
-    <article class="metric card metric-toggleable" data-metric-toggle>
-      <h3>
+    <article class="metric card metric-card-done metric-toggleable" data-metric-toggle>
+      <span class="metric-label">
         <img src="/img/icon-user.svg" alt="" class="metric-icon" />
         <span data-metric-title-overall>Completadas</span>
         <span data-metric-title-today hidden>Completadas hoy</span>
-      </h3>
-      <p>
+      </span>
+      <p class="metric-num">
         <span data-metric-value-overall><%= summary.completed %></span>
         <span data-metric-value-today hidden><%= summary.todayCompleted %></span>
       </p>
-      <small data-metric-subtitle-overall>Atenciones finalizadas</small>
-      <small data-metric-subtitle-today hidden>Atenciones finalizadas hoy</small>
+      <span class="metric-sub" data-metric-subtitle-overall>Atenciones finalizadas</span>
+      <span class="metric-sub" data-metric-subtitle-today hidden>Finalizadas hoy</span>
     </article>
-    <article class="metric card metric-toggleable" data-metric-toggle>
-      <h3>
+    <article class="metric card metric-card-cancel metric-toggleable" data-metric-toggle>
+      <span class="metric-label">
         <img src="/img/icon-doctor.svg" alt="" class="metric-icon" />
         <span data-metric-title-overall>Canceladas</span>
         <span data-metric-title-today hidden>Canceladas hoy</span>
-      </h3>
-      <p>
+      </span>
+      <p class="metric-num">
         <span data-metric-value-overall><%= summary.cancelled %></span>
         <span data-metric-value-today hidden><%= summary.todayCancelled %></span>
       </p>
-      <small data-metric-subtitle-overall>Incidencias y ausencias</small>
-      <small data-metric-subtitle-today hidden>Incidencias en jornada actual</small>
+      <span class="metric-sub" data-metric-subtitle-overall>Incidencias y ausencias</span>
+      <span class="metric-sub" data-metric-subtitle-today hidden>Incidencias hoy</span>
     </article>
-    <article class="metric card">
-      <h3><img src="/img/icon-doctor.svg" alt="" class="metric-icon" />Médicos</h3>
-      <p><%= summary.totalDoctors %></p>
-      <small>Especialistas activos</small>
+    <article class="metric card metric-card-total">
+      <span class="metric-label"><img src="/img/icon-doctor.svg" alt="" class="metric-icon" /> Médicos</span>
+      <p class="metric-num"><%= summary.totalDoctors %></p>
+      <span class="metric-sub">Especialistas activos</span>
     </article>
-    <article class="metric card">
-      <h3><img src="/img/icon-user.svg" alt="" class="metric-icon" />Pacientes</h3>
-      <p><%= summary.totalPatients %></p>
-      <small>Usuarios registrados</small>
+    <article class="metric card metric-card-total">
+      <span class="metric-label"><img src="/img/icon-user.svg" alt="" class="metric-icon" /> Pacientes</span>
+      <p class="metric-num"><%= summary.totalPatients %></p>
+      <span class="metric-sub">Usuarios registrados</span>
     </article>
   </div>
 </section>
@@ -222,16 +222,23 @@
     </div>
 
     <% if (!pendingBySpecialty.length) { %>
-      <p class="helper">No hay carga pendiente para las proximas fechas.</p>
+      <div class="tbl-empty">
+        <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
+        <strong>Sin carga pendiente</strong>
+        <p>No hay citas pendientes por especialidad por el momento.</p>
+      </div>
     <% } else { %>
+      <% const maxPending = Math.max(...pendingBySpecialty.map(r => r.total), 1); %>
       <div class="admin-specialty-list">
         <% pendingBySpecialty.forEach((row, index) => { %>
-          <div class="admin-specialty-row">
-            <div>
+          <div class="specialty-bar-row">
+            <div class="specialty-bar-info">
               <strong>#<%= index + 1 %> <%= row.specialty %></strong>
-              <small>Pendientes activos</small>
+              <div class="specialty-bar-track">
+                <div class="specialty-bar-fill" style="width: <%= Math.round((row.total / maxPending) * 100) %>%"></div>
+              </div>
             </div>
-            <span><%= row.total %></span>
+            <span class="specialty-bar-count"><%= row.total %></span>
           </div>
         <% }) %>
       </div>
@@ -245,7 +252,11 @@
     </div>
 
     <% if (!todayPendingDetails.length) { %>
-      <p class="helper">No hay pacientes pendientes de atencion para hoy.</p>
+      <div class="tbl-empty">
+        <div class="tbl-empty-icon"><img src="/img/icon-clock.svg" alt="" /></div>
+        <strong>Agenda libre hoy</strong>
+        <p>No hay pacientes pendientes de atención para hoy.</p>
+      </div>
     <% } else { %>
       <div class="table-shell">
         <table>
@@ -277,12 +288,16 @@
 
 <section class="card dashboard-section-gap dashboard-table-card">
   <div class="section-title-wrap">
-    <h2>Proximas citas programadas</h2>
+    <h2>Próximas citas programadas</h2>
     <span class="table-count"><%= upcoming.length %> en lista</span>
   </div>
 
   <% if (!upcoming.length) { %>
-    <p class="helper">No hay citas próximas registradas por el momento.</p>
+    <div class="tbl-empty">
+      <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
+      <strong>Sin próximas citas</strong>
+      <p>No hay citas programadas próximamente.</p>
+    </div>
   <% } else { %>
     <div class="table-shell">
       <table>

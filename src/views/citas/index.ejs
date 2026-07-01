@@ -10,219 +10,309 @@
           if (!year || !month || !day) return value;
           return `${day}-${month}-${year}`;
         };
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const isPaciente = currentUser.role === 'paciente';
 %>
 
+<!-- ============================================================
+     HERO — diferenciado por rol
+     ============================================================ -->
+<% if (isPaciente) { %>
+<section class="pac-hero card">
+  <div class="pac-hero-copy">
+    <span class="page-kicker"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Mis citas</span>
+    <h2>Bienvenido/a, <%= currentUser.full_name.split(' ')[0] %></h2>
+    <p>Reserva una nueva cita, revisa tus atenciones y gestiona tu agenda médica.</p>
+
+    <!-- Mini-stats del paciente -->
+    <% if (appointments && appointments.length) { %>
+    <div class="pac-hero-stats">
+      <div class="pac-hero-stat pac-stat-pending">
+        <strong><%= appointments.filter(a => a.status === 'pendiente').length %></strong>
+        <span>pendiente(s)</span>
+      </div>
+      <div class="pac-hero-stat pac-stat-done">
+        <strong><%= appointments.filter(a => a.status === 'completada').length %></strong>
+        <span>completada(s)</span>
+      </div>
+      <div class="pac-hero-stat pac-stat-cancel">
+        <strong><%= appointments.filter(a => a.status === 'cancelada').length %></strong>
+        <span>cancelada(s)</span>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <div class="pac-hero-media">
+    <img src="/img/hero-appointments.svg" alt="Mis citas" />
+  </div>
+</section>
+<% } else { %>
 <section class="card appointments-hero">
   <div class="appointments-hero-copy">
     <span class="page-kicker"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Citas</span>
-
-    <% if (currentUser.role === 'paciente') { %>
-      <h2>Mis Citas</h2>
-      <p>Consulta tus citas programadas o agenda una nueva atención.</p>
-    <% } else { %>
-      <h2>Agenda de citas</h2>
-      <p>Gestiona reservas, seguimiento y estados de atención desde una vista central.</p>
-
-      <div class="appointments-insight">
-        <strong>Resumen rápido</strong>
-        <p><%= appointmentSummary.today %> citas para hoy y <%= appointmentSummary.upcoming %> próximas por atender.</p>
-      </div>
-
-      <div class="appointments-kpis">
-        <article class="appointment-kpi">
-          <span>Total</span>
-          <strong><%= appointmentSummary.total %></strong>
-        </article>
-        <article class="appointment-kpi">
-          <span>Pendientes</span>
-          <strong><%= appointmentSummary.pending %></strong>
-        </article>
-        <article class="appointment-kpi">
-          <span>Completadas</span>
-          <strong><%= appointmentSummary.completed %></strong>
-        </article>
-        <article class="appointment-kpi">
-          <span>Canceladas</span>
-          <strong><%= appointmentSummary.cancelled %></strong>
-        </article>
-        <article class="appointment-kpi">
-          <span>Reprogramadas</span>
-          <strong><%= appointmentSummary.reprogrammed %></strong>
-        </article>
-        <article class="appointment-kpi">
-          <span>Solicitudes</span>
-          <strong><%= appointmentSummary.rescheduleRequested %></strong>
-        </article>
-      </div>
-    <% } %>
+    <h2>Agenda de citas</h2>
+    <p>Gestiona reservas, seguimiento y estados de atención desde una vista central.</p>
+    <div class="appointments-insight">
+      <strong>Resumen rápido</strong>
+      <p><%= appointmentSummary.today %> citas para hoy y <%= appointmentSummary.upcoming %> próximas por atender.</p>
+    </div>
+    <div class="appointments-kpis">
+      <article class="appointment-kpi"><span>Total</span><strong><%= appointmentSummary.total %></strong></article>
+      <article class="appointment-kpi"><span>Pendientes</span><strong><%= appointmentSummary.pending %></strong></article>
+      <article class="appointment-kpi"><span>Completadas</span><strong><%= appointmentSummary.completed %></strong></article>
+      <article class="appointment-kpi"><span>Canceladas</span><strong><%= appointmentSummary.cancelled %></strong></article>
+      <article class="appointment-kpi"><span>Reprogramadas</span><strong><%= appointmentSummary.reprogrammed %></strong></article>
+      <article class="appointment-kpi"><span>Solicitudes</span><strong><%= appointmentSummary.rescheduleRequested %></strong></article>
+    </div>
   </div>
   <div class="appointments-hero-media">
-    <img src="/img/hero-appointments.svg" alt="Ilustracion de agenda y reserva de citas" />
+    <img src="/img/hero-appointments.svg" alt="Agenda de citas" />
   </div>
 </section>
+<% } %>
 
-<% if (currentUser.role === 'paciente') { %>
-<section class="card booking-shell">
-  <div class="section-title-wrap">
-    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Reservar Cita</h2>
-    <span class="table-count">Paciente</span>
+<!-- ============================================================
+     RESERVAR CITA — solo paciente, rediseñado
+     ============================================================ -->
+<% if (isPaciente) { %>
+<section class="pac-booking card">
+  <div class="pac-booking-header">
+    <div>
+      <span class="page-kicker"><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Nueva reserva</span>
+      <h2>Reservar cita médica</h2>
+      <p>Elige especialidad, médico y fecha para ver los turnos disponibles.</p>
+    </div>
+    <!-- Stepper visual -->
+    <div class="pac-steps" aria-label="Pasos del proceso">
+      <div class="pac-step <%= !selectedDoctorId ? 'pac-step-active' : 'pac-step-done' %>">
+        <span class="pac-step-num">1</span>
+        <span class="pac-step-label">Especialidad y médico</span>
+      </div>
+      <div class="pac-step-line"></div>
+      <div class="pac-step <%= selectedDoctorId && !slots.length ? 'pac-step-active' : (slots.length ? 'pac-step-done' : '') %>">
+        <span class="pac-step-num">2</span>
+        <span class="pac-step-label">Fecha y disponibilidad</span>
+      </div>
+      <div class="pac-step-line"></div>
+      <div class="pac-step <%= slots.length ? 'pac-step-active' : '' %>">
+        <span class="pac-step-num">3</span>
+        <span class="pac-step-label">Confirmar</span>
+      </div>
+    </div>
   </div>
 
-  <form method="get" action="/citas/disponibilidad" class="grid-form two-cols register-form reservation-filter-form">
-    <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Especialidad</label>
-    <select name="specialty" id="booking-specialty" required>
-      <option value="">Seleccione especialidad</option>
-      <% specialties.forEach((specialty) => { %>
-        <option value="<%= specialty %>" <%= selectedSpecialty === specialty ? 'selected' : '' %>><%= specialty %></option>
-      <% }) %>
-    </select>
-
-    <label><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Médico</label>
-    <select name="doctor_id" id="booking-doctor" required>
-      <option value="">Seleccione un médico</option>
-      <% doctors.forEach((doctor) => { %>
-        <option
-          value="<%= doctor.id %>"
-          data-specialty="<%= doctor.specialty %>"
-          <%= selectedDoctorId === doctor.id ? 'selected' : '' %>
-        >
-          <%= doctor.full_name %> - <%= doctor.specialty %><%= doctor.office ? ` (Consultorio ${doctor.office})` : '' %>
-        </option>
-      <% }) %>
-    </select>
-
-    <p class="helper booking-specialty-helper" id="booking-specialty-helper">
-      Elige una especialidad para ver solo los médicos correspondientes.
-    </p>
-
-    <label><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Fecha</label>
-    <input type="date" name="appointment_date" value="<%= selectedDate || '' %>" required />
-
-    <button type="submit" class="btn auth-submit">Consultar disponibilidad</button>
-  </form>
-
-  <% if (selectedDoctor) { %>
-    <section class="booking-doctor-schedule">
-      <div class="section-title-wrap">
-        <h3><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios de <%= selectedDoctor.full_name %></h3>
-        <span class="table-count"><%= selectedDoctor.office ? `Consultorio ${selectedDoctor.office}` : 'Consultorio no registrado' %></span>
+  <!-- PASO 1: Especialidad + médico + fecha -->
+  <form method="get" action="/citas/disponibilidad" class="pac-booking-form" id="bookingFilterForm">
+    <div class="pac-booking-fields">
+      <div class="reg-field">
+        <label for="booking-specialty">
+          <img src="/img/icon-heart.svg" alt="" class="reg-input-icon" style="position:static;width:14px;height:14px;opacity:0.5;margin-right:4px;vertical-align:middle" />
+          Especialidad <span class="reg-required">*</span>
+        </label>
+        <div class="reg-input-wrap">
+          <img src="/img/icon-heart.svg" alt="" class="reg-input-icon" />
+          <select name="specialty" id="booking-specialty" class="reg-input" required>
+            <option value="">Selecciona una especialidad</option>
+            <% specialties.forEach((s) => { %>
+              <option value="<%= s %>" <%= selectedSpecialty === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
       </div>
 
-      <% if (selectedDateHasShift === false) { %>
-        <p class="helper schedule-warning">El médico no atiende en la fecha seleccionada. Elige otra fecha para ver turnos disponibles.</p>
-      <% } else if (selectedDateHasShift === true) { %>
-        <p class="helper schedule-ok">El médico atiende en la fecha seleccionada. Puedes continuar con la reserva.</p>
-      <% } %>
-
-      <% if (!selectedDoctorSchedule.length) { %>
-        <p class="helper">Este médico aún no tiene horarios activos configurados.</p>
-      <% } else { %>
-        <div class="table-shell">
-          <table>
-            <thead>
-              <tr>
-                <th>Día</th>
-                <th>Desde</th>
-                <th>Hasta</th>
-                <th>Bloque</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; %>
-              <% selectedDoctorSchedule.forEach((slot) => { %>
-                <tr class="<%= selectedDayOfWeek === slot.day_of_week ? 'schedule-day-selected' : '' %>">
-                  <td><%= dayNames[slot.day_of_week] %></td>
-                  <td><%= slot.start_time %></td>
-                  <td><%= slot.end_time %></td>
-                  <td><%= slot.slot_minutes %> min</td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
+      <div class="reg-field">
+        <label for="booking-doctor">
+          Médico <span class="reg-required">*</span>
+        </label>
+        <div class="reg-input-wrap">
+          <img src="/img/icon-doctor.svg" alt="" class="reg-input-icon" />
+          <select name="doctor_id" id="booking-doctor" class="reg-input" required>
+            <option value="">Selecciona un médico</option>
+            <% doctors.forEach((doc) => { %>
+              <option
+                value="<%= doc.id %>"
+                data-specialty="<%= doc.specialty %>"
+                <%= selectedDoctorId === doc.id ? 'selected' : '' %>
+              >
+                <%= doc.full_name %><%= doc.office ? ` · Consultorio ${doc.office}` : '' %>
+              </option>
+            <% }) %>
+          </select>
         </div>
-      <% } %>
-    </section>
-  <% } %>
+        <span class="reg-hint" id="booking-specialty-helper">Elige especialidad para filtrar médicos</span>
+      </div>
 
-  <% if (slots.length) { %>
-    <div class="booking-flow-actions">
-      <a
-        href="/citas/disponibilidad?specialty=<%= encodeURIComponent(selectedSpecialty || '') %>"
-        class="btn btn-secondary"
-      >
-        <img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Cambiar especialidad o médico
-      </a>
-      <a href="/citas" class="btn btn-danger">
-        <img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar proceso
-      </a>
+      <div class="reg-field">
+        <label for="booking-date">Fecha <span class="reg-required">*</span></label>
+        <div class="reg-input-wrap">
+          <img src="/img/icon-calendar.svg" alt="" class="reg-input-icon" />
+          <input type="date" id="booking-date" name="appointment_date"
+            value="<%= selectedDate || '' %>" class="reg-input" required
+            min="<%= todayIso %>" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn auth-submit pac-booking-search-btn">
+        <img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Consultar disponibilidad
+      </button>
+    </div>
+  </form>
+
+  <!-- Info del médico seleccionado -->
+  <% if (selectedDoctor) { %>
+    <div class="pac-doctor-info">
+      <div class="pac-doctor-avatar">
+        <%= selectedDoctor.full_name.charAt(0).toUpperCase() %>
+      </div>
+      <div class="pac-doctor-details">
+        <strong><%= selectedDoctor.full_name %></strong>
+        <span><%= selectedSpecialty %><% if (selectedDoctor.office) { %> · Consultorio <%= selectedDoctor.office %><% } %></span>
+      </div>
+      <% if (selectedDateHasShift === true) { %>
+        <span class="status status-completada">Atiende este día</span>
+      <% } else if (selectedDateHasShift === false) { %>
+        <span class="status status-cancelada">No atiende este día</span>
+      <% } %>
     </div>
 
-    <form
-      method="post"
-      action="/citas"
-      class="grid-form two-cols register-form booking-confirm-form"
-      data-confirm="¿Desea confirmar y registrar esta cita?"
-    >
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <input type="hidden" name="specialty" value="<%= selectedSpecialty || '' %>" />
-      <input type="hidden" name="doctor_id" value="<%= selectedDoctorId %>" />
-      <input type="hidden" name="appointment_date" value="<%= selectedDate %>" />
+    <% if (selectedDateHasShift === false) { %>
+      <div class="pac-booking-alert pac-booking-alert-warn">
+        <img src="/img/icon-clock.svg" alt="" />
+        <div>
+          <strong>El médico no atiende en esa fecha</strong>
+          <p>Elige otra fecha o selecciona un médico diferente para ver disponibilidad.</p>
+        </div>
+      </div>
+    <% } %>
 
-      <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horario disponible</label>
-      <select name="start_time" required>
-        <% slots.forEach((slot) => { %>
-          <option value="<%= slot %>"><%= slot %></option>
-        <% }) %>
-      </select>
+    <% if (!selectedDoctorSchedule.length) { %>
+      <div class="pac-booking-alert pac-booking-alert-warn">
+        <img src="/img/icon-clock.svg" alt="" />
+        <div>
+          <strong>Sin horarios configurados</strong>
+          <p>Este médico aún no tiene turnos activos. Consulta otro especialista.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <!-- Horarios del médico agrupados -->
+      <div class="pac-schedule-preview">
+        <h4><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios semanales de <%= selectedDoctor.full_name %></h4>
+        <div class="pac-schedule-chips">
+          <% const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; %>
+          <% selectedDoctorSchedule.forEach((slot) => { %>
+            <div class="pac-schedule-chip <%= selectedDayOfWeek === slot.day_of_week ? 'pac-schedule-chip-active' : '' %>">
+              <strong><%= dayNames[slot.day_of_week] %></strong>
+              <span><%= slot.start_time %>–<%= slot.end_time %></span>
+              <small><%= slot.slot_minutes %> min</small>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
 
-      <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Motivo de consulta</label>
-      <input type="text" name="reason" required />
+  <!-- PASO 3: Slots disponibles + confirmación -->
+  <% if (slots.length) { %>
+    <div class="pac-slots-section">
+      <div class="pac-slots-header">
+        <h4><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Turnos disponibles — <%= dmy(selectedDate) %></h4>
+        <a href="/citas/disponibilidad?specialty=<%= encodeURIComponent(selectedSpecialty || '') %>" class="pac-change-link">
+          ← Cambiar médico o fecha
+        </a>
+      </div>
 
-      <button type="submit" class="btn auth-submit" data-loading-text="Confirmando cita...">Confirmar cita</button>
-    </form>
-  <% } else if (selectedDoctorId && selectedDate) { %>
-    <p class="helper">No hay horarios disponibles para la fecha seleccionada.</p>
+      <form method="post" action="/citas" class="pac-confirm-form" data-confirm="¿Confirmar esta cita?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="specialty" value="<%= selectedSpecialty || '' %>" />
+        <input type="hidden" name="doctor_id" value="<%= selectedDoctorId %>" />
+        <input type="hidden" name="appointment_date" value="<%= selectedDate %>" />
+
+        <!-- Selector de slot como pills -->
+        <div class="pac-slot-pills" role="group" aria-label="Selecciona un turno">
+          <% slots.forEach((slot, i) => { %>
+            <label class="pac-slot-pill">
+              <input type="radio" name="start_time" value="<%= slot %>" <%= i === 0 ? 'checked' : '' %> required />
+              <span><img src="/img/icon-clock.svg" alt="" /><%= slot %></span>
+            </label>
+          <% }) %>
+        </div>
+
+        <div class="reg-field pac-reason-field">
+          <label for="booking-reason">Motivo de consulta <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-clipboard.svg" alt="" class="reg-input-icon" />
+            <input type="text" id="booking-reason" name="reason"
+              placeholder="Describe brevemente el motivo de tu visita"
+              class="reg-input" required />
+          </div>
+        </div>
+
+        <div class="pac-confirm-footer">
+          <a href="/citas" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn auth-submit pac-confirm-btn" data-loading-text="Reservando...">
+            <img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Confirmar cita
+          </button>
+        </div>
+      </form>
+    </div>
+  <% } else if (selectedDoctorId && selectedDate && selectedDateHasShift === true) { %>
+    <div class="pac-booking-alert pac-booking-alert-info">
+      <img src="/img/icon-calendar.svg" alt="" />
+      <div>
+        <strong>Sin turnos disponibles</strong>
+        <p>No hay horarios libres para la fecha seleccionada. Prueba con otra fecha.</p>
+      </div>
+    </div>
   <% } %>
 </section>
 <% } %>
 
-<% if (currentUser.role === 'paciente' && pendingRatings.length) { %>
-<section class="card satisfaction-shell">
+<!-- ============================================================
+     CALIFICACIONES PENDIENTES
+     ============================================================ -->
+<% if (isPaciente && pendingRatings.length) { %>
+<section class="pac-ratings card">
   <div class="section-title-wrap">
-    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Calificaciones pendientes</h2>
+    <div>
+      <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Califica tu atención</h2>
+      <p style="margin:0.2rem 0 0;color:var(--text-muted);font-size:0.88rem">Tu opinión ayuda a mejorar el servicio. Solo se califica una vez por cita.</p>
+    </div>
     <span class="table-count"><%= pendingRatings.length %> por valorar</span>
   </div>
-  <p class="helper">Tu experiencia ayuda a mejorar la atención médica. Califica cada consulta completada una sola vez.</p>
 
-  <div class="satisfaction-grid">
-    <% pendingRatings.forEach((appointment) => { %>
-      <article class="satisfaction-card" id="calificacion-<%= appointment.id %>">
-        <div class="satisfaction-card-header">
-          <div>
-            <span class="appointment-origin-badge">Atención completada</span>
-            <strong><%= appointment.doctor_name %></strong>
-            <p><%= dmy(appointment.appointment_date) %> - <%= appointment.start_time %><%= appointment.specialty ? ` · ${appointment.specialty}` : '' %></p>
+  <div class="pac-ratings-grid">
+    <% pendingRatings.forEach((apt) => { %>
+      <article class="pac-rating-card" id="calificacion-<%= apt.id %>">
+        <div class="pac-rating-card-top">
+          <div class="pac-rating-doc-avatar"><%= apt.doctor_name.charAt(0).toUpperCase() %></div>
+          <div class="pac-rating-doc-info">
+            <strong><%= apt.doctor_name %></strong>
+            <span><%= apt.specialty || '' %></span>
+            <small><img src="/img/icon-calendar.svg" alt="" style="width:11px;height:11px;opacity:0.5;vertical-align:middle;margin-right:3px" /><%= dmy(apt.appointment_date) %> · <%= apt.start_time %></small>
           </div>
-          <span class="rating-chip">Pendiente de calificación</span>
+          <span class="rating-chip">Pendiente</span>
         </div>
 
-        <form
-          method="post"
-          action="/citas/<%= appointment.id %>/calificar"
-          class="rating-form"
-        >
+        <form method="post" action="/citas/<%= apt.id %>/calificar" class="pac-rating-form">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <div class="star-rating" role="radiogroup" aria-label="Calificación de la atención">
-            <% for (let star = 5; star >= 1; star -= 1) { %>
-              <input id="rating-<%= appointment.id %>-<%= star %>" type="radio" name="rating" value="<%= star %>" required />
-              <label for="rating-<%= appointment.id %>-<%= star %>" title="<%= star %> estrella<%= star === 1 ? '' : 's' %>">★</label>
-            <% } %>
+          <div class="pac-star-wrap">
+            <p class="pac-star-label">¿Cómo fue tu atención?</p>
+            <div class="star-rating" role="radiogroup" aria-label="Calificación de la atención">
+              <% for (let star = 5; star >= 1; star--) { %>
+                <input id="rating-<%= apt.id %>-<%= star %>" type="radio" name="rating" value="<%= star %>" required />
+                <label for="rating-<%= apt.id %>-<%= star %>" title="<%= star %> estrella<%= star === 1 ? '' : 's' %>">★</label>
+              <% } %>
+            </div>
           </div>
-
-          <label for="comment-<%= appointment.id %>" class="helper">Comentario opcional</label>
-          <textarea id="comment-<%= appointment.id %>" name="comment" rows="3" maxlength="250" placeholder="Cuéntanos cómo fue la atención..."></textarea>
-
-          <button type="submit" class="btn auth-submit" data-loading-text="Enviando calificación...">Enviar calificación</button>
+          <div class="reg-field">
+            <label for="comment-<%= apt.id %>" style="font-size:0.84rem;color:var(--text-muted)">Comentario (opcional)</label>
+            <textarea id="comment-<%= apt.id %>" name="comment" rows="2" maxlength="250"
+              placeholder="¿Algo que destacar sobre la atención recibida?"
+              style="width:100%;padding:0.55rem 0.7rem;border-radius:10px;border:1px solid #c0d6e8;font-family:inherit;font-size:0.88rem;resize:vertical"></textarea>
+          </div>
+          <button type="submit" class="btn auth-submit pac-rating-submit" data-loading-text="Enviando...">
+            <img src="/img/icon-heart.svg" alt="" class="inline-icon" />Enviar calificación
+          </button>
         </form>
       </article>
     <% }) %>
@@ -230,134 +320,175 @@
 </section>
 <% } %>
 
+<!-- ============================================================
+     LISTADO DE CITAS
+     ============================================================ -->
 <section class="card">
   <div class="section-title-wrap">
-    <h2><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Listado de Citas</h2>
-    <span class="table-count"><%= appointments.length %> registros</span>
+    <div>
+      <h2><img src="/img/icon-calendar.svg" alt="" class="inline-icon" /><%= isPaciente ? 'Mi historial de citas' : 'Listado de citas' %></h2>
+      <% if (isPaciente) { %><p style="margin:0.15rem 0 0;color:var(--text-muted);font-size:0.85rem">Todas tus citas programadas y completadas</p><% } %>
+    </div>
+    <span class="table-count"><%= appointments.length %> registro(s)</span>
   </div>
 
   <% if (!appointments.length) { %>
-    <p class="helper">No hay citas para mostrar en este momento.</p>
+    <div class="tbl-empty">
+      <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
+      <strong><%= isPaciente ? 'Aún no tienes citas' : 'Sin citas registradas' %></strong>
+      <p><%= isPaciente ? 'Reserva tu primera cita usando el formulario de arriba.' : 'No hay citas para mostrar en este momento.' %></p>
+    </div>
   <% } else { %>
+
+    <!-- Vista cards en mobile para paciente -->
+    <% if (isPaciente) { %>
+    <div class="pac-citas-cards">
+      <% appointments.forEach((a) => { %>
+        <article class="pac-cita-card pac-cita-<%= a.status %>">
+          <div class="pac-cita-card-left">
+            <div class="pac-cita-date">
+              <strong><%= dmy(a.appointment_date) %></strong>
+              <small><%= a.start_time %>–<%= a.end_time %></small>
+            </div>
+          </div>
+          <div class="pac-cita-card-body">
+            <div class="pac-cita-doc">
+              <span class="pac-cita-doc-avatar"><%= a.doctor_name.charAt(0).toUpperCase() %></span>
+              <div>
+                <strong><%= a.doctor_name %></strong>
+                <span class="pac-cita-specialty"><%= a.specialty %></span>
+              </div>
+            </div>
+            <div class="pac-cita-meta">
+              <% if (a.doctor_office) { %>
+                <span><img src="/img/icon-home.svg" alt="" style="width:12px;opacity:0.4;vertical-align:middle;margin-right:3px" />Consultorio <%= a.doctor_office %></span>
+              <% } %>
+              <% if (a.appointment_date === todayIso) { %>
+                <span class="status status-pendiente" style="font-size:0.7rem;padding:0.1rem 0.4rem">Hoy</span>
+              <% } %>
+            </div>
+          </div>
+          <div class="pac-cita-card-right">
+            <span class="status status-<%= a.status %>"><%= a.status %></span>
+            <% if (a.status === 'pendiente' && !a.is_auto_rescheduled) { %>
+              <form method="post" action="/citas/<%= a.id %>/solicitar-reprogramacion" class="inline-form" data-confirm="¿Enviar solicitud de reprogramación?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button type="submit" class="pac-cita-action-btn pac-cita-btn-reschedule" data-loading-text="...">Reprogramar</button>
+              </form>
+              <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form" data-confirm="¿Cancelar esta cita?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button type="submit" class="pac-cita-action-btn pac-cita-btn-cancel" data-loading-text="...">Cancelar</button>
+              </form>
+            <% } %>
+            <% if (a.status === 'solicitud_reprogramacion') { %>
+              <span class="pac-cita-note">Solicitud enviada. En espera de aprobación.</span>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- Vista tabla para admin/medico (y toggle en paciente) -->
+    <% if (!isPaciente) { %>
     <div class="table-shell appointments-table-shell">
       <div class="table-shell-scroller">
-      <table class="appointments-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <% if (currentUser.role !== 'paciente') { %>
-              <th>Paciente</th>
-            <% } %>
-            <th>Médico</th>
-            <th>Especialidad</th>
-            <th>Consultorio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% appointments.forEach((a) => { %>
+        <table class="appointments-table">
+          <thead>
             <tr>
-              <td><%= dmy(a.appointment_date) %></td>
-              <td><%= a.start_time %> - <%= a.end_time %></td>
-              <% if (currentUser.role !== 'paciente') { %>
-                <td><%= a.patient_name %></td>
-              <% } %>
-              <td><%= a.doctor_name %></td>
-              <td><%= a.specialty %></td>
-              <td><%= a.doctor_office || '-' %></td>
-              <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
-              <td class="appointments-actions-cell">
-                <div class="appointments-actions-stack">
-                  <div class="appointments-actions-badges">
-                    <% if (a.is_auto_rescheduled) { %>
-                      <span class="appointment-origin-badge">Generada automáticamente tras una reprogramación previa</span>
-                    <% } %>
-
-                    <% if (a.status === 'pendiente' && currentUser.role === 'paciente' && a.is_auto_rescheduled) { %>
-                      <span class="appointment-origin-note">Esta cita ya es la nueva fecha generada automáticamente. Si necesita otro cambio, contacte al médico o administrador.</span>
-                    <% } %>
-                  </div>
-
-                  <div class="appointments-actions-row">
-                    <% if (a.status === 'pendiente' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                      <form
-                        method="post"
-                        action="/citas/<%= a.id %>/completar"
-                        class="inline-form"
-                        data-confirm="¿Marcar esta cita como completada?"
-                      >
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-secondary action-btn" data-loading-text="Marcando..."><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar</button>
-                      </form>
-                    <% } %>
-
-                    <% if (a.status === 'pendiente' && currentUser.role === 'paciente' && !a.is_auto_rescheduled) { %>
-                      <form
-                        method="post"
-                        action="/citas/<%= a.id %>/solicitar-reprogramacion"
-                        class="inline-form"
-                        data-confirm="¿Enviar una solicitud de reprogramación para esta cita?"
-                      >
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-request action-btn" data-loading-text="Enviando solicitud..."><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Solicitar reprogramación</button>
-                      </form>
-                    <% } %>
-
-                    <% if (a.status === 'solicitud_reprogramacion' && (currentUser.role === 'admin' || currentUser.role === 'medico')) { %>
-                      <form
-                        method="post"
-                        action="/citas/<%= a.id %>/aprobar-reprogramacion"
-                        class="inline-form"
-                        data-confirm="¿Aprobar esta reprogramación y generar una nueva cita automática?"
-                      >
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-approve action-btn" data-loading-text="Aprobando..."><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar reprogramación</button>
-                      </form>
-                    <% } %>
-
-                    <% if (a.status === 'pendiente') { %>
-                      <form
-                        method="post"
-                        action="/citas/<%= a.id %>/cancelar"
-                        class="inline-form"
-                      >
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-danger btn-danger-soft action-btn" data-loading-text="Cancelando..."><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita</button>
-                      </form>
-                    <% } %>
-
-                    <% if (currentUser.role === 'admin' || currentUser.role === 'medico') { %>
-                      <details class="appointment-edit-inline">
-                        <summary class="btn btn-edit action-btn"><img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Editar</summary>
-                        <form
-                          method="post"
-                          action="/citas/<%= a.id %>/editar"
-                          class="appointment-edit-form"
-                          data-confirm="¿Guardar el nuevo estado de la cita?"
-                        >
-                          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                          <label for="status-<%= a.id %>" class="helper">Nuevo estado</label>
-                          <select id="status-<%= a.id %>" name="status" required>
-                            <option value="pendiente" <%= a.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
-                            <option value="completada" <%= a.status === 'completada' ? 'selected' : '' %>>Completada</option>
-                            <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
-                            <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
-                          </select>
-                          <button type="submit" class="btn action-btn" data-loading-text="Guardando..."><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar</button>
-                        </form>
-                      </details>
-                    <% } %>
-                  </div>
-                </div>
-              </td>
+              <th class="sortable-header">Fecha</th>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th class="sortable-header">Médico</th>
+              <th>Especialidad</th>
+              <th>Consultorio</th>
+              <th class="sortable-header">Estado</th>
+              <th>Acciones</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% appointments.forEach((a) => { %>
+              <tr class="<%= a.appointment_date === todayIso ? 'row-today' : '' %>">
+                <td>
+                  <%= dmy(a.appointment_date) %>
+                  <% if (a.appointment_date === todayIso) { %>
+                    <span class="status status-pendiente" style="font-size:0.68rem;padding:0.12rem 0.4rem;margin-left:4px">Hoy</span>
+                  <% } %>
+                </td>
+                <td><%= a.start_time %>–<%= a.end_time %></td>
+                <td><%= a.patient_name %></td>
+                <td>
+                  <div class="td-name">
+                    <span class="td-avatar"><%= a.doctor_name.charAt(0).toUpperCase() %></span>
+                    <%= a.doctor_name %>
+                  </div>
+                </td>
+                <td><%= a.specialty %></td>
+                <td><%= a.doctor_office || '-' %></td>
+                <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
+                <td class="appointments-actions-cell">
+                  <div class="tbl-actions">
+                    <% if (a.status === 'pendiente') { %>
+                      <form method="post" action="/citas/<%= a.id %>/completar" class="inline-form" data-confirm="¿Marcar como completada?">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn-tbl btn-tbl-complete" data-loading-text="...">
+                          <img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Completar
+                        </button>
+                      </form>
+                    <% } %>
+                    <% if (a.status === 'solicitud_reprogramacion') { %>
+                      <form method="post" action="/citas/<%= a.id %>/aprobar-reprogramacion" class="inline-form" data-confirm="¿Aprobar esta reprogramación?">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn-tbl btn-tbl-approve" data-loading-text="...">
+                          <img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Aprobar
+                        </button>
+                      </form>
+                    <% } %>
+                    <% if (a.status === 'pendiente' || currentUser.role === 'admin') { %>
+                      <div class="tbl-dropdown" data-dropdown>
+                        <button type="button" class="tbl-dropdown-toggle" aria-label="Más acciones" aria-expanded="false">⋯</button>
+                        <div class="tbl-dropdown-menu" role="menu">
+                          <% if (a.is_auto_rescheduled) { %>
+                            <span class="appointment-origin-badge" style="margin:0.3rem 0.5rem 0.1rem;display:block">Reprogramación automática</span>
+                          <% } %>
+                          <% if (a.status === 'pendiente') { %>
+                            <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form" style="width:100%">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <button type="submit" class="tbl-dropdown-item" style="color:#952222" data-loading-text="Cancelando...">
+                                <img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita
+                              </button>
+                            </form>
+                          <% } %>
+                          <div class="tbl-dropdown-sep"></div>
+                          <details class="appointment-edit-inline" style="width:100%">
+                            <summary class="tbl-dropdown-item">
+                              <img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Cambiar estado
+                            </summary>
+                            <form method="post" action="/citas/<%= a.id %>/editar" class="tbl-edit-form" data-confirm="¿Guardar nuevo estado?">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <select id="status-<%= a.id %>" name="status" required>
+                                <option value="pendiente" <%= a.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
+                                <option value="completada" <%= a.status === 'completada' ? 'selected' : '' %>>Completada</option>
+                                <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
+                                <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
+                              </select>
+                              <button type="submit" class="btn-tbl btn-tbl-approve" data-loading-text="Guardando...">
+                                <img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar
+                              </button>
+                            </form>
+                          </details>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
       </div>
     </div>
+    <% } %>
   <% } %>
 </section>
 

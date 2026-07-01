@@ -1,66 +1,201 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
+<%
+  const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const dayColors = ['#e8e5fd', '#deeffe', '#d9f5e8', '#fff4e0', '#fde8e8', '#e8f4fb', '#f5f0ff'];
+  const dayDots   = ['#8b7ef5', '#2fa8d9', '#28a262', '#d98c1a', '#d94444', '#0d7fa3', '#7c5fc0'];
+  const scheduleRows = Array.isArray(schedules) ? schedules : [];
 
-<section class="page-hero card">
-  <img src="/img/hero-schedule.svg" alt="Ilustracion de horarios medicos" />
-  <div class="page-hero-copy">
-    <span class="page-kicker"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios</span>
-    <h2>Defina turnos claros y organizados para cada médico</h2>
-    <p>Configure bloques de atención por día para evitar conflictos de reserva.</p>
+  // Agrupar horarios por día
+  const byDay = {};
+  scheduleRows.forEach((s) => {
+    if (!byDay[s.day_of_week]) byDay[s.day_of_week] = [];
+    byDay[s.day_of_week].push(s);
+  });
+  const sortedDays = Object.keys(byDay).map(Number).sort((a, b) => (a === 0 ? 7 : a) - (b === 0 ? 7 : b));
+%>
+
+<!-- HERO con datos del médico -->
+<section class="mgmt-hero card">
+  <div class="mgmt-hero-copy">
+    <a href="/medicos" class="auth-home-link" style="margin-bottom:0.75rem;display:inline-flex">
+      <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver a médicos
+    </a>
+    <span class="page-kicker"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Gestión de horarios</span>
+    <h2><%= doctor.full_name %></h2>
+    <div class="mgmt-hero-stats">
+      <div class="mgmt-hero-stat">
+        <strong><%= doctor.specialty %></strong>
+        <span>especialidad</span>
+      </div>
+      <% if (doctor.office) { %>
+      <div class="mgmt-hero-stat">
+        <strong>Consultorio <%= doctor.office %></strong>
+        <span>ubicación</span>
+      </div>
+      <% } %>
+      <div class="mgmt-hero-stat">
+        <strong><%= scheduleRows.length %></strong>
+        <span>turno(s) configurado(s)</span>
+      </div>
+    </div>
+  </div>
+  <div class="mgmt-hero-media">
+    <img src="/img/hero-schedule.svg" alt="Horarios del médico" />
   </div>
 </section>
 
-<section class="card">
-  <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios - <%= doctor.full_name %></h2>
-  <form method="post" action="/medicos/<%= doctor.id %>/horarios" class="grid-form two-cols register-form">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+<!-- LAYOUT: formulario izquierdo + horarios activos derecho -->
+<div class="mgmt-layout">
 
-    <label><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Día de semana</label>
-    <select name="day_of_week" required>
-      <option value="1">Lunes</option>
-      <option value="2">Martes</option>
-      <option value="3">Miércoles</option>
-      <option value="4">Jueves</option>
-      <option value="5">Viernes</option>
-      <option value="6">Sábado</option>
-      <option value="0">Domingo</option>
-    </select>
+  <!-- PANEL IZQUIERDO: Agregar turno -->
+  <aside class="mgmt-sidebar">
+    <div class="card mgmt-form-card">
+      <div class="mgmt-form-header">
+        <span class="page-kicker"><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Nuevo turno</span>
+        <h3>Agregar horario</h3>
+        <p>Define un bloque de atención para un día específico de la semana.</p>
+      </div>
 
-    <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Hora inicio</label>
-    <input type="time" name="start_time" required />
+      <form method="post" action="/medicos/<%= doctor.id %>/horarios" class="reg-form" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-    <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Hora fin</label>
-    <input type="time" name="end_time" required />
+        <div class="reg-field">
+          <label for="sch-day">Día de la semana <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-calendar.svg" alt="" class="reg-input-icon" />
+            <select id="sch-day" name="day_of_week" class="reg-input" required>
+              <option value="1">Lunes</option>
+              <option value="2">Martes</option>
+              <option value="3">Miércoles</option>
+              <option value="4">Jueves</option>
+              <option value="5">Viernes</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </div>
+        </div>
 
-    <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Duración del bloque (min)</label>
-    <input type="number" name="slot_minutes" value="30" min="10" max="120" required />
+        <div class="reg-field-row">
+          <div class="reg-field">
+            <label for="sch-start">Hora inicio <span class="reg-required">*</span></label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-clock.svg" alt="" class="reg-input-icon" />
+              <input type="time" id="sch-start" name="start_time" class="reg-input" required />
+            </div>
+          </div>
+          <div class="reg-field">
+            <label for="sch-end">Hora fin <span class="reg-required">*</span></label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-clock.svg" alt="" class="reg-input-icon" />
+              <input type="time" id="sch-end" name="end_time" class="reg-input" required />
+            </div>
+          </div>
+        </div>
 
-    <button type="submit" class="btn auth-submit">Agregar horario</button>
-  </form>
-</section>
+        <div class="reg-field">
+          <label for="sch-slot">Duración del bloque <span class="reg-required">*</span></label>
+          <div class="sch-slot-pills" role="group" aria-label="Duración del bloque en minutos">
+            <% [10, 15, 20, 30, 45, 60].forEach((min) => { %>
+              <label class="sch-slot-pill">
+                <input type="radio" name="slot_minutes" value="<%= min %>" <%= min === 30 ? 'checked' : '' %> required />
+                <span><%= min %> min</span>
+              </label>
+            <% }) %>
+          </div>
+          <input type="hidden" id="sch-slot-hidden" name="slot_minutes_fallback" value="30" />
+          <span class="reg-hint">Tiempo por paciente en cada turno</span>
+        </div>
 
-<section class="card">
-  <h3><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Horarios activos</h3>
-  <table>
-    <thead>
-      <tr>
-        <th><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Día</th>
-        <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Inicio</th>
-        <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fin</th>
-        <th><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Bloque</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% schedules.forEach((s) => { %>
-        <tr>
-          <td><%= ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][s.day_of_week] %></td>
-          <td><%= s.start_time %></td>
-          <td><%= s.end_time %></td>
-          <td><%= s.slot_minutes %> min</td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</section>
+        <button type="submit" class="btn auth-submit reg-submit-btn" style="width:100%;justify-content:center;margin-top:0.25rem">
+          <img src="/img/icon-clock.svg" alt="" class="inline-icon" />Agregar turno
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- PANEL DERECHO: Horarios activos -->
+  <section class="mgmt-main">
+    <div class="card mgmt-list-card">
+      <div class="mgmt-list-header" style="margin-bottom:1rem">
+        <div>
+          <h3><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Horarios activos</h3>
+          <p class="mgmt-list-sub"><%= scheduleRows.length %> turno(s) configurado(s) para esta semana</p>
+        </div>
+      </div>
+
+      <% if (!scheduleRows.length) { %>
+        <div class="tbl-empty">
+          <div class="tbl-empty-icon"><img src="/img/icon-clock.svg" alt="" /></div>
+          <strong>Sin horarios configurados</strong>
+          <p>Agrega el primer turno de atención usando el formulario.</p>
+        </div>
+      <% } else { %>
+        <!-- Vista agrupada por día -->
+        <div class="sch-days-grid">
+          <% sortedDays.forEach((day) => { %>
+            <div class="sch-day-group">
+              <div class="sch-day-header" style="background:<%= dayColors[day] %>20;border-left:3px solid <%= dayDots[day] %>">
+                <span class="sch-day-dot" style="background:<%= dayDots[day] %>"></span>
+                <strong><%= dayNames[day] %></strong>
+                <span class="sch-day-count"><%= byDay[day].length %> turno(s)</span>
+              </div>
+              <% byDay[day].forEach((s) => { %>
+                <div class="sch-slot-row">
+                  <div class="sch-slot-time">
+                    <img src="/img/icon-clock.svg" alt="" />
+                    <span><%= s.start_time %> — <%= s.end_time %></span>
+                  </div>
+                  <div class="sch-slot-badge">
+                    <span class="sch-slot-chip"><%= s.slot_minutes %> min / paciente</span>
+                  </div>
+                  <% if (s.id) { %>
+                    <form method="post" action="/medicos/<%= doctor.id %>/horarios/<%= s.id %>/eliminar" class="inline-form"
+                      data-confirm="¿Eliminar este turno?">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <button type="submit" class="sch-delete-btn" aria-label="Eliminar turno">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              <% }) %>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Vista tabla compacta (alternativa) -->
+        <details class="sch-table-toggle">
+          <summary>Ver como tabla</summary>
+          <div class="table-shell" style="margin-top:0.75rem">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable-header">Día</th>
+                  <th class="sortable-header">Inicio</th>
+                  <th class="sortable-header">Fin</th>
+                  <th>Bloque</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% scheduleRows.forEach((s) => { %>
+                  <tr>
+                    <td>
+                      <span class="sch-day-dot-inline" style="background:<%= dayDots[s.day_of_week] %>"></span>
+                      <%= dayNames[s.day_of_week] %>
+                    </td>
+                    <td><%= s.start_time %></td>
+                    <td><%= s.end_time %></td>
+                    <td><span class="sch-slot-chip"><%= s.slot_minutes %> min</span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      <% } %>
+    </div>
+  </section>
+</div>
 
 <%- include('../partials/foot') %>

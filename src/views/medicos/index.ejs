@@ -6,82 +6,180 @@
   const activeSpecialty = typeof selectedSpecialty === 'string' ? selectedSpecialty : '';
 %>
 
-<section class="page-hero card page-hero-doctors">
-  <img src="/img/hero-doctors.svg" alt="Ilustracion de gestion de medicos" />
-  <div class="page-hero-copy">
+<!-- HERO -->
+<section class="mgmt-hero card">
+  <div class="mgmt-hero-copy">
     <span class="page-kicker"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestión médica</span>
-    <h2>Organiza especialistas, horarios y disponibilidad clínica</h2>
-    <p>Controle la estructura médica del policlínico con una interfaz simple y profesional.</p>
+    <h2>Médicos y especialistas del policlínico</h2>
+    <p>Registra nuevos médicos, consulta el equipo activo y gestiona sus horarios de atención.</p>
+    <div class="mgmt-hero-stats">
+      <div class="mgmt-hero-stat">
+        <strong><%= doctorRows.length %></strong>
+        <span><%= activeSpecialty ? `en "${activeSpecialty}"` : 'médicos registrados' %></span>
+      </div>
+      <div class="mgmt-hero-stat">
+        <strong><%= specialtyOptions.length %></strong>
+        <span>especialidades activas</span>
+      </div>
+    </div>
+  </div>
+  <div class="mgmt-hero-media">
+    <img src="/img/hero-doctors.svg" alt="Gestión de médicos" />
   </div>
 </section>
 
-<section class="card doctors-form-card">
-  <h2><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Gestión de Médicos</h2>
-  <form method="post" action="/medicos" class="grid-form two-cols register-form">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-    <label><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre completo</label>
-    <input type="text" name="full_name" required />
+<!-- LAYOUT: formulario izquierdo + listado derecho -->
+<div class="mgmt-layout">
 
-    <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo</label>
-    <input type="email" name="email" required />
+  <!-- PANEL IZQUIERDO: Formulario registro -->
+  <aside class="mgmt-sidebar">
+    <div class="card mgmt-form-card">
+      <div class="mgmt-form-header">
+        <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nuevo médico</span>
+        <h3>Registrar especialista</h3>
+        <p>Completa los datos del médico para añadirlo al sistema.</p>
+      </div>
 
-    <label><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Especialidad</label>
-    <input type="text" name="specialty" required />
+      <form method="post" action="/medicos" class="reg-form" id="doctorForm" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-    <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Número CMP</label>
-    <input type="text" name="license_number" required />
+        <div class="reg-field">
+          <label for="doc-full_name">Nombre completo <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-user.svg" alt="" class="reg-input-icon" />
+            <input type="text" id="doc-full_name" name="full_name"
+              placeholder="Dr. Nombre Apellido" class="reg-input" required autocomplete="name" />
+          </div>
+        </div>
 
-    <label><img src="/img/icon-home.svg" alt="" class="inline-icon" />Consultorio</label>
-    <input type="text" name="office" />
+        <div class="reg-field">
+          <label for="doc-email">Correo electrónico <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-mail.svg" alt="" class="reg-input-icon" />
+            <input type="email" id="doc-email" name="email"
+              placeholder="medico@policlinico.pe" class="reg-input" required autocomplete="email" />
+          </div>
+        </div>
 
-    <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña inicial</label>
-    <input type="text" name="password" placeholder="Medico123*" />
+        <div class="reg-field">
+          <label for="doc-specialty">Especialidad <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-doctor.svg" alt="" class="reg-input-icon" />
+            <input type="text" id="doc-specialty" name="specialty"
+              placeholder="Ej. Cardiología" class="reg-input" required
+              list="specialty-suggestions" />
+            <datalist id="specialty-suggestions">
+              <% specialtyOptions.forEach((s) => { %><option value="<%= s %>"><% }) %>
+            </datalist>
+          </div>
+          <span class="reg-hint">Puedes elegir una existente o escribir una nueva</span>
+        </div>
 
-    <button type="submit" class="btn auth-submit">Registrar Médico</button>
-  </form>
-</section>
+        <div class="reg-field-row">
+          <div class="reg-field">
+            <label for="doc-license">CMP <span class="reg-required">*</span></label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-clipboard.svg" alt="" class="reg-input-icon" />
+              <input type="text" id="doc-license" name="license_number"
+                placeholder="CMP-00000" class="reg-input" required />
+            </div>
+          </div>
+          <div class="reg-field">
+            <label for="doc-office">Consultorio</label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-home.svg" alt="" class="reg-input-icon" />
+              <input type="text" id="doc-office" name="office"
+                placeholder="Ej. 101" class="reg-input" />
+            </div>
+          </div>
+        </div>
 
-<section class="card doctors-list-card">
-  <h3><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Listado de Médicos</h3>
-  <form method="get" action="/medicos" class="grid-form two-cols register-form" style="margin-bottom: 1rem;">
-    <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Filtrar por especialidad</label>
-    <select name="specialty">
-      <option value="">Todas</option>
-      <% specialtyOptions.forEach((specialty) => { %>
-        <option value="<%= specialty %>" <%= activeSpecialty === specialty ? 'selected' : '' %>><%= specialty %></option>
-      <% }) %>
-    </select>
+        <div class="reg-field">
+          <label for="doc-password">Contraseña inicial</label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-lock.svg" alt="" class="reg-input-icon" />
+            <input type="text" id="doc-password" name="password"
+              placeholder="Medico123*" class="reg-input" autocomplete="new-password" />
+          </div>
+          <span class="reg-hint">Si se deja vacío se usará la clave por defecto</span>
+        </div>
 
-    <button type="submit" class="btn btn-secondary">Aplicar filtro</button>
-  </form>
+        <button type="submit" class="btn auth-submit reg-submit-btn" style="width:100%;justify-content:center;margin-top:0.25rem">
+          <img src="/img/icon-user.svg" alt="" class="inline-icon" />Registrar médico
+        </button>
+      </form>
+    </div>
+  </aside>
 
-  <table>
-    <thead>
-      <tr>
-        <th><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre</th>
-        <th><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Especialidad</th>
-        <th><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />CMP</th>
-        <th><img src="/img/icon-home.svg" alt="" class="inline-icon" />Consultorio</th>
-        <th><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% doctorRows.forEach((doctor) => { %>
-        <tr>
-          <td><%= doctor.full_name %></td>
-          <td><%= doctor.specialty %></td>
-          <td><%= doctor.license_number %></td>
-          <td><%= doctor.office || '-' %></td>
-          <td><a class="btn btn-secondary" href="/medicos/<%= doctor.id %>/horarios">Gestionar</a></td>
-        </tr>
-      <% }) %>
+  <!-- PANEL DERECHO: Listado -->
+  <section class="mgmt-main">
+    <div class="card mgmt-list-card">
+      <div class="mgmt-list-header">
+        <div>
+          <h3><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Equipo médico</h3>
+          <p class="mgmt-list-sub">
+            <%= activeSpecialty
+              ? `Mostrando ${doctorRows.length} médico(s) en ${activeSpecialty}`
+              : `${doctorRows.length} médico(s) registrado(s)` %>
+          </p>
+        </div>
+
+        <!-- Filtro inline -->
+        <form method="get" action="/medicos" class="mgmt-filter-form">
+          <div class="reg-input-wrap" style="max-width:220px">
+            <img src="/img/icon-heart.svg" alt="" class="reg-input-icon" />
+            <select name="specialty" class="reg-input" onchange="this.form.submit()" style="padding-right:2rem">
+              <option value="">Todas las especialidades</option>
+              <% specialtyOptions.forEach((s) => { %>
+                <option value="<%= s %>" <%= activeSpecialty === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </div>
+          <% if (activeSpecialty) { %>
+            <a href="/medicos" class="mgmt-filter-clear">✕ Limpiar filtro</a>
+          <% } %>
+        </form>
+      </div>
+
       <% if (!doctorRows.length) { %>
-        <tr>
-          <td colspan="5" class="helper">No hay medicos para el filtro seleccionado.</td>
-        </tr>
+        <div class="tbl-empty">
+          <div class="tbl-empty-icon"><img src="/img/icon-doctor.svg" alt="" /></div>
+          <strong>Sin médicos registrados</strong>
+          <p><%= activeSpecialty ? `No hay médicos en "${activeSpecialty}". Prueba otra especialidad.` : 'Registra el primer médico usando el formulario.' %></p>
+        </div>
+      <% } else { %>
+        <!-- Cards de médicos (vista de tarjetas) -->
+        <div class="doctor-cards-grid">
+          <% doctorRows.forEach((doctor) => { %>
+            <article class="doctor-card">
+              <div class="doctor-card-avatar">
+                <%= doctor.full_name.split(' ').filter((_, i, a) => i === 0 || i === a.length - 1).map(w => w[0]).join('').toUpperCase().slice(0, 2) %>
+              </div>
+              <div class="doctor-card-info">
+                <strong class="doctor-card-name"><%= doctor.full_name %></strong>
+                <span class="doctor-card-specialty"><%= doctor.specialty %></span>
+                <div class="doctor-card-meta">
+                  <span class="doctor-card-meta-item">
+                    <img src="/img/icon-clipboard.svg" alt="" />
+                    <%= doctor.license_number %>
+                  </span>
+                  <% if (doctor.office) { %>
+                    <span class="doctor-card-meta-item">
+                      <img src="/img/icon-home.svg" alt="" />
+                      Consultorio <%= doctor.office %>
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+              <a href="/medicos/<%= doctor.id %>/horarios" class="doctor-card-action btn btn-secondary">
+                <img src="/img/icon-clock.svg" alt="" class="inline-icon" />Horarios
+              </a>
+            </article>
+          <% }) %>
+        </div>
       <% } %>
-    </tbody>
-  </table>
-</section>
+    </div>
+  </section>
+</div>
 
 <%- include('../partials/foot') %>

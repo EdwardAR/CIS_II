@@ -326,3 +326,38 @@ document.querySelectorAll('table').forEach((table) => {
     });
   });
 });
+
+/* ============================================================
+   DROPDOWN DE ACCIONES EN TABLA
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  function closeAllDropdowns(except) {
+    document.querySelectorAll('[data-dropdown].is-open').forEach((d) => {
+      if (d !== except) {
+        d.classList.remove('is-open');
+        const btn = d.querySelector('.tbl-dropdown-toggle');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  document.querySelectorAll('[data-dropdown]').forEach((dropdown) => {
+    const toggle = dropdown.querySelector('.tbl-dropdown-toggle');
+    if (!toggle) return;
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('is-open');
+      closeAllDropdowns(null);
+      if (!isOpen) {
+        dropdown.classList.add('is-open');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  document.addEventListener('click', () => closeAllDropdowns(null));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllDropdowns(null);
+  });
+});

@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { db } = require('../../config/db');
 
 const listDoctorsBaseQuery = `SELECT d.id, u.full_name, u.email, d.specialty, d.license_number, d.office

@@ -40,6 +40,7 @@ const authLimiter = rateLimit({
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
+  res.locals.currentPath = req.path;
   res.locals.formErrors = [];
   res.locals.flash = req.session.flash || null;
   res.locals.formatDateDmy = formatIsoDateToDmy;

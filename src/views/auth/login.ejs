@@ -1,89 +1,243 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="login-shell">
-  <article class="login-visual card login-visual-pro">
-    <div class="login-visual-media-wrap">
-      <img
-        src="/img/clinic-hero-1.jpg"
-        alt="Profesionales revisando informacion clinica"
-      />
-      <span class="login-badge">Acceso protegido</span>
-    </div>
+<section class="reg-shell">
 
-    <div class="login-visual-copy">
-      <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Plataforma clinica</span>
-      <h2>Gestione su policlinico con una experiencia profesional</h2>
-      <p>Inicie sesion para administrar agenda, atenciones y flujo medico con seguridad y trazabilidad.</p>
-
-      <div class="login-gallery" aria-label="Imagenes relacionadas con el contexto clinico">
-        <img
-          src="/img/clinic-team-2.jpg"
-          alt="Equipo medico en consulta"
-        />
-        <img
-          src="/img/clinic-tools-1.jpg"
-          alt="Instrumental y cuidado clinico"
-        />
-      </div>
-
-      <div class="login-tags">
-        <span>Agenda inteligente</span>
-        <span>Control por roles</span>
-        <span>Sesiones seguras</span>
-      </div>
-
-      <div class="login-trust-grid" aria-label="Beneficios del sistema">
-        <article>
-          <strong>+11</strong>
-          <p>Especialidades de referencia</p>
-        </article>
-        <article>
-          <strong>24/7</strong>
-          <p>Acceso web operativo</p>
-        </article>
-        <article>
-          <strong>100%</strong>
-          <p>Flujo centralizado de citas</p>
-        </article>
-      </div>
-    </div>
-  </article>
-
-  <article class="card auth-card auth-card-elevated auth-login-pro">
-    <div class="auth-header-actions">
-      <a href="/" class="auth-home-link">
+  <!-- SIDEBAR IZQUIERDO (mismo patrón que registro) -->
+  <aside class="reg-sidebar">
+    <div class="reg-sidebar-top">
+      <a href="/" class="auth-home-link reg-back-link">
         <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver al inicio
       </a>
     </div>
 
-    <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Inicio de sesion</span>
-    <h2>Bienvenido de nuevo</h2>
-    <p>Ingrese con su cuenta institucional para continuar en el sistema de gestion de citas.</p>
-
-    <div class="demo-credentials">
-      <h3>Acceso demo</h3>
-      <p><strong>Administrador:</strong> admin@policlinico.pe</p>
-      <p><strong>Clave:</strong> Admin123*</p>
+    <div class="reg-sidebar-hero">
+      <img src="/img/clinic-hero-1.jpg" alt="Profesionales revisando información clínica" class="reg-sidebar-img" />
+      <div class="reg-sidebar-overlay">
+        <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Policlínico San Juan Bautista</span>
+        <h2>Accede a tu plataforma clínica de manera segura</h2>
+      </div>
     </div>
 
-    <form method="post" action="/auth/login" class="grid-form auth-form">
+    <div class="reg-sidebar-body">
+      <p class="reg-sidebar-lead">Gestiona citas, agenda médica y administración desde un solo lugar con trazabilidad completa.</p>
+
+      <ul class="reg-benefits">
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--green">
+            <img src="/img/icon-calendar.svg" alt="" />
+          </span>
+          <div>
+            <strong>Agenda inteligente</strong>
+            <span>Reserva y gestiona citas en línea sin llamadas</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--blue">
+            <img src="/img/icon-shield.svg" alt="" />
+          </span>
+          <div>
+            <strong>Control por roles</strong>
+            <span>Acceso diferenciado para paciente, médico y admin</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--purple">
+            <img src="/img/icon-clock.svg" alt="" />
+          </span>
+          <div>
+            <strong>Recordatorios automáticos</strong>
+            <span>Notificaciones antes de cada cita programada</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--orange">
+            <img src="/img/icon-doctor.svg" alt="" />
+          </span>
+          <div>
+            <strong>+11 especialidades médicas</strong>
+            <span>Cardiología, pediatría, dermatología y más</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="reg-sidebar-stats">
+        <div class="reg-stat">
+          <strong>+11</strong>
+          <span>Especialidades</span>
+        </div>
+        <div class="reg-stat-divider"></div>
+        <div class="reg-stat">
+          <strong>24/7</strong>
+          <span>Acceso web</span>
+        </div>
+        <div class="reg-stat-divider"></div>
+        <div class="reg-stat">
+          <strong>3</strong>
+          <span>Roles</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- PANEL DERECHO DEL FORMULARIO -->
+  <main class="reg-form-panel card">
+
+    <div class="reg-form-header">
+      <span class="page-kicker"><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Inicio de sesión</span>
+      <h2>Bienvenido de nuevo</h2>
+      <p>Ingrese con su cuenta para continuar en el sistema.</p>
+    </div>
+
+    <!-- ACCESO RÁPIDO POR ROL -->
+    <div class="demo-roles">
+      <p class="demo-roles-label">Acceso demo — elige tu rol:</p>
+      <div class="demo-roles-grid">
+        <button type="button" class="demo-role-btn demo-role-admin"
+          data-email="admin@policlinico.pe"
+          data-password="Admin123*">
+          <span class="demo-role-icon">
+            <img src="/img/icon-shield.svg" alt="" />
+          </span>
+          <span class="demo-role-copy">
+            <strong>Administrador</strong>
+            <small>Control total del sistema</small>
+          </span>
+          <span class="demo-role-arrow">→</span>
+        </button>
+        <button type="button" class="demo-role-btn demo-role-medico"
+          data-email="ana.torres@policlinico.pe"
+          data-password="Admin123*">
+          <span class="demo-role-icon">
+            <img src="/img/icon-doctor.svg" alt="" />
+          </span>
+          <span class="demo-role-copy">
+            <strong>Médico</strong>
+            <small>Dra. Ana Torres · Medicina General</small>
+          </span>
+          <span class="demo-role-arrow">→</span>
+        </button>
+        <button type="button" class="demo-role-btn demo-role-paciente"
+          data-email="jose.quispe@pacientes.pe"
+          data-password="Admin123*">
+          <span class="demo-role-icon">
+            <img src="/img/icon-user.svg" alt="" />
+          </span>
+          <span class="demo-role-copy">
+            <strong>Paciente</strong>
+            <small>Jose Quispe · Cuenta demo</small>
+          </span>
+          <span class="demo-role-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="demo-roles-divider">
+      <span>o ingresa manualmente</span>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form method="post" action="/auth/login" class="reg-form" id="loginForm" novalidate>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>
-      <input type="email" name="email" placeholder="usuario@policlinico.pe" required />
 
-      <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña</label>
-      <input type="password" name="password" placeholder="••••••••" required />
+      <fieldset class="reg-fieldset login-fieldset">
+        <legend class="reg-legend">
+          <span class="reg-legend-num">
+            <img src="/img/icon-lock.svg" alt="" style="width:12px;height:12px;filter:brightness(0)invert(1)" />
+          </span>
+          Credenciales de acceso
+        </legend>
 
-      <button type="submit" class="btn auth-submit">Ingresar al sistema</button>
+        <div class="reg-field">
+          <label for="login-email">Correo electrónico <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-mail.svg" alt="" class="reg-input-icon" />
+            <input
+              type="email"
+              id="login-email"
+              name="email"
+              placeholder="usuario@policlinico.pe"
+              class="reg-input"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="reg-field" style="margin-top:0.7rem">
+          <label for="login-password">Contraseña <span class="reg-required">*</span></label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-lock.svg" alt="" class="reg-input-icon" />
+            <input
+              type="password"
+              id="login-password"
+              name="password"
+              placeholder="••••••••"
+              class="reg-input"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="password-toggle" aria-label="Mostrar contraseña" data-target="login-password">
+              <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-icon eye-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="btn auth-submit reg-submit-btn login-submit-full" id="loginSubmit">
+        <img src="/img/icon-lock.svg" alt="" class="inline-icon" />
+        Ingresar al sistema
+      </button>
     </form>
-    <div class="auth-register-cta">
+
+    <div class="reg-login-cta">
       <span class="helper">¿No tiene cuenta?</span>
-      <a href="/auth/register" class="btn btn-secondary auth-register-link">
-        <img src="/img/icon-user.svg" alt="" class="inline-icon" />Regístrese aquí
+      <a href="/auth/register" class="btn btn-secondary reg-login-link">
+        <img src="/img/icon-user.svg" alt="" class="inline-icon" />Registrarse como paciente
       </a>
     </div>
-  </article>
+  </main>
 </section>
+
+<script>
+  /* Toggle password */
+  document.querySelectorAll('.password-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var input = document.getElementById(this.dataset.target);
+      var isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      this.querySelector('.eye-show').style.display = isPassword ? 'none' : '';
+      this.querySelector('.eye-hide').style.display = isPassword ? '' : 'none';
+      this.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+  });
+
+  /* Demo role autocomplete */
+  document.querySelectorAll('.demo-role-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var emailInput    = document.getElementById('login-email');
+      var passwordInput = document.getElementById('login-password');
+
+      emailInput.value    = this.dataset.email;
+      passwordInput.value = this.dataset.password;
+
+      passwordInput.type = 'text';
+      var showBtn = document.querySelector('.password-toggle[data-target="login-password"]');
+      if (showBtn) {
+        showBtn.querySelector('.eye-show').style.display = 'none';
+        showBtn.querySelector('.eye-hide').style.display = '';
+        showBtn.setAttribute('aria-label', 'Ocultar contraseña');
+      }
+
+      document.querySelectorAll('.demo-role-btn').forEach(function(b) {
+        b.classList.remove('demo-role-btn--active');
+      });
+      btn.classList.add('demo-role-btn--active');
+
+      document.getElementById('loginSubmit').focus();
+    });
+  });
+</script>
 
 <%- include('../partials/foot') %>

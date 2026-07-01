@@ -1,20 +1,69 @@
-<nav class="main-nav">
-  <a href="/"><img src="/img/icon-home.svg" alt="" class="nav-icon" />Inicio</a>
-  <% if (currentUser.role === 'paciente') { %>
-    <a href="/pacientes/perfil"><img src="/img/icon-user.svg" alt="" class="nav-icon" />Mi Perfil</a>
-    <a href="/citas"><img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Mis Citas</a>
-  <% } %>
-  <% if (currentUser.role === 'medico') { %>
-    <a href="/medicos/mi-panel"><img src="/img/icon-doctor.svg" alt="" class="nav-icon" />Mi Panel Médico</a>
-    <a href="/citas"><img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Agenda</a>
-  <% } %>
-  <% if (currentUser.role === 'admin') { %>
-    <a href="/admin"><img src="/img/icon-shield.svg" alt="" class="nav-icon" />Panel Admin</a>
-    <a href="/medicos"><img src="/img/icon-doctor.svg" alt="" class="nav-icon" />Médicos</a>
-    <a href="/citas"><img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Citas</a>
-  <% } %>
-  <form method="post" action="/auth/logout" class="logout-form">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-    <button type="submit" class="btn btn-secondary"><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Cerrar sesión</button>
-  </form>
+<%
+  const navPath = typeof currentPath !== 'undefined' ? currentPath : '';
+  function isActive(href) {
+    if (href === '/') return navPath === '/';
+    return navPath.startsWith(href);
+  }
+%>
+<nav class="main-nav" id="mainNav">
+  <button class="nav-hamburger" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="nav-links" id="navLinks">
+    <a href="/" class="<%= isActive('/') ? 'nav-active' : '' %>">
+      <img src="/img/icon-home.svg" alt="" class="nav-icon" />Inicio
+    </a>
+
+    <% if (currentUser.role === 'paciente') { %>
+      <a href="/pacientes/perfil" class="<%= isActive('/pacientes') ? 'nav-active' : '' %>">
+        <img src="/img/icon-user.svg" alt="" class="nav-icon" />Mi Perfil
+      </a>
+      <a href="/citas" class="<%= isActive('/citas') ? 'nav-active' : '' %>">
+        <img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Mis Citas
+      </a>
+    <% } %>
+
+    <% if (currentUser.role === 'medico') { %>
+      <a href="/medicos/mi-panel" class="<%= isActive('/medicos/mi-panel') ? 'nav-active' : '' %>">
+        <img src="/img/icon-doctor.svg" alt="" class="nav-icon" />Mi Panel
+      </a>
+      <a href="/citas" class="<%= isActive('/citas') ? 'nav-active' : '' %>">
+        <img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Agenda
+      </a>
+    <% } %>
+
+    <% if (currentUser.role === 'admin') { %>
+      <a href="/admin" class="<%= isActive('/admin') ? 'nav-active' : '' %>">
+        <img src="/img/icon-shield.svg" alt="" class="nav-icon" />Panel Admin
+      </a>
+      <a href="/medicos" class="<%= isActive('/medicos') && !isActive('/medicos/mi-panel') ? 'nav-active' : '' %>">
+        <img src="/img/icon-doctor.svg" alt="" class="nav-icon" />Médicos
+      </a>
+      <a href="/citas" class="<%= isActive('/citas') ? 'nav-active' : '' %>">
+        <img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Citas
+      </a>
+    <% } %>
+
+    <div class="nav-logout-wrap">
+      <form method="post" action="/auth/logout" class="logout-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn btn-danger-soft nav-logout-btn">
+          <img src="/img/icon-lock.svg" alt="" class="inline-icon" />Cerrar sesión
+        </button>
+      </form>
+    </div>
+  </div>
 </nav>
+
+<script>
+  (function() {
+    var toggle = document.getElementById('navToggle');
+    var links  = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    toggle.addEventListener('click', function() {
+      var open = links.classList.toggle('nav-links--open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+  })();
+</script>

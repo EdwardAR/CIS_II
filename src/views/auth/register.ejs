@@ -1,115 +1,396 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="register-shell">
-  <article class="card register-visual-card">
-    <div class="register-visual-main">
-      <img src="/img/clinic-hero-1.jpg" alt="Equipo clínico coordinando atención y registros" />
-      <div class="register-visual-overlay">
-        <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Alta guiada</span>
-        <h2>Registrar un paciente debe sentirse claro, confiable y rápido</h2>
-        <p>La pantalla de alta está pensada para orientar al paciente con una lectura limpia y visualmente cuidada.</p>
-      </div>
-    </div>
+<%
+  function fieldError(field) {
+    if (!formErrors || !formErrors.length) return '';
+    const e = formErrors.find(function(err) { return err.path === field; });
+    return e ? e.msg : '';
+  }
+  function hasError(field) { return fieldError(field) ? 'field-invalid' : ''; }
+%>
 
-    <div class="register-visual-grid">
-      <article class="register-mini-card">
-        <img src="/img/clinic-team-2.jpg" alt="Personal médico atendiendo a un paciente" />
-        <div>
-          <strong>Atención humana</strong>
-          <p>Conecta el registro con la experiencia clínica real.</p>
-        </div>
-      </article>
+<section class="reg-shell">
 
-      <article class="register-mini-card">
-        <img src="/img/clinic-tools-1.jpg" alt="Instrumental clínico y cuidado profesional" />
-        <div>
-          <strong>Proceso ordenado</strong>
-          <p>Refuerza el tono profesional del sistema.</p>
-        </div>
-      </article>
-    </div>
-  </article>
-
-  <article class="card auth-card auth-card-wide auth-register-pro auth-register-panel">
-    <div class="auth-header-actions">
-      <a href="/" class="auth-home-link">
+  <!-- PANEL IZQUIERDO -->
+  <aside class="reg-sidebar">
+    <div class="reg-sidebar-top">
+      <a href="/" class="auth-home-link reg-back-link">
         <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver al inicio
       </a>
     </div>
 
-    <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Alta de paciente</span>
-    <h2>Registro de Paciente</h2>
-    <p>Complete sus datos para reservar citas médicas en línea.</p>
-
-    <div class="register-promo-strip">
-      <article>
-        <strong>Acceso simple</strong>
-        <span>Formulario claro y directo</span>
-      </article>
-      <article>
-        <strong>Datos seguros</strong>
-        <span>Información centralizada</span>
-      </article>
-      <article>
-        <strong>Listo para citas</strong>
-        <span>Alta conectada al flujo clínico</span>
-      </article>
+    <div class="reg-sidebar-hero">
+      <img src="/img/clinic-hero-1.jpg" alt="Equipo clínico en consulta" class="reg-sidebar-img" />
+      <div class="reg-sidebar-overlay">
+        <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Policlínico San Juan Bautista</span>
+        <h2>Tu salud, bien gestionada desde el primer día</h2>
+      </div>
     </div>
 
-    <form method="post" action="/auth/register" class="grid-form two-cols register-form register-form-pro">
+    <div class="reg-sidebar-body">
+      <p class="reg-sidebar-lead">Únete a cientos de pacientes que ya gestionan sus citas médicas en línea de forma rápida y segura.</p>
+
+      <ul class="reg-benefits">
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--green">
+            <img src="/img/icon-calendar.svg" alt="" />
+          </span>
+          <div>
+            <strong>Reserva citas en segundos</strong>
+            <span>Elige especialidad, médico y horario sin llamadas</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--blue">
+            <img src="/img/icon-clock.svg" alt="" />
+          </span>
+          <div>
+            <strong>Recordatorios automáticos</strong>
+            <span>Te avisamos antes de tu cita para que no la olvides</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--purple">
+            <img src="/img/icon-shield.svg" alt="" />
+          </span>
+          <div>
+            <strong>Historial siempre disponible</strong>
+            <span>Revisa tus atenciones pasadas en cualquier momento</span>
+          </div>
+        </li>
+        <li class="reg-benefit-item">
+          <span class="reg-benefit-icon reg-benefit-icon--orange">
+            <img src="/img/icon-doctor.svg" alt="" />
+          </span>
+          <div>
+            <strong>+11 especialidades médicas</strong>
+            <span>Cardiología, pediatría, dermatología y más</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="reg-sidebar-stats">
+        <div class="reg-stat">
+          <strong>Gratis</strong>
+          <span>Registro sin costo</span>
+        </div>
+        <div class="reg-stat-divider"></div>
+        <div class="reg-stat">
+          <strong>2 min</strong>
+          <span>Tiempo de alta</span>
+        </div>
+        <div class="reg-stat-divider"></div>
+        <div class="reg-stat">
+          <strong>100%</strong>
+          <span>En línea</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- FORMULARIO DERECHO -->
+  <main class="reg-form-panel card">
+
+    <div class="reg-form-header">
+      <span class="page-kicker"><img src="/img/icon-user.svg" alt="" class="inline-icon" />Alta de paciente</span>
+      <h2>Crear cuenta de paciente</h2>
+      <p>Completa tus datos en menos de 2 minutos y reserva tu primera cita hoy.</p>
+    </div>
+
+    <form
+      method="post"
+      action="/auth/register"
+      class="reg-form"
+      id="registerForm"
+      novalidate
+    >
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-      <%
-        function fieldError(field) {
-          if (!formErrors || !formErrors.length) return '';
-          const e = formErrors.find(function(err) { return err.path === field; });
-          return e ? e.msg : '';
-        }
-        function hasError(field) { return fieldError(field) ? 'field-invalid' : ''; }
-      %>
+      <!-- GRUPO 1: Identidad -->
+      <fieldset class="reg-fieldset">
+        <legend class="reg-legend">
+          <span class="reg-legend-num">1</span>
+          Información personal
+        </legend>
 
-      <label><img src="/img/icon-user.svg" alt="" class="inline-icon" />Nombre completo</label>
-      <input type="text" name="full_name" placeholder="Nombre y apellidos" class="<%= hasError('full_name') %>" required minlength="5" title="Debe contener solo letras y espacios, mínimo 5 caracteres." />
-      <% if (fieldError('full_name')) { %><span class="field-error"><%= fieldError('full_name') %></span><% } %>
+        <div class="reg-field-row">
+          <div class="reg-field">
+            <label for="reg-full_name">
+              Nombre completo <span class="reg-required">*</span>
+            </label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-user.svg" alt="" class="reg-input-icon" />
+              <input
+                type="text"
+                id="reg-full_name"
+                name="full_name"
+                placeholder="Ej. María García López"
+                class="reg-input <%= hasError('full_name') %>"
+                autocomplete="name"
+                required
+                minlength="5"
+              />
+            </div>
+            <% if (fieldError('full_name')) { %>
+              <span class="field-error"><%= fieldError('full_name') %></span>
+            <% } %>
+          </div>
 
-      <label><img src="/img/icon-mail.svg" alt="" class="inline-icon" />Correo electrónico</label>
-      <input type="email" name="email" placeholder="usuario@correo.com" class="<%= hasError('email') %>" required title="Ingrese un correo válido, ejemplo: usuario@correo.com" />
-      <% if (fieldError('email')) { %><span class="field-error"><%= fieldError('email') %></span><% } %>
+          <div class="reg-field">
+            <label for="reg-dni">
+              DNI <span class="reg-required">*</span>
+            </label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-clipboard.svg" alt="" class="reg-input-icon" />
+              <input
+                type="text"
+                id="reg-dni"
+                name="dni"
+                placeholder="12345678"
+                class="reg-input <%= hasError('dni') %>"
+                autocomplete="off"
+                required
+                pattern="\d{8}"
+                inputmode="numeric"
+                maxlength="8"
+              />
+            </div>
+            <% if (fieldError('dni')) { %>
+              <span class="field-error"><%= fieldError('dni') %></span>
+            <% } else { %>
+              <span class="reg-hint">8 dígitos numéricos</span>
+            <% } %>
+          </div>
+        </div>
 
-      <label><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Contraseña</label>
-      <input type="password" name="password" placeholder="Cree una contraseña segura" class="<%= hasError('password') %>" required minlength="8" title="Mínimo 8 caracteres, debe incluir mayúscula, número y carácter especial." autocomplete="new-password" />
-      <% if (fieldError('password')) { %><span class="field-error"><%= fieldError('password') %></span><% } %>
+        <div class="reg-field-row">
+          <div class="reg-field">
+            <label for="reg-birth_date">
+              Fecha de nacimiento
+            </label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-clock.svg" alt="" class="reg-input-icon" />
+              <input
+                type="date"
+                id="reg-birth_date"
+                name="birth_date"
+                class="reg-input <%= hasError('birth_date') %>"
+                autocomplete="bday"
+              />
+            </div>
+            <% if (fieldError('birth_date')) { %>
+              <span class="field-error"><%= fieldError('birth_date') %></span>
+            <% } %>
+          </div>
 
-      <label><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />DNI</label>
-      <input type="text" name="dni" placeholder="Número de documento" class="<%= hasError('dni') %>" required pattern="\d{8}" inputmode="numeric" maxlength="8" minlength="8" title="Debe tener exactamente 8 dígitos numéricos." />
-      <% if (fieldError('dni')) { %><span class="field-error"><%= fieldError('dni') %></span><% } %>
+          <div class="reg-field">
+            <label for="reg-phone">
+              Teléfono <span class="reg-required">*</span>
+            </label>
+            <div class="reg-input-wrap">
+              <img src="/img/icon-heart.svg" alt="" class="reg-input-icon" />
+              <input
+                type="tel"
+                id="reg-phone"
+                name="phone"
+                placeholder="9XXXXXXXX"
+                class="reg-input <%= hasError('phone') %>"
+                autocomplete="tel"
+                required
+                pattern="9\d{8}"
+                inputmode="numeric"
+                maxlength="9"
+              />
+            </div>
+            <% if (fieldError('phone')) { %>
+              <span class="field-error"><%= fieldError('phone') %></span>
+            <% } else { %>
+              <span class="reg-hint">Empieza con 9, 9 dígitos</span>
+            <% } %>
+          </div>
+        </div>
 
-      <label><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Teléfono</label>
-      <input type="tel" name="phone" placeholder="Número de contacto" class="<%= hasError('phone') %>" required pattern="9\d{8}" inputmode="numeric" maxlength="9" title="Debe tener 9 dígitos y comenzar con 9." />
-      <% if (fieldError('phone')) { %><span class="field-error"><%= fieldError('phone') %></span><% } %>
+        <div class="reg-field">
+          <label for="reg-address">Dirección</label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-home.svg" alt="" class="reg-input-icon" />
+            <input
+              type="text"
+              id="reg-address"
+              name="address"
+              placeholder="Av. Ejemplo 123, Lima"
+              class="reg-input"
+              autocomplete="street-address"
+            />
+          </div>
+        </div>
+      </fieldset>
 
-      <label><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Fecha de nacimiento</label>
-      <input type="date" name="birth_date" class="<%= hasError('birth_date') %>" />
-      <% if (fieldError('birth_date')) { %><span class="field-error"><%= fieldError('birth_date') %></span><% } %>
+      <!-- GRUPO 2: Acceso -->
+      <fieldset class="reg-fieldset">
+        <legend class="reg-legend">
+          <span class="reg-legend-num">2</span>
+          Datos de acceso
+        </legend>
 
-      <label><img src="/img/icon-home.svg" alt="" class="inline-icon" />Dirección</label>
-      <input type="text" name="address" placeholder="Dirección domiciliaria" />
+        <div class="reg-field">
+          <label for="reg-email">
+            Correo electrónico <span class="reg-required">*</span>
+          </label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-mail.svg" alt="" class="reg-input-icon" />
+            <input
+              type="email"
+              id="reg-email"
+              name="email"
+              placeholder="usuario@correo.com"
+              class="reg-input <%= hasError('email') %>"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <% if (fieldError('email')) { %>
+            <span class="field-error"><%= fieldError('email') %></span>
+          <% } %>
+        </div>
 
-      <label><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Contacto de emergencia</label>
-      <input type="text" name="emergency_contact" placeholder="Nombre y teléfono" class="<%= hasError('emergency_contact') %>" />
-      <% if (fieldError('emergency_contact')) { %><span class="field-error"><%= fieldError('emergency_contact') %></span><% } %>
+        <div class="reg-field">
+          <label for="reg-password">
+            Contraseña <span class="reg-required">*</span>
+          </label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-lock.svg" alt="" class="reg-input-icon" />
+            <input
+              type="password"
+              id="reg-password"
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              class="reg-input <%= hasError('password') %>"
+              autocomplete="new-password"
+              required
+              minlength="8"
+            />
+            <button type="button" class="password-toggle" aria-label="Mostrar contraseña" data-target="reg-password">
+              <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-icon eye-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <% if (fieldError('password')) { %>
+            <span class="field-error"><%= fieldError('password') %></span>
+          <% } %>
+          <!-- Indicador de fortaleza -->
+          <div class="password-strength" id="passwordStrength" aria-live="polite">
+            <div class="password-strength-bar">
+              <span class="password-strength-fill" id="strengthFill"></span>
+            </div>
+            <span class="password-strength-label" id="strengthLabel"></span>
+          </div>
+          <div class="password-rules" id="passwordRules">
+            <span class="pw-rule" id="rule-length"><span class="pw-rule-dot"></span>Mínimo 8 caracteres</span>
+            <span class="pw-rule" id="rule-upper"><span class="pw-rule-dot"></span>Una mayúscula</span>
+            <span class="pw-rule" id="rule-number"><span class="pw-rule-dot"></span>Un número</span>
+            <span class="pw-rule" id="rule-special"><span class="pw-rule-dot"></span>Un carácter especial</span>
+          </div>
+        </div>
+      </fieldset>
 
-      <button type="submit" class="btn auth-submit register-submit">Crear cuenta</button>
+      <!-- GRUPO 3: Emergencia -->
+      <fieldset class="reg-fieldset">
+        <legend class="reg-legend">
+          <span class="reg-legend-num">3</span>
+          Contacto de emergencia <span class="reg-legend-optional">(opcional)</span>
+        </legend>
+
+        <div class="reg-field">
+          <label for="reg-emergency">Nombre y teléfono</label>
+          <div class="reg-input-wrap">
+            <img src="/img/icon-shield.svg" alt="" class="reg-input-icon" />
+            <input
+              type="text"
+              id="reg-emergency"
+              name="emergency_contact"
+              placeholder="Ej. Juan García — 987654321"
+              class="reg-input <%= hasError('emergency_contact') %>"
+            />
+          </div>
+          <% if (fieldError('emergency_contact')) { %>
+            <span class="field-error"><%= fieldError('emergency_contact') %></span>
+          <% } %>
+        </div>
+      </fieldset>
+
+      <div class="reg-form-footer">
+        <p class="reg-terms">
+          Al registrarte, aceptas que tus datos sean usados para gestionar tus citas en el sistema.
+        </p>
+        <button type="submit" class="btn auth-submit reg-submit-btn">
+          <img src="/img/icon-user.svg" alt="" class="inline-icon" />
+          Crear mi cuenta
+        </button>
+      </div>
     </form>
 
-    <div class="auth-register-cta auth-login-cta">
-      <span class="helper">¿Ya tiene cuenta?</span>
-      <a href="/auth/login" class="btn btn-secondary auth-register-link auth-login-link">
-        <img src="/img/icon-lock.svg" alt="" class="inline-icon" />Inicie sesión
+    <div class="reg-login-cta">
+      <span class="helper">¿Ya tienes cuenta?</span>
+      <a href="/auth/login" class="btn btn-secondary reg-login-link">
+        <img src="/img/icon-lock.svg" alt="" class="inline-icon" />Iniciar sesión
       </a>
     </div>
-  </article>
+  </main>
 </section>
+
+<script>
+  /* Toggle password */
+  document.querySelectorAll('.password-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var input = document.getElementById(this.dataset.target);
+      var isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      this.querySelector('.eye-show').style.display = isPassword ? 'none' : '';
+      this.querySelector('.eye-hide').style.display = isPassword ? '' : 'none';
+      this.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+  });
+
+  /* Password strength */
+  var pwInput = document.getElementById('reg-password');
+  var fillEl  = document.getElementById('strengthFill');
+  var labelEl = document.getElementById('strengthLabel');
+
+  var rules = {
+    length:  { el: document.getElementById('rule-length'),  test: function(v){ return v.length >= 8; } },
+    upper:   { el: document.getElementById('rule-upper'),   test: function(v){ return /[A-Z]/.test(v); } },
+    number:  { el: document.getElementById('rule-number'),  test: function(v){ return /[0-9]/.test(v); } },
+    special: { el: document.getElementById('rule-special'), test: function(v){ return /[^A-Za-z0-9]/.test(v); } }
+  };
+
+  var levels = [
+    { label: '',         cls: '',                  pct: 0   },
+    { label: 'Débil',    cls: 'strength--weak',    pct: 25  },
+    { label: 'Regular',  cls: 'strength--fair',    pct: 50  },
+    { label: 'Buena',    cls: 'strength--good',    pct: 75  },
+    { label: 'Fuerte',   cls: 'strength--strong',  pct: 100 }
+  ];
+
+  if (pwInput) {
+    pwInput.addEventListener('input', function() {
+      var v = this.value;
+      var score = 0;
+      Object.keys(rules).forEach(function(k) {
+        var ok = rules[k].test(v);
+        if (ok) score++;
+        if (rules[k].el) {
+          rules[k].el.classList.toggle('pw-rule--ok', ok);
+        }
+      });
+      var lvl = v.length === 0 ? levels[0] : levels[score];
+      fillEl.style.width = lvl.pct + '%';
+      fillEl.className = 'password-strength-fill ' + lvl.cls;
+      labelEl.textContent = lvl.label;
+      labelEl.className = 'password-strength-label ' + lvl.cls;
+    });
+  }
+</script>
 
 <%- include('../partials/foot') %>

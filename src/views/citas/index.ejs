@@ -448,32 +448,39 @@
                       <div class="tbl-dropdown" data-dropdown>
                         <button type="button" class="tbl-dropdown-toggle" aria-label="Más acciones" aria-expanded="false">⋯</button>
                         <div class="tbl-dropdown-menu" role="menu">
+
                           <% if (a.is_auto_rescheduled) { %>
-                            <span class="appointment-origin-badge" style="margin:0.3rem 0.5rem 0.1rem;display:block">Reprogramación automática</span>
+                            <span class="tbl-dropdown-badge">Reprogramación automática</span>
                           <% } %>
+
                           <% if (a.status === 'pendiente') { %>
-                            <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form" style="width:100%">
+                            <form method="post" action="/citas/<%= a.id %>/cancelar" class="inline-form" style="width:100%" data-confirm="¿Cancelar esta cita? Esta acción no se puede deshacer.">
                               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                              <button type="submit" class="tbl-dropdown-item" style="color:#952222" data-loading-text="Cancelando...">
-                                <img src="/img/icon-shield.svg" alt="" class="inline-icon" />Cancelar cita
+                              <button type="submit" class="tbl-dropdown-item tbl-dropdown-item--danger" data-loading-text="Cancelando...">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;opacity:0.7"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                Cancelar cita
                               </button>
                             </form>
                           <% } %>
+
                           <div class="tbl-dropdown-sep"></div>
                           <details class="appointment-edit-inline" style="width:100%">
                             <summary class="tbl-dropdown-item">
-                              <img src="/img/icon-pencil.svg" alt="" class="inline-icon" />Cambiar estado
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;opacity:0.65"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              Cambiar estado
                             </summary>
-                            <form method="post" action="/citas/<%= a.id %>/editar" class="tbl-edit-form" data-confirm="¿Guardar nuevo estado?">
+                            <form method="post" action="/citas/<%= a.id %>/editar" class="tbl-edit-form" data-confirm="¿Guardar el nuevo estado de la cita?">
                               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <label for="status-<%= a.id %>">Nuevo estado</label>
                               <select id="status-<%= a.id %>" name="status" required>
-                                <option value="pendiente" <%= a.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
-                                <option value="completada" <%= a.status === 'completada' ? 'selected' : '' %>>Completada</option>
-                                <option value="cancelada" <%= a.status === 'cancelada' ? 'selected' : '' %>>Cancelada</option>
-                                <option value="reprogramada" <%= a.status === 'reprogramada' ? 'selected' : '' %>>Reprogramada</option>
+                                <option value="pendiente"   <%= a.status === 'pendiente'   ? 'selected' : '' %>>⏳ Pendiente</option>
+                                <option value="completada"  <%= a.status === 'completada'  ? 'selected' : '' %>>✅ Completada</option>
+                                <option value="cancelada"   <%= a.status === 'cancelada'   ? 'selected' : '' %>>❌ Cancelada</option>
+                                <option value="reprogramada"<%= a.status === 'reprogramada'? 'selected' : '' %>>🔄 Reprogramada</option>
                               </select>
                               <button type="submit" class="btn-tbl btn-tbl-approve" data-loading-text="Guardando...">
-                                <img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Guardar
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>
+                                Guardar cambio
                               </button>
                             </form>
                           </details>

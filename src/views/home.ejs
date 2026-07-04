@@ -1,65 +1,43 @@
 <%- include('partials/head') %>
 <%- include('partials/flash') %>
-<%
-  const roleCards = [
-    {
-      key: 'paciente',
-      icon: '/img/icon-user.svg',
-      title: 'Pacientes',
-      badge: 'Alta y seguimiento',
-      description: 'Reserva citas con tu médico, revisa tu historial y recibe recordatorios automáticos.',
-      href: currentUser && currentUser.role === 'paciente' ? '/citas' : '/auth/register',
-      action: currentUser && currentUser.role === 'paciente' ? 'Ver mis citas' : 'Crear cuenta',
-      primary: true
-    },
-    {
-      key: 'medico',
-      icon: '/img/icon-doctor.svg',
-      title: 'Médicos',
-      badge: 'Agenda clínica',
-      description: 'Gestiona tu agenda, revisa pacientes del día y controla tu carga de atención.',
-      href: currentUser && currentUser.role === 'medico' ? '/medicos/mi-panel' : '/auth/login',
-      action: currentUser && currentUser.role === 'medico' ? 'Abrir mi panel' : 'Ingresar',
-      primary: false
-    },
-    {
-      key: 'admin',
-      icon: '/img/icon-shield.svg',
-      title: 'Administración',
-      badge: 'Control operativo',
-      description: 'Supervisa métricas, gestiona médicos y toma decisiones con visión completa.',
-      href: currentUser && currentUser.role === 'admin' ? '/admin' : '/auth/login',
-      action: currentUser && currentUser.role === 'admin' ? 'Ir al panel' : 'Ingresar',
-      primary: false
-    }
-  ];
-%>
 
-<!-- HERO -->
-<section class="home-hero motion-reveal">
-  <div class="home-hero-copy">
-    <span class="page-kicker">
-      <img src="/img/icon-shield.svg" alt="" class="inline-icon" />
-      Policlínico San Juan Bautista
-    </span>
-    <h2>Gestión de citas médicas <em>simple, rápida y centralizada</em></h2>
-    <p>
-      Pacientes reservan citas, médicos gestionan su agenda y administración
-      supervisa todo — desde una sola plataforma segura.
-    </p>
+<% if (currentUser) { %>
+  <%
+    const dest = {
+      admin:    { href: '/admin',            label: 'Ir al panel admin',  icon: '/img/icon-shield.svg'   },
+      medico:   { href: '/medicos/mi-panel', label: 'Ir a mi panel',      icon: '/img/icon-doctor.svg'   },
+      paciente: { href: '/citas',            label: 'Ver mis citas',       icon: '/img/icon-calendar.svg' }
+    }[currentUser.role] || { href: '/', label: 'Continuar', icon: '/img/icon-home.svg' };
+  %>
+  <!-- Usuario autenticado: pantalla de bienvenida con acceso directo -->
+  <section class="home-logged card">
+    <div class="home-logged-copy">
+      <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Sesión activa</span>
+      <h2>Hola de nuevo, <%= currentUser.full_name.split(' ')[0] %> 👋</h2>
+      <p>Ya tienes sesión iniciada. Accede directamente a tu área de trabajo.</p>
+      <a href="<%= dest.href %>" class="auth-submit-btn home-logged-btn">
+        <img src="<%= dest.icon %>" alt="" class="inline-icon" />
+        <%= dest.label %>
+      </a>
+    </div>
+    <div class="home-logged-media">
+      <img src="/img/hero-dashboard.svg" alt="" />
+    </div>
+  </section>
 
-    <div class="home-hero-actions">
-      <% if (currentUser) { %>
-        <% const continueLinks = {
-          admin:    { href: '/admin',           label: 'Ir al panel admin' },
-          medico:   { href: '/medicos/mi-panel',label: 'Abrir mi panel'   },
-          paciente: { href: '/citas',            label: 'Ver mis citas'    }
-        }; %>
-        <a href="<%= continueLinks[currentUser.role]?.href || '/citas' %>" class="btn auth-submit home-btn-lg">
-          <img src="/img/icon-home.svg" alt="" class="inline-icon" />
-          <%= continueLinks[currentUser.role]?.label || 'Continuar' %>
-        </a>
-      <% } else { %>
+<% } else { %>
+
+  <!-- HERO — usuario no autenticado -->
+  <section class="home-hero motion-reveal">
+    <div class="home-hero-copy">
+      <span class="page-kicker">
+        <img src="/img/icon-shield.svg" alt="" class="inline-icon" />
+        Policlínico San Juan Bautista
+      </span>
+      <h2>Gestión de citas médicas <em>simple, rápida y centralizada</em></h2>
+      <p>Reserva citas, gestiona tu agenda y supervisa la operación clínica — todo desde una sola plataforma segura.</p>
+
+      <div class="home-hero-actions">
         <a href="/auth/login" class="btn auth-submit home-btn-lg">
           <img src="/img/icon-lock.svg" alt="" class="inline-icon" />
           Iniciar sesión
@@ -68,188 +46,182 @@
           <img src="/img/icon-user.svg" alt="" class="inline-icon" />
           Soy paciente nuevo
         </a>
-      <% } %>
-    </div>
-
-    <div class="home-trust-strip">
-      <article class="home-stat-card">
-        <div class="home-stat-icon">
-          <img src="/img/icon-heart.svg" alt="" />
-        </div>
-        <div>
-          <strong>+11</strong>
-          <span>especialidades médicas</span>
-        </div>
-      </article>
-      <article class="home-stat-card">
-        <div class="home-stat-icon">
-          <img src="/img/icon-user.svg" alt="" />
-        </div>
-        <div>
-          <strong>3 roles</strong>
-          <span>paciente, médico y admin</span>
-        </div>
-      </article>
-      <article class="home-stat-card">
-        <div class="home-stat-icon">
-          <img src="/img/icon-clock.svg" alt="" />
-        </div>
-        <div>
-          <strong>24/7</strong>
-          <span>acceso web seguro</span>
-        </div>
-      </article>
-    </div>
-  </div>
-
-  <div class="home-hero-media">
-    <div class="home-mosaic-shell">
-      <div class="home-mosaic-main">
-        <img src="/img/hero-dashboard.svg" alt="Panel general del sistema clínico" />
-        <div class="home-mosaic-tag home-mosaic-tag-primary">
-          <strong>Panel unificado</strong>
-          <span>Visión ejecutiva en tiempo real</span>
-        </div>
       </div>
-      <div class="home-mosaic-side">
-        <article class="home-mosaic-card">
-          <img src="/img/hero-appointments.svg" alt="Agenda de citas" />
-          <div>
-            <strong>Agenda de citas</strong>
-            <span>Reserva y seguimiento</span>
-          </div>
+
+      <div class="home-trust-strip">
+        <article class="home-stat-card">
+          <div class="home-stat-icon"><img src="/img/icon-heart.svg" alt="" /></div>
+          <div><strong>+11</strong><span>especialidades médicas</span></div>
         </article>
-        <article class="home-mosaic-card">
-          <img src="/img/hero-medical-panel.svg" alt="Panel médico" />
-          <div>
-            <strong>Panel médico</strong>
-            <span>Atención y turnos</span>
-          </div>
+        <article class="home-stat-card">
+          <div class="home-stat-icon"><img src="/img/icon-user.svg" alt="" /></div>
+          <div><strong>3 roles</strong><span>paciente, médico y admin</span></div>
+        </article>
+        <article class="home-stat-card">
+          <div class="home-stat-icon"><img src="/img/icon-clock.svg" alt="" /></div>
+          <div><strong>24/7</strong><span>acceso web seguro</span></div>
         </article>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- RUTAS POR ROL -->
-<section class="home-section motion-reveal">
-  <div class="section-title-wrap">
-    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />¿Quién eres?</h2>
-    <span class="table-count">Accede según tu perfil</span>
-  </div>
+    <div class="home-hero-media">
+      <div class="home-mosaic-shell">
+        <div class="home-mosaic-main">
+          <img src="/img/hero-dashboard.svg" alt="Panel del sistema" />
+          <div class="home-mosaic-tag home-mosaic-tag-primary">
+            <strong>Panel unificado</strong>
+            <span>Visión ejecutiva en tiempo real</span>
+          </div>
+        </div>
+        <div class="home-mosaic-side">
+          <article class="home-mosaic-card">
+            <img src="/img/hero-appointments.svg" alt="Citas" />
+            <div><strong>Agenda de citas</strong><span>Reserva y seguimiento</span></div>
+          </article>
+          <article class="home-mosaic-card">
+            <img src="/img/hero-medical-panel.svg" alt="Panel médico" />
+            <div><strong>Panel médico</strong><span>Atención y turnos</span></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <div class="home-path-grid">
-    <% roleCards.forEach((card) => { %>
-      <article class="card home-path-card home-path-<%= card.key %>">
+  <!-- RUTAS POR ROL -->
+  <section class="home-section motion-reveal">
+    <div class="section-title-wrap">
+      <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />¿Cómo puedo ayudarte?</h2>
+      <span class="table-count">Accede según tu perfil</span>
+    </div>
+
+    <div class="home-path-grid">
+      <article class="card home-path-card home-path-paciente">
         <div class="home-path-icon-wrap">
-          <span class="home-path-icon-circle">
-            <img src="<%= card.icon %>" alt="" />
+          <span class="home-path-icon-circle" style="background:linear-gradient(135deg,#ddf5e8,#c4ecd6);border-color:#a8dfc3">
+            <img src="/img/icon-user.svg" alt="" />
           </span>
-          <span class="home-path-badge"><%= card.badge %></span>
+          <span class="home-path-badge">Alta y seguimiento</span>
         </div>
         <div class="home-path-copy">
-          <h3><%= card.title %></h3>
-          <p><%= card.description %></p>
+          <h3>Paciente</h3>
+          <p>Reserva citas con tu médico, revisa tu historial y recibe recordatorios automáticos.</p>
         </div>
-        <a href="<%= card.href %>" class="btn <%= card.primary ? 'auth-submit' : 'btn-secondary' %> home-path-action">
-          <%= card.action %> →
-        </a>
+        <a href="/auth/register" class="btn auth-submit home-path-action">Crear cuenta →</a>
       </article>
-    <% }) %>
-  </div>
-</section>
 
-<!-- CÓMO FUNCIONA -->
-<section class="home-section home-how-section motion-reveal">
-  <div class="home-how-grid">
-    <div class="home-how-copy card">
-      <span class="page-kicker">
-        <img src="/img/icon-clock.svg" alt="" class="inline-icon" />
-        Cómo funciona
-      </span>
-      <h2>Del registro a la atención en 3 pasos</h2>
-      <div class="home-process">
-        <div class="home-process-step">
-          <strong>01</strong>
-          <div>
-            <h3>Créate una cuenta o inicia sesión</h3>
-            <p>El registro es rápido. Si ya tienes cuenta, el acceso es inmediato.</p>
+      <article class="card home-path-card home-path-medico">
+        <div class="home-path-icon-wrap">
+          <span class="home-path-icon-circle" style="background:linear-gradient(135deg,#deeffe,#c8e5fd);border-color:#a9d4f7">
+            <img src="/img/icon-doctor.svg" alt="" />
+          </span>
+          <span class="home-path-badge">Agenda clínica</span>
+        </div>
+        <div class="home-path-copy">
+          <h3>Médico</h3>
+          <p>Gestiona tu agenda, revisa pacientes del día y controla tu carga de atención.</p>
+        </div>
+        <a href="/auth/login" class="btn btn-secondary home-path-action">Ingresar →</a>
+      </article>
+
+      <article class="card home-path-card home-path-admin">
+        <div class="home-path-icon-wrap">
+          <span class="home-path-icon-circle" style="background:linear-gradient(135deg,#e8e5fd,#d6d0fc);border-color:#bdb6f9">
+            <img src="/img/icon-shield.svg" alt="" />
+          </span>
+          <span class="home-path-badge">Control operativo</span>
+        </div>
+        <div class="home-path-copy">
+          <h3>Administración</h3>
+          <p>Supervisa métricas, gestiona médicos y toma decisiones con visión completa.</p>
+        </div>
+        <a href="/auth/login" class="btn btn-secondary home-path-action">Ingresar →</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section class="home-section home-how-section motion-reveal">
+    <div class="home-how-grid">
+      <div class="home-how-copy card">
+        <span class="page-kicker">
+          <img src="/img/icon-clock.svg" alt="" class="inline-icon" />Cómo funciona
+        </span>
+        <h2>Del registro a la atención en 3 pasos</h2>
+        <div class="home-process">
+          <div class="home-process-step">
+            <strong>01</strong>
+            <div>
+              <h3>Créate una cuenta o inicia sesión</h3>
+              <p>El registro es rápido. Si ya tienes cuenta, el acceso es inmediato.</p>
+            </div>
+          </div>
+          <div class="home-process-step">
+            <strong>02</strong>
+            <div>
+              <h3>Elige especialidad, médico y horario</h3>
+              <p>Filtra por disponibilidad real. Sin llamadas, sin esperas innecesarias.</p>
+            </div>
+          </div>
+          <div class="home-process-step">
+            <strong>03</strong>
+            <div>
+              <h3>Tu cita queda confirmada y trazada</h3>
+              <p>Recibes notificaciones y recordatorios. El médico ve tu cita en su panel.</p>
+            </div>
           </div>
         </div>
-        <div class="home-process-step">
-          <strong>02</strong>
-          <div>
-            <h3>Elige especialidad, médico y horario</h3>
-            <p>Filtra por disponibilidad real. Sin llamadas, sin esperas innecesarias.</p>
-          </div>
-        </div>
-        <div class="home-process-step">
-          <strong>03</strong>
-          <div>
-            <h3>Tu cita queda confirmada y trazada</h3>
-            <p>Recibes notificaciones y recordatorios. El médico ve tu cita en su panel.</p>
-          </div>
-        </div>
-      </div>
-      <% if (!currentUser) { %>
         <a href="/auth/register" class="btn auth-submit home-how-cta">
           <img src="/img/icon-user.svg" alt="" class="inline-icon" />
           Reserva tu primera cita
         </a>
-      <% } %>
-    </div>
+      </div>
 
-    <div class="home-how-photo">
-      <div class="home-how-img-main">
-        <img
-          src="/img/clinic-hero-1.jpg"
-          alt="Profesionales de salud en consulta"
-        />
-        <div class="home-how-img-badge">
-          <img src="/img/icon-shield.svg" alt="" />
-          <span>Atención con trazabilidad completa</span>
+      <div class="home-how-photo">
+        <div class="home-how-img-main">
+          <img src="/img/clinic-hero-1.jpg" alt="Profesionales de salud en consulta" />
+          <div class="home-how-img-badge">
+            <img src="/img/icon-shield.svg" alt="" />
+            <span>Atención con trazabilidad completa</span>
+          </div>
+        </div>
+        <div class="home-how-img-pair">
+          <img src="/img/clinic-team-2.jpg" alt="Equipo médico" />
+          <img src="/img/clinic-tools-1.jpg" alt="Instrumentos clínicos" />
         </div>
       </div>
-      <div class="home-how-img-pair">
-        <img src="/img/clinic-team-2.jpg" alt="Equipo médico" />
-        <img src="/img/clinic-tools-1.jpg" alt="Instrumentos clínicos" />
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="home-section motion-reveal">
+    <article class="home-final-cta card">
+      <div class="home-final-cta-copy">
+        <span class="page-kicker">
+          <img src="/img/icon-shield.svg" alt="" class="inline-icon" />
+          ¿Listo para empezar?
+        </span>
+        <h2>Tu salud, gestionada en un solo lugar</h2>
+        <p>Regístrate gratis y reserva tu primera cita en menos de 2 minutos.</p>
       </div>
-    </div>
+      <div class="home-final-cta-actions">
+        <a href="/auth/register" class="btn auth-submit home-btn-lg">
+          <img src="/img/icon-user.svg" alt="" class="inline-icon" />
+          Crear cuenta de paciente
+        </a>
+        <a href="/auth/login" class="btn btn-secondary home-btn-lg">
+          <img src="/img/icon-lock.svg" alt="" class="inline-icon" />
+          Ya tengo cuenta
+        </a>
+      </div>
+    </article>
+  </section>
+
+  <!-- STICKY CTA MOBILE -->
+  <div class="home-sticky-cta" aria-hidden="true">
+    <a href="/auth/login" class="btn auth-submit">Iniciar sesión</a>
+    <a href="/auth/register" class="btn btn-secondary">Registrarme</a>
   </div>
-</section>
 
-<!-- CTA FINAL (solo si no está logueado) -->
-<% if (!currentUser) { %>
-<section class="home-section motion-reveal">
-  <article class="home-final-cta card">
-    <div class="home-final-cta-copy">
-      <span class="page-kicker">
-        <img src="/img/icon-shield.svg" alt="" class="inline-icon" />
-        ¿Listo para empezar?
-      </span>
-      <h2>Tu salud, gestionada en un solo lugar</h2>
-      <p>Regístrate gratis y reserva tu primera cita en menos de 2 minutos.</p>
-    </div>
-    <div class="home-final-cta-actions">
-      <a href="/auth/register" class="btn auth-submit home-btn-lg">
-        <img src="/img/icon-user.svg" alt="" class="inline-icon" />
-        Crear cuenta de paciente
-      </a>
-      <a href="/auth/login" class="btn btn-secondary home-btn-lg">
-        <img src="/img/icon-lock.svg" alt="" class="inline-icon" />
-        Ya tengo cuenta
-      </a>
-    </div>
-  </article>
-</section>
-<% } %>
-
-<!-- STICKY CTA MOBILE -->
-<% if (!currentUser) { %>
-<div class="home-sticky-cta" aria-hidden="true">
-  <a href="/auth/login" class="btn auth-submit">Iniciar sesión</a>
-  <a href="/auth/register" class="btn btn-secondary">Registrarme</a>
-</div>
 <% } %>
 
 <%- include('partials/foot') %>

@@ -1,19 +1,119 @@
+/* ============================================================
+   MODAL DE CONFIRMACIÓN PERSONALIZADO
+   ============================================================ */
+
+function showConfirmModal(message, onConfirm) {
+  // Detectar tipo de acción por palabras clave para elegir ícono/color
+  var msg = (message || '').toLowerCase();
+  var isDelete  = msg.includes('cancel') || msg.includes('elimin');
+  var isDanger  = isDelete;
+  var isApprove = msg.includes('aprobar') || msg.includes('completar') || msg.includes('confirmar');
+  var isEdit    = msg.includes('guardar') || msg.includes('estado');
+
+  var iconSvg = isDelete
+    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    : isApprove
+    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+  var iconColor = isDelete  ? '#d94444'
+                : isApprove ? '#28a262'
+                : isEdit    ? '#e0980e'
+                : '#0d7fa3';
+
+  var confirmLabel = isDelete  ? 'Sí, cancelar'
+                   : isApprove ? 'Confirmar'
+                   : isEdit    ? 'Guardar'
+                   : 'Confirmar';
+
+  var confirmClass = isDelete  ? 'modal-confirm-danger'
+                   : isApprove ? 'modal-confirm-success'
+                   : 'modal-confirm-primary';
+
+  // Crear overlay
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'modal-title');
+
+  overlay.innerHTML =
+    '<div class="modal-box">' +
+      '<div class="modal-icon-wrap" style="color:' + iconColor + ';background:' + iconColor + '18">' +
+        iconSvg +
+      '</div>' +
+      '<h3 class="modal-title" id="modal-title">¿Confirmar acción?</h3>' +
+      '<p class="modal-message">' + message + '</p>' +
+      '<div class="modal-actions">' +
+        '<button type="button" class="modal-btn-cancel">Cancelar</button>' +
+        '<button type="button" class="modal-btn-confirm ' + confirmClass + '">' + confirmLabel + '</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  // Animar entrada
+  requestAnimationFrame(function() {
+    overlay.classList.add('modal-overlay-visible');
+  });
+
+  function close() {
+    overlay.classList.remove('modal-overlay-visible');
+    overlay.classList.add('modal-overlay-closing');
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 220);
+  }
+
+  // Eventos
+  overlay.querySelector('.modal-btn-cancel').addEventListener('click', close);
+  overlay.querySelector('.modal-btn-confirm').addEventListener('click', function() {
+    close();
+    onConfirm();
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) close();
+  });
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escHandler); }
+  });
+
+  // Focus al botón de confirmar
+  setTimeout(function() {
+    var btn = overlay.querySelector('.modal-btn-confirm');
+    if (btn) btn.focus();
+  }, 80);
+}
+
+/* ============================================================
+   FORM SUBMIT — usa modal en vez de window.confirm
+   ============================================================ */
 document.querySelectorAll('form').forEach((form) => {
   form.addEventListener('submit', (event) => {
     if (form.dataset.confirm && form.dataset.confirmed !== 'true') {
-      const accepted = window.confirm(form.dataset.confirm);
-      if (!accepted) {
-        event.preventDefault();
-        return;
-      }
+      event.preventDefault();
 
-      form.dataset.confirmed = 'true';
+      showConfirmModal(form.dataset.confirm, function() {
+        form.dataset.confirmed = 'true';
+
+        var submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+          var loadingText = submitButton.dataset.loadingText || 'Procesando...';
+          submitButton.dataset.originalHtml = submitButton.dataset.originalHtml || submitButton.innerHTML;
+          submitButton.disabled = true;
+          submitButton.classList.add('is-loading');
+          submitButton.setAttribute('aria-busy', 'true');
+          submitButton.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span><span class="btn-label">' + loadingText + '</span>';
+        }
+
+        form.submit();
+      });
+      return;
     }
 
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) {
       const loadingText = submitButton.dataset.loadingText || 'Procesando...';
-
       submitButton.dataset.originalHtml = submitButton.dataset.originalHtml || submitButton.innerHTML;
       submitButton.disabled = true;
       submitButton.classList.add('is-loading');
@@ -328,36 +428,123 @@ document.querySelectorAll('table').forEach((table) => {
 });
 
 /* ============================================================
-   DROPDOWN DE ACCIONES EN TABLA
+   DROPDOWN DE ACCIONES EN TABLA — Smart Positioning
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  function closeAllDropdowns(except) {
-    document.querySelectorAll('[data-dropdown].is-open').forEach((d) => {
-      if (d !== except) {
-        d.classList.remove('is-open');
-        const btn = d.querySelector('.tbl-dropdown-toggle');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
-      }
-    });
+
+  /* Referencia al menú actualmente abierto (movido al body) */
+  var _activeMenu     = null;
+  var _activeDropdown = null;
+  var _activeToggle   = null;
+
+  /* Cierra el dropdown activo y devuelve el menú a su lugar */
+  function closeActive() {
+    if (!_activeDropdown) return;
+    _activeDropdown.classList.remove('is-open');
+    if (_activeToggle) _activeToggle.setAttribute('aria-expanded', 'false');
+    if (_activeMenu && _activeMenu._originalParent) {
+      _activeMenu._originalParent.appendChild(_activeMenu);
+      _activeMenu._originalParent = null;
+    }
+    if (_activeMenu) {
+      _activeMenu.removeAttribute('style');
+      _activeMenu.classList.remove('tbl-dropdown-menu--up');
+    }
+    _activeMenu     = null;
+    _activeDropdown = null;
+    _activeToggle   = null;
   }
 
-  document.querySelectorAll('[data-dropdown]').forEach((dropdown) => {
-    const toggle = dropdown.querySelector('.tbl-dropdown-toggle');
+  /* Calcula y aplica la posición del menú */
+  function positionMenu(toggle, menu) {
+    var rect  = toggle.getBoundingClientRect();
+    var vw    = window.innerWidth;
+    var vh    = window.innerHeight;
+    var menuW = menu.offsetWidth  || 210;
+    var menuH = menu.offsetHeight || 160;
+    var gap   = 6;
+
+    var spaceBelow = vh - rect.bottom - gap;
+    var spaceAbove = rect.top - gap;
+    var openUp     = spaceBelow < menuH && spaceAbove > spaceBelow;
+
+    var top;
+    if (openUp) {
+      top = rect.top + window.scrollY - menuH - gap;
+      menu.classList.add('tbl-dropdown-menu--up');
+    } else {
+      top = rect.bottom + window.scrollY + gap;
+      menu.classList.remove('tbl-dropdown-menu--up');
+    }
+
+    var left = rect.right + window.scrollX - menuW;
+    if (left < 8) left = 8;
+    if (left + menuW > vw - 8) left = vw - menuW - 8;
+
+    menu.style.position = 'absolute';
+    menu.style.top      = top + 'px';
+    menu.style.left     = left + 'px';
+    menu.style.right    = 'auto';
+    menu.style.zIndex   = '9000';
+  }
+
+  document.querySelectorAll('[data-dropdown]').forEach(function(dropdown) {
+    var toggle = dropdown.querySelector('.tbl-dropdown-toggle');
     if (!toggle) return;
 
-    toggle.addEventListener('click', (e) => {
+    toggle.addEventListener('click', function(e) {
       e.stopPropagation();
-      const isOpen = dropdown.classList.contains('is-open');
-      closeAllDropdowns(null);
-      if (!isOpen) {
-        dropdown.classList.add('is-open');
-        toggle.setAttribute('aria-expanded', 'true');
+
+      /* Si este dropdown ya estaba abierto → cerrar y salir */
+      if (_activeDropdown === dropdown) {
+        closeActive();
+        return;
       }
+
+      /* Cerrar cualquier otro que estuviera abierto */
+      closeActive();
+
+      /* Abrir este */
+      var menu = dropdown.querySelector('.tbl-dropdown-menu');
+      if (!menu) return;
+
+      dropdown.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+
+      /* Medir dimensiones reales antes de posicionar */
+      menu.style.visibility = 'hidden';
+      menu.style.display    = 'flex';
+
+      /* Mover al body para escapar de cualquier overflow */
+      menu._originalParent = dropdown;
+      document.body.appendChild(menu);
+
+      positionMenu(toggle, menu);
+      menu.style.visibility = '';
+
+      _activeMenu     = menu;
+      _activeDropdown = dropdown;
+      _activeToggle   = toggle;
     });
   });
 
-  document.addEventListener('click', () => closeAllDropdowns(null));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAllDropdowns(null);
+  /* Reposicionar al scroll/resize */
+  function repositionActive() {
+    if (_activeToggle && _activeMenu) positionMenu(_activeToggle, _activeMenu);
+  }
+  window.addEventListener('scroll', repositionActive, { passive: true });
+  window.addEventListener('resize', repositionActive, { passive: true });
+
+  /* Click fuera → cerrar */
+  document.addEventListener('click', function(e) {
+    if (!_activeMenu) return;
+    /* Si el click fue dentro del menú (que está en el body), no cerrar */
+    if (_activeMenu.contains(e.target)) return;
+    closeActive();
+  });
+
+  /* Escape → cerrar */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeActive();
   });
 });

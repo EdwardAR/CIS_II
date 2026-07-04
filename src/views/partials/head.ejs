@@ -74,7 +74,7 @@
       const notificationItems = Array.isArray(typeof systemNotifications === 'undefined' ? [] : systemNotifications) ? (typeof systemNotifications === 'undefined' ? [] : systemNotifications) : [];
       const notificationCount = typeof systemNotificationsCount === 'number' ? systemNotificationsCount : notificationItems.length;
     %>
-    <% if (notificationCount) { %>
+    <% if (notificationCount && pageTitle === 'Calificaciones') { %>
       <section class="card system-notifications-shell">
         <div class="section-title-wrap">
           <h2><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Notificaciones clínicas</h2>

@@ -1,243 +1,258 @@
 <%- include('../partials/head') %>
 <%- include('../partials/flash') %>
 
-<section class="reg-shell">
+<section class="auth-shell">
 
-  <!-- SIDEBAR IZQUIERDO (mismo patrón que registro) -->
-  <aside class="reg-sidebar">
-    <div class="reg-sidebar-top">
-      <a href="/" class="auth-home-link reg-back-link">
-        <img src="/img/icon-home.svg" alt="" class="inline-icon" />Volver al inicio
+  <!-- SIDEBAR IZQUIERDO -->
+  <aside class="auth-sidebar">
+    <div class="auth-sidebar-top">
+      <a href="/" class="auth-back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver al inicio
       </a>
     </div>
 
-    <div class="reg-sidebar-hero">
-      <img src="/img/clinic-hero-1.jpg" alt="Profesionales revisando información clínica" class="reg-sidebar-img" />
-      <div class="reg-sidebar-overlay">
-        <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Policlínico San Juan Bautista</span>
-        <h2>Accede a tu plataforma clínica de manera segura</h2>
+    <div class="auth-sidebar-photo">
+      <img src="/img/clinic-hero-1.jpg" alt="Equipo clínico" />
+      <div class="auth-sidebar-photo-overlay">
+        <div class="auth-sidebar-brand">
+          <img src="/img/logo-mark.svg" alt="" class="auth-sidebar-logo" />
+          <div>
+            <strong>Policlínico San Juan Bautista</strong>
+            <span>Sistema de Gestión Clínica</span>
+          </div>
+        </div>
+        <blockquote class="auth-sidebar-quote">
+          "La salud es un estado de completo bienestar físico, mental y social."
+        </blockquote>
       </div>
     </div>
 
-    <div class="reg-sidebar-body">
-      <p class="reg-sidebar-lead">Gestiona citas, agenda médica y administración desde un solo lugar con trazabilidad completa.</p>
+    <div class="auth-sidebar-features">
+      <div class="auth-feature">
+        <span class="auth-feature-icon auth-feature-green">
+          <img src="/img/icon-calendar.svg" alt="" />
+        </span>
+        <div>
+          <strong>Agenda digital</strong>
+          <span>Reserva y gestiona citas sin llamadas</span>
+        </div>
+      </div>
+      <div class="auth-feature">
+        <span class="auth-feature-icon auth-feature-blue">
+          <img src="/img/icon-shield.svg" alt="" />
+        </span>
+        <div>
+          <strong>Acceso seguro por rol</strong>
+          <span>Paciente, médico y administración</span>
+        </div>
+      </div>
+      <div class="auth-feature">
+        <span class="auth-feature-icon auth-feature-purple">
+          <img src="/img/icon-clock.svg" alt="" />
+        </span>
+        <div>
+          <strong>Recordatorios automáticos</strong>
+          <span>Notificaciones antes de cada cita</span>
+        </div>
+      </div>
+    </div>
 
-      <ul class="reg-benefits">
-        <li class="reg-benefit-item">
-          <span class="reg-benefit-icon reg-benefit-icon--green">
-            <img src="/img/icon-calendar.svg" alt="" />
-          </span>
-          <div>
-            <strong>Agenda inteligente</strong>
-            <span>Reserva y gestiona citas en línea sin llamadas</span>
-          </div>
-        </li>
-        <li class="reg-benefit-item">
-          <span class="reg-benefit-icon reg-benefit-icon--blue">
-            <img src="/img/icon-shield.svg" alt="" />
-          </span>
-          <div>
-            <strong>Control por roles</strong>
-            <span>Acceso diferenciado para paciente, médico y admin</span>
-          </div>
-        </li>
-        <li class="reg-benefit-item">
-          <span class="reg-benefit-icon reg-benefit-icon--purple">
-            <img src="/img/icon-clock.svg" alt="" />
-          </span>
-          <div>
-            <strong>Recordatorios automáticos</strong>
-            <span>Notificaciones antes de cada cita programada</span>
-          </div>
-        </li>
-        <li class="reg-benefit-item">
-          <span class="reg-benefit-icon reg-benefit-icon--orange">
-            <img src="/img/icon-doctor.svg" alt="" />
-          </span>
-          <div>
-            <strong>+11 especialidades médicas</strong>
-            <span>Cardiología, pediatría, dermatología y más</span>
-          </div>
-        </li>
-      </ul>
-
-      <div class="reg-sidebar-stats">
-        <div class="reg-stat">
-          <strong>+11</strong>
-          <span>Especialidades</span>
-        </div>
-        <div class="reg-stat-divider"></div>
-        <div class="reg-stat">
-          <strong>24/7</strong>
-          <span>Acceso web</span>
-        </div>
-        <div class="reg-stat-divider"></div>
-        <div class="reg-stat">
-          <strong>3</strong>
-          <span>Roles</span>
-        </div>
+    <div class="auth-sidebar-stats">
+      <div class="auth-sidebar-stat">
+        <strong>+11</strong>
+        <span>Especialidades</span>
+      </div>
+      <div class="auth-sidebar-stat-sep"></div>
+      <div class="auth-sidebar-stat">
+        <strong>24/7</strong>
+        <span>Disponible</span>
+      </div>
+      <div class="auth-sidebar-stat-sep"></div>
+      <div class="auth-sidebar-stat">
+        <strong>3</strong>
+        <span>Roles</span>
       </div>
     </div>
   </aside>
 
-  <!-- PANEL DERECHO DEL FORMULARIO -->
-  <main class="reg-form-panel card">
+  <!-- PANEL FORMULARIO -->
+  <main class="auth-panel">
 
-    <div class="reg-form-header">
-      <span class="page-kicker"><img src="/img/icon-lock.svg" alt="" class="inline-icon" />Inicio de sesión</span>
-      <h2>Bienvenido de nuevo</h2>
-      <p>Ingrese con su cuenta para continuar en el sistema.</p>
+    <div class="auth-panel-header">
+      <div class="auth-panel-logo-mobile">
+        <img src="/img/logo-mark.svg" alt="Logo" />
+        <span>Policlínico San Juan Bautista</span>
+      </div>
+      <span class="auth-panel-kicker">
+        <img src="/img/icon-lock.svg" alt="" />
+        Inicio de sesión
+      </span>
+      <h1 class="auth-panel-title">Bienvenido de nuevo</h1>
+      <p class="auth-panel-sub">Accede con tu cuenta para continuar en el sistema.</p>
     </div>
 
-    <!-- ACCESO RÁPIDO POR ROL -->
-    <div class="demo-roles">
-      <p class="demo-roles-label">Acceso demo — elige tu rol:</p>
-      <div class="demo-roles-grid">
-        <button type="button" class="demo-role-btn demo-role-admin"
+    <!-- ACCESO DEMO POR ROL -->
+    <div class="demo-section">
+      <p class="demo-section-label">
+        <span class="demo-section-badge">DEMO</span>
+        Acceso rápido — elige un rol
+      </p>
+      <div class="demo-grid">
+        <button type="button" class="demo-btn demo-btn-admin"
           data-email="admin@policlinico.pe"
           data-password="Admin123*">
-          <span class="demo-role-icon">
+          <span class="demo-btn-icon">
             <img src="/img/icon-shield.svg" alt="" />
           </span>
-          <span class="demo-role-copy">
+          <span class="demo-btn-body">
             <strong>Administrador</strong>
-            <small>Control total del sistema</small>
+            <small>admin@policlinico.pe</small>
           </span>
-          <span class="demo-role-arrow">→</span>
+          <span class="demo-btn-check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
         </button>
-        <button type="button" class="demo-role-btn demo-role-medico"
+
+        <button type="button" class="demo-btn demo-btn-medico"
           data-email="ana.torres@policlinico.pe"
           data-password="Admin123*">
-          <span class="demo-role-icon">
+          <span class="demo-btn-icon">
             <img src="/img/icon-doctor.svg" alt="" />
           </span>
-          <span class="demo-role-copy">
+          <span class="demo-btn-body">
             <strong>Médico</strong>
-            <small>Dra. Ana Torres · Medicina General</small>
+            <small>Dra. Ana Torres</small>
           </span>
-          <span class="demo-role-arrow">→</span>
+          <span class="demo-btn-check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
         </button>
-        <button type="button" class="demo-role-btn demo-role-paciente"
+
+        <button type="button" class="demo-btn demo-btn-paciente"
           data-email="jose.quispe@pacientes.pe"
           data-password="Admin123*">
-          <span class="demo-role-icon">
+          <span class="demo-btn-icon">
             <img src="/img/icon-user.svg" alt="" />
           </span>
-          <span class="demo-role-copy">
+          <span class="demo-btn-body">
             <strong>Paciente</strong>
-            <small>Jose Quispe · Cuenta demo</small>
+            <small>Jose Quispe</small>
           </span>
-          <span class="demo-role-arrow">→</span>
+          <span class="demo-btn-check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
         </button>
       </div>
     </div>
 
-    <div class="demo-roles-divider">
-      <span>o ingresa manualmente</span>
-    </div>
+    <div class="auth-divider"><span>o ingresa manualmente</span></div>
 
     <!-- FORMULARIO -->
-    <form method="post" action="/auth/login" class="reg-form" id="loginForm" novalidate>
+    <form method="post" action="/auth/login" id="loginForm" class="auth-form" novalidate>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-      <fieldset class="reg-fieldset login-fieldset">
-        <legend class="reg-legend">
-          <span class="reg-legend-num">
-            <img src="/img/icon-lock.svg" alt="" style="width:12px;height:12px;filter:brightness(0)invert(1)" />
-          </span>
-          Credenciales de acceso
-        </legend>
-
-        <div class="reg-field">
-          <label for="login-email">Correo electrónico <span class="reg-required">*</span></label>
-          <div class="reg-input-wrap">
-            <img src="/img/icon-mail.svg" alt="" class="reg-input-icon" />
-            <input
-              type="email"
-              id="login-email"
-              name="email"
-              placeholder="usuario@policlinico.pe"
-              class="reg-input"
-              autocomplete="email"
-              required
-            />
-          </div>
+      <div class="auth-field">
+        <label for="login-email">Correo electrónico</label>
+        <div class="auth-input-wrap">
+          <img src="/img/icon-mail.svg" alt="" class="auth-input-icon" />
+          <input
+            type="email"
+            id="login-email"
+            name="email"
+            placeholder="usuario@policlinico.pe"
+            class="auth-input"
+            autocomplete="email"
+            required
+          />
         </div>
+      </div>
 
-        <div class="reg-field" style="margin-top:0.7rem">
-          <label for="login-password">Contraseña <span class="reg-required">*</span></label>
-          <div class="reg-input-wrap">
-            <img src="/img/icon-lock.svg" alt="" class="reg-input-icon" />
-            <input
-              type="password"
-              id="login-password"
-              name="password"
-              placeholder="••••••••"
-              class="reg-input"
-              autocomplete="current-password"
-              required
-            />
-            <button type="button" class="password-toggle" aria-label="Mostrar contraseña" data-target="login-password">
-              <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="eye-icon eye-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </button>
-          </div>
+      <div class="auth-field">
+        <label for="login-password">Contraseña</label>
+        <div class="auth-input-wrap">
+          <img src="/img/icon-lock.svg" alt="" class="auth-input-icon" />
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            placeholder="••••••••"
+            class="auth-input"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="auth-eye-btn" aria-label="Mostrar contraseña" data-target="login-password">
+            <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-icon eye-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
         </div>
-      </fieldset>
+      </div>
 
-      <button type="submit" class="btn auth-submit reg-submit-btn login-submit-full" id="loginSubmit">
+      <button type="submit" class="auth-submit-btn" id="loginSubmit">
         <img src="/img/icon-lock.svg" alt="" class="inline-icon" />
         Ingresar al sistema
       </button>
     </form>
 
-    <div class="reg-login-cta">
-      <span class="helper">¿No tiene cuenta?</span>
-      <a href="/auth/register" class="btn btn-secondary reg-login-link">
-        <img src="/img/icon-user.svg" alt="" class="inline-icon" />Registrarse como paciente
+    <div class="auth-panel-footer">
+      <span>¿No tienes cuenta?</span>
+      <a href="/auth/register" class="auth-footer-link">
+        <img src="/img/icon-user.svg" alt="" />
+        Registrarse como paciente
       </a>
     </div>
   </main>
 </section>
 
 <script>
-  /* Toggle password */
-  document.querySelectorAll('.password-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var input = document.getElementById(this.dataset.target);
-      var isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      this.querySelector('.eye-show').style.display = isPassword ? 'none' : '';
-      this.querySelector('.eye-hide').style.display = isPassword ? '' : 'none';
-      this.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
-    });
+/* Toggle de visibilidad de contraseña */
+document.querySelectorAll('.auth-eye-btn, .password-toggle').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var input = document.getElementById(this.dataset.target);
+    if (!input) return;
+    var isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    this.querySelector('.eye-show').style.display = isPassword ? 'none' : '';
+    this.querySelector('.eye-hide').style.display  = isPassword ? '' : 'none';
+    this.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
   });
+});
 
-  /* Demo role autocomplete */
-  document.querySelectorAll('.demo-role-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var emailInput    = document.getElementById('login-email');
-      var passwordInput = document.getElementById('login-password');
+/* Autocompletar demo — contraseña SIEMPRE en formato password */
+document.querySelectorAll('.demo-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var emailInput    = document.getElementById('login-email');
+    var passwordInput = document.getElementById('login-password');
 
-      emailInput.value    = this.dataset.email;
-      passwordInput.value = this.dataset.password;
+    emailInput.value    = this.dataset.email;
+    passwordInput.value = this.dataset.password;
 
-      passwordInput.type = 'text';
-      var showBtn = document.querySelector('.password-toggle[data-target="login-password"]');
-      if (showBtn) {
-        showBtn.querySelector('.eye-show').style.display = 'none';
-        showBtn.querySelector('.eye-hide').style.display = '';
-        showBtn.setAttribute('aria-label', 'Ocultar contraseña');
-      }
+    /* Mantener siempre en modo password (puntos) */
+    passwordInput.type = 'password';
+    var eyeBtn = document.querySelector('.auth-eye-btn[data-target="login-password"], .password-toggle[data-target="login-password"]');
+    if (eyeBtn) {
+      eyeBtn.querySelector('.eye-show').style.display = '';
+      eyeBtn.querySelector('.eye-hide').style.display = 'none';
+      eyeBtn.setAttribute('aria-label', 'Mostrar contraseña');
+    }
 
-      document.querySelectorAll('.demo-role-btn').forEach(function(b) {
-        b.classList.remove('demo-role-btn--active');
-      });
-      btn.classList.add('demo-role-btn--active');
-
-      document.getElementById('loginSubmit').focus();
+    /* Feedback visual — marcar el botón activo y desmarcar el resto */
+    document.querySelectorAll('.demo-btn').forEach(function(b) {
+      b.classList.remove('demo-btn--active');
     });
+    btn.classList.add('demo-btn--active');
+
+    /* Animar el campo de email para confirmar el llenado */
+    emailInput.classList.add('auth-input-filled');
+    passwordInput.classList.add('auth-input-filled');
+    setTimeout(function() {
+      emailInput.classList.remove('auth-input-filled');
+      passwordInput.classList.remove('auth-input-filled');
+    }, 600);
+
+    document.getElementById('loginSubmit').focus();
   });
+});
 </script>
 
 <%- include('../partials/foot') %>

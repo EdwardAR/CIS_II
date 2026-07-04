@@ -34,7 +34,7 @@
     <% } %>
 
     <% if (currentUser.role === 'admin') { %>
-      <a href="/admin" class="<%= isActive('/admin') ? 'nav-active' : '' %>">
+      <a href="/admin" class="<%= isActive('/admin') && navPath === '/admin' ? 'nav-active' : '' %>">
         <img src="/img/icon-shield.svg" alt="" class="nav-icon" />Panel Admin
       </a>
       <a href="/medicos" class="<%= isActive('/medicos') && !isActive('/medicos/mi-panel') ? 'nav-active' : '' %>">
@@ -42,6 +42,9 @@
       </a>
       <a href="/citas" class="<%= isActive('/citas') ? 'nav-active' : '' %>">
         <img src="/img/icon-calendar.svg" alt="" class="nav-icon" />Citas
+      </a>
+      <a href="/admin/calificaciones" class="<%= navPath === '/admin/calificaciones' ? 'nav-active' : '' %>">
+        <img src="/img/icon-heart.svg" alt="" class="nav-icon" />Calificaciones
       </a>
     <% } %>
 

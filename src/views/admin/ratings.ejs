@@ -1,0 +1,242 @@
+<%- include('../partials/head') %>
+<%- include('../partials/flash') %>
+<%
+  const dmy = typeof formatDateDmy === 'function' ? formatDateDmy
+    : (v) => { if (!v) return v; const [y,m,d] = v.split('-'); return d+'-'+m+'-'+y; };
+
+  function stars(n) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) s += i <= n ? '★' : '☆';
+    return s;
+  }
+%>
+
+<!-- HERO -->
+<section class="mgmt-hero card">
+  <div class="mgmt-hero-copy">
+    <a href="/admin" class="auth-back-btn" style="display:inline-flex;margin-bottom:0.75rem">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver al panel
+    </a>
+    <span class="page-kicker"><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Calificaciones</span>
+    <h2>Satisfacción de atenciones</h2>
+    <p>Revisión detallada de las calificaciones entregadas por los pacientes por médico y consulta.</p>
+    <div class="mgmt-hero-stats">
+      <div class="mgmt-hero-stat">
+        <strong><%= allRatings.length %></strong>
+        <span>calificaciones</span>
+      </div>
+      <div class="mgmt-hero-stat">
+        <strong><%= byDoctor.length %></strong>
+        <span>médicos evaluados</span>
+      </div>
+      <% if (byDoctor.length) { %>
+      <div class="mgmt-hero-stat">
+        <strong><%= (byDoctor.reduce((a,d)=>a+d.average,0)/byDoctor.length).toFixed(1) %>/5</strong>
+        <span>promedio general</span>
+      </div>
+      <% } %>
+    </div>
+  </div>
+  <div class="mgmt-hero-media">
+    <img src="/img/hero-dashboard.svg" alt="Calificaciones" />
+  </div>
+</section>
+
+<!-- RESUMEN POR MÉDICO -->
+<section class="card dashboard-section-gap">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Resumen por médico</h2>
+    <span class="table-count"><%= byDoctor.length %> médico(s) evaluado(s)</span>
+  </div>
+
+  <% if (!byDoctor.length) { %>
+    <div class="tbl-empty">
+      <div class="tbl-empty-icon"><img src="/img/icon-heart.svg" alt="" /></div>
+      <strong>Sin calificaciones aún</strong>
+      <p>Los pacientes podrán calificar sus atenciones completadas.</p>
+    </div>
+  <% } else { %>
+    <div class="ratings-doctor-grid">
+      <% byDoctor.forEach((doc) => { %>
+        <article class="ratings-doctor-card">
+          <div class="ratings-doctor-top">
+            <div class="td-avatar ratings-avatar"><%= doc.doctor_name.charAt(0).toUpperCase() %></div>
+            <div class="ratings-doctor-info">
+              <strong><%= doc.doctor_name %></strong>
+              <span class="doctor-card-specialty"><%= doc.specialty %></span>
+            </div>
+            <div class="ratings-score">
+              <strong class="ratings-score-num" style="color:<%= doc.average >= 4 ? '#1e6b3d' : doc.average >= 3 ? '#9a6010' : '#952222' %>">
+                <%= doc.average.toFixed(1) %>
+              </strong>
+              <span class="ratings-stars-sm" style="color:<%= doc.average >= 4 ? '#e0a520' : '#c8d5df' %>">
+                ★★★★★
+              </span>
+              <small><%= doc.total %> reseña(s)</small>
+            </div>
+          </div>
+          <!-- Barra distribución estrellas -->
+          <div class="ratings-dist">
+            <% const starData = [
+              { n: 5, count: doc.five_stars },
+              { n: 4, count: doc.four_stars },
+              { n: 3, count: doc.three_stars },
+              { n: 2, count: doc.two_stars  },
+              { n: 1, count: doc.one_star   }
+            ]; %>
+            <% starData.forEach(function(s) { %>
+              <div class="ratings-dist-row">
+                <span class="ratings-dist-label"><%= s.n %>★</span>
+                <div class="ratings-dist-track">
+                  <div class="ratings-dist-fill" style="width:<%= doc.total > 0 ? Math.round((s.count/doc.total)*100) : 0 %>%;background:<%= s.n >= 4 ? '#28a262' : s.n === 3 ? '#e0980e' : '#d94444' %>"></div>
+                </div>
+                <span class="ratings-dist-count"><%= s.count %></span>
+              </div>
+            <% }) %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<!-- GRÁFICO DE CALIFICACIONES por médico -->
+<% if (byDoctor.length > 1) { %>
+<section class="card dashboard-section-gap">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Comparativa de promedios</h2>
+    <span class="table-count">Top médicos</span>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="chartRatings" aria-label="Comparativa de promedios por médico"></canvas>
+  </div>
+</section>
+<% } %>
+
+<!-- HISTORIAL DE CALIFICACIONES -->
+<section class="card dashboard-section-gap">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Historial de calificaciones</h2>
+    <span class="table-count"><%= allRatings.length %> registro(s)</span>
+  </div>
+
+  <% if (!allRatings.length) { %>
+    <div class="tbl-empty">
+      <div class="tbl-empty-icon"><img src="/img/icon-heart.svg" alt="" /></div>
+      <strong>Sin calificaciones registradas</strong>
+      <p>Aparecerán aquí cuando los pacientes califiquen sus atenciones.</p>
+    </div>
+  <% } else { %>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable-header">Fecha</th>
+            <th>Paciente</th>
+            <th class="sortable-header">Médico</th>
+            <th>Especialidad</th>
+            <th class="sortable-header">Calificación</th>
+            <th>Comentario</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% allRatings.forEach((r) => { %>
+            <tr>
+              <td><%= dmy(r.appointment_date) %></td>
+              <td>
+                <div class="td-name">
+                  <span class="td-avatar"><%= r.patient_name.charAt(0).toUpperCase() %></span>
+                  <%= r.patient_name %>
+                </div>
+              </td>
+              <td>
+                <div class="td-name">
+                  <span class="td-avatar"><%= r.doctor_name.charAt(0).toUpperCase() %></span>
+                  <%= r.doctor_name %>
+                </div>
+              </td>
+              <td><%= r.specialty %></td>
+              <td>
+                <div class="ratings-cell">
+                  <span class="ratings-stars-inline" style="color:<%= r.rating >= 4 ? '#e0a520' : r.rating >= 3 ? '#aaa' : '#d94444' %>">
+                    <% for(let i=1;i<=5;i++) { %><%= i<=r.rating?'★':'☆' %><% } %>
+                  </span>
+                  <span class="status <%= r.rating>=4?'status-completada':r.rating>=3?'status-reprogramada':'status-cancelada' %>">
+                    <%= r.rating %>/5
+                  </span>
+                </div>
+              </td>
+              <td>
+                <% if (r.comment) { %>
+                  <span class="ratings-comment" title="<%= r.comment %>">
+                    <%= r.comment.length > 55 ? r.comment.slice(0, 55) + '…' : r.comment %>
+                  </span>
+                <% } else { %>
+                  <span style="color:var(--text-muted);font-size:0.8rem">Sin comentario</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<% if (byDoctor.length > 1) { %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  var ctx = document.getElementById('chartRatings');
+  if (!ctx) return;
+  var labels = <%- JSON.stringify(byDoctor.map(d => d.doctor_name.split(' ').slice(0,2).join(' '))) %>;
+  var avgs   = <%- JSON.stringify(byDoctor.map(d => d.average)) %>;
+  var counts = <%- JSON.stringify(byDoctor.map(d => d.total)) %>;
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Promedio (sobre 5)',
+        data: avgs,
+        backgroundColor: avgs.map(function(v) {
+          return v >= 4 ? 'rgba(40,162,98,0.2)' : v >= 3 ? 'rgba(224,152,14,0.2)' : 'rgba(217,68,68,0.2)';
+        }),
+        borderColor: avgs.map(function(v) {
+          return v >= 4 ? '#28a262' : v >= 3 ? '#e0980e' : '#d94444';
+        }),
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ' Promedio: ' + ctx.parsed.y.toFixed(2) + '/5 (' + counts[ctx.dataIndex] + ' reseñas)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { size: 11 }, color: '#4a5f70', maxRotation: 30 }, grid: { color: 'rgba(18,46,66,0.06)' } },
+        y: {
+          min: 0, max: 5,
+          ticks: { stepSize: 1, font: { size: 11 }, color: '#4a5f70' },
+          grid: { color: 'rgba(18,46,66,0.06)' }
+        }
+      }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<%- include('../partials/foot') %>

@@ -16,19 +16,19 @@
         };
 %>
 
+<!-- ============================================================
+     HERO
+     ============================================================ -->
 <section class="card admin-hero-shell">
   <div class="admin-hero-copy">
     <span class="page-kicker"><img src="/img/icon-shield.svg" alt="" class="inline-icon" />Panel administrativo</span>
     <h2>Centro de control clínico</h2>
-    <p>Monitorea la operación diaria, detecta cuellos de botella y ejecuta acciones concretas con contexto completo.</p>
+    <p>Monitorea la operación diaria, detecta cuellos de botella y ejecuta acciones concretas.</p>
 
     <div class="admin-insight-strip">
       <div>
         <strong>Efectividad de atención</strong>
-        <p>
-          <%= summary.completionRate %>% de citas completadas.
-          <%= summary.todayPending %> pendiente(s) para hoy.
-        </p>
+        <p><%= summary.completionRate %>% de citas completadas · <%= summary.todayPending %> pendiente(s) hoy</p>
       </div>
       <div class="insight-progress" aria-hidden="true">
         <span style="width: <%= summary.completionRate %>%"></span>
@@ -38,27 +38,27 @@
     <div class="quick-actions">
       <a href="/medicos" class="btn action-btn"><img src="/img/icon-doctor.svg" alt="" class="inline-icon" />Gestionar médicos</a>
       <a href="/citas" class="btn btn-secondary action-btn"><img src="/img/icon-calendar.svg" alt="" class="inline-icon" />Revisar agenda</a>
+      <a href="/admin/calificaciones" class="btn btn-secondary action-btn"><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Calificaciones</a>
     </div>
   </div>
   <div class="admin-hero-media">
-    <img src="/img/hero-dashboard.svg" alt="Resumen visual del panel administrativo" />
+    <img src="/img/hero-dashboard.svg" alt="Panel administrativo" />
   </div>
 </section>
 
+<!-- ============================================================
+     ESTADO OPERATIVO
+     ============================================================ -->
 <section class="admin-ops-grid dashboard-section-gap">
   <article class="card admin-ops-alert <%= hasOperationalLoad ? 'admin-ops-alert-busy' : 'admin-ops-alert-clear' %>">
     <div class="admin-ops-head">
       <span class="admin-ops-pill"><%= hasOperationalLoad ? 'Operación activa' : 'Operación estable' %></span>
       <strong><%= hasOperationalLoad ? 'Hay pacientes por atender hoy' : 'No hay citas pendientes para hoy' %></strong>
     </div>
-
     <% if (hasOperationalLoad && summary.nextAppointment) { %>
-      <p>
-        Próxima atención: <b><%= summary.nextAppointment.patient_name %></b> con
-        <b><%= summary.nextAppointment.doctor_name %></b> a las <b><%= summary.nextAppointment.start_time %></b>.
-      </p>
+      <p>Próxima atención: <b><%= summary.nextAppointment.patient_name %></b> con <b><%= summary.nextAppointment.doctor_name %></b> a las <b><%= summary.nextAppointment.start_time %></b>.</p>
     <% } else { %>
-      <p>La agenda de hoy no presenta pendientes activos. Puede priorizar tareas administrativas y seguimiento preventivo.</p>
+      <p>La agenda de hoy no presenta pendientes activos.</p>
     <% } %>
   </article>
 
@@ -74,14 +74,17 @@
         <strong><%= summary.doctorsWithAppointmentsToday %></strong>
       </div>
     </div>
-    <p class="helper">Referencia operativa en tiempo real para coordinar derivaciones y redistribución de carga.</p>
+    <p class="helper">Referencia operativa en tiempo real para coordinar derivaciones.</p>
   </article>
 </section>
 
+<!-- ============================================================
+     MÉTRICAS
+     ============================================================ -->
 <section class="card dashboard-section-gap admin-metrics-card" data-dashboard-metrics="overall">
   <div class="section-title-wrap admin-metrics-toolbar">
     <h2>Métricas del sistema</h2>
-    <div class="metrics-mode-switch" role="tablist" aria-label="Vista de métricas de citas">
+    <div class="metrics-mode-switch" role="tablist" aria-label="Vista de métricas">
       <button type="button" class="metrics-mode-btn is-active" data-metrics-mode="overall" aria-pressed="true">General</button>
       <button type="button" class="metrics-mode-btn" data-metrics-mode="today" aria-pressed="false">Hoy</button>
     </div>
@@ -91,12 +94,12 @@
     <article class="metric card metric-card-total">
       <span class="metric-label"><img src="/img/icon-calendar.svg" alt="" class="metric-icon" /> Total citas</span>
       <p class="metric-num"><%= summary.total %></p>
-      <span class="metric-sub">Registro global del sistema</span>
+      <span class="metric-sub">Registro global</span>
     </article>
     <article class="metric card metric-card-total">
       <span class="metric-label"><img src="/img/icon-clock.svg" alt="" class="metric-icon" /> Hoy</span>
       <p class="metric-num"><%= summary.today %></p>
-      <span class="metric-sub">Citas programadas hoy</span>
+      <span class="metric-sub">Citas programadas</span>
     </article>
     <article class="metric card metric-card-pending metric-toggleable" data-metric-toggle>
       <span class="metric-label">
@@ -134,7 +137,7 @@
         <span data-metric-value-overall><%= summary.cancelled %></span>
         <span data-metric-value-today hidden><%= summary.todayCancelled %></span>
       </p>
-      <span class="metric-sub" data-metric-subtitle-overall>Incidencias y ausencias</span>
+      <span class="metric-sub" data-metric-subtitle-overall>Incidencias</span>
       <span class="metric-sub" data-metric-subtitle-today hidden>Incidencias hoy</span>
     </article>
     <article class="metric card metric-card-total">
@@ -150,82 +153,112 @@
   </div>
 </section>
 
-<section class="card dashboard-section-gap satisfaction-shell" id="satisfaccion">
-  <div class="section-title-wrap">
-    <h2><img src="/img/icon-heart.svg" alt="" class="inline-icon" />Satisfacción de atención</h2>
-    <span class="table-count"><%= summary.satisfaction.totalRatings %> calificación(es)</span>
-  </div>
+<!-- ============================================================
+     GRÁFICOS ESTADÍSTICOS
+     ============================================================ -->
+<section class="dashboard-charts-grid dashboard-section-gap">
 
-  <div class="satisfaction-summary-grid">
-    <article class="satisfaction-summary-card">
-      <span class="satisfaction-summary-label">Promedio general</span>
-      <strong><%= summary.satisfaction.averageRating.toFixed(2) %>/5</strong>
-      <small><%= summary.satisfaction.totalRatings %> respuestas registradas</small>
-    </article>
-    <article class="satisfaction-summary-card">
-      <span class="satisfaction-summary-label">Atenciones satisfechas</span>
-      <strong><%= summary.satisfaction.satisfactionRate %>%</strong>
-      <small><%= summary.satisfaction.satisfiedRatings %> calificaciones de 4 o 5 estrellas</small>
-    </article>
-    <article class="satisfaction-summary-card">
-      <span class="satisfaction-summary-label">Pendientes por valorar</span>
-      <strong><%= summary.satisfaction.pendingRatings %></strong>
-      <small>Citas completadas sin calificación</small>
-    </article>
-  </div>
+  <!-- Gráfico donut: distribución de estados -->
+  <article class="card chart-card">
+    <div class="chart-card-header">
+      <h3>Distribución de citas</h3>
+      <span class="table-count">Global</span>
+    </div>
+    <div class="chart-wrap chart-wrap-sm">
+      <canvas id="chartDonut" aria-label="Distribución de estados de citas"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#28a262"></span>Completadas (<%= summary.completed %>)</div>
+      <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#e0980e"></span>Pendientes (<%= summary.pending %>)</div>
+      <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#d94444"></span>Canceladas (<%= summary.cancelled %>)</div>
+    </div>
+  </article>
 
-  <div class="satisfaction-progress-shell">
-    <div class="satisfaction-progress-head">
-      <strong>Lectura rápida</strong>
-      <span><%= summary.satisfaction.lowRatings %> calificación(es) bajas</span>
+  <!-- Gráfico barras: carga por especialidad -->
+  <article class="card chart-card">
+    <div class="chart-card-header">
+      <h3>Carga pendiente por especialidad</h3>
+      <span class="table-count"><%= pendingBySpecialty.length %> especialidades</span>
     </div>
-    <div class="insight-progress satisfaction-progress" aria-hidden="true">
-      <span style="width: <%= Math.min(summary.satisfaction.satisfactionRate, 100) %>%"></span>
-    </div>
-  </div>
+    <% if (!pendingBySpecialty.length) { %>
+      <div class="tbl-empty" style="padding:2rem 1rem">
+        <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
+        <strong>Sin carga pendiente</strong>
+        <p>No hay citas pendientes por especialidad.</p>
+      </div>
+    <% } else { %>
+      <div class="chart-wrap">
+        <canvas id="chartBars" aria-label="Carga pendiente por especialidad"></canvas>
+      </div>
+    <% } %>
+  </article>
 
-  <% if (!summary.satisfaction.ratingsByDoctor.length) { %>
-    <p class="helper">Aún no hay suficientes calificaciones para medir satisfacción por médico.</p>
-  <% } else { %>
-    <div class="table-shell satisfaction-table-shell">
-      <table>
-        <thead>
-          <tr>
-            <th>Médico</th>
-            <th>Especialidad</th>
-            <th>Promedio</th>
-            <th>Calificaciones</th>
-            <th>Satisfechas</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% summary.satisfaction.ratingsByDoctor.forEach((doctor) => { %>
-            <tr>
-              <td><%= doctor.doctor_name %></td>
-              <td><%= doctor.specialty %></td>
-              <td><%= doctor.averageRating.toFixed(2) %>/5</td>
-              <td><%= doctor.totalRatings %></td>
-              <td><%= doctor.satisfiedRatings %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+  <!-- Gráfico satisfacción -->
+  <article class="card chart-card">
+    <div class="chart-card-header">
+      <h3>Satisfacción del servicio</h3>
+      <span class="table-count"><%= summary.satisfaction.totalRatings %> calificaciones</span>
     </div>
-  <% } %>
+    <div class="chart-satisfaction">
+      <!-- Gauge visual con CSS -->
+      <div class="sat-gauge-wrap">
+        <div class="sat-gauge">
+          <svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg">
+            <!-- Track -->
+            <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="#dde9f2" stroke-width="12" stroke-linecap="round"/>
+            <!-- Fill proporcional a satisfactionRate -->
+            <% const gaugeAngle = Math.min(summary.satisfaction.satisfactionRate, 100) / 100; %>
+            <% const endX = 10 + 100 * Math.cos(Math.PI * (1 - gaugeAngle)); %>
+            <% const endY = 65 - 50 * Math.sin(Math.PI * (1 - gaugeAngle)); %>
+            <% const largeArc = gaugeAngle > 0.5 ? 1 : 0; %>
+            <path d="M 10 65 A 50 50 0 <%= largeArc %> 1 <%= endX.toFixed(1) %> <%= endY.toFixed(1) %>" fill="none"
+              stroke="<%= summary.satisfaction.satisfactionRate >= 70 ? '#28a262' : summary.satisfaction.satisfactionRate >= 40 ? '#e0980e' : '#d94444' %>"
+              stroke-width="12" stroke-linecap="round"/>
+            <text x="60" y="58" text-anchor="middle" font-size="18" font-weight="700"
+              fill="<%= summary.satisfaction.satisfactionRate >= 70 ? '#1e6b3d' : summary.satisfaction.satisfactionRate >= 40 ? '#9a6010' : '#952222' %>">
+              <%= summary.satisfaction.satisfactionRate %>%
+            </text>
+          </svg>
+        </div>
+        <p class="sat-gauge-label">tasa de satisfacción</p>
+      </div>
+      <div class="sat-stats">
+        <div class="sat-stat">
+          <strong style="color:#1e6b3d"><%= summary.satisfaction.averageRating.toFixed(1) %>/5</strong>
+          <span>Promedio ★</span>
+        </div>
+        <div class="sat-stat">
+          <strong style="color:#1e6b3d"><%= summary.satisfaction.satisfiedRatings %></strong>
+          <span>Satisfechas (4-5★)</span>
+        </div>
+        <div class="sat-stat">
+          <strong style="color:#952222"><%= summary.satisfaction.lowRatings %></strong>
+          <span>Bajas (1-2★)</span>
+        </div>
+        <div class="sat-stat">
+          <strong style="color:#9a6010"><%= summary.satisfaction.pendingRatings %></strong>
+          <span>Sin calificar</span>
+        </div>
+      </div>
+    </div>
+    <a href="/admin/calificaciones" class="chart-cta-link">Ver detalle de calificaciones →</a>
+  </article>
 </section>
 
+<!-- ============================================================
+     DOS COLUMNAS: especialidades + pendientes hoy
+     ============================================================ -->
 <section class="admin-two-col dashboard-section-gap">
   <article class="card dashboard-table-card">
     <div class="section-title-wrap">
       <h2>Carga por especialidad</h2>
       <span class="table-count"><%= pendingBySpecialty.length %> especialidad(es)</span>
     </div>
-
     <% if (!pendingBySpecialty.length) { %>
       <div class="tbl-empty">
         <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
         <strong>Sin carga pendiente</strong>
-        <p>No hay citas pendientes por especialidad por el momento.</p>
+        <p>No hay citas pendientes por especialidad.</p>
       </div>
     <% } else { %>
       <% const maxPending = Math.max(...pendingBySpecialty.map(r => r.total), 1); %>
@@ -250,7 +283,6 @@
       <h2>Pendientes de hoy</h2>
       <span class="table-count"><%= todayPendingDetails.length %> en lista</span>
     </div>
-
     <% if (!todayPendingDetails.length) { %>
       <div class="tbl-empty">
         <div class="tbl-empty-icon"><img src="/img/icon-clock.svg" alt="" /></div>
@@ -264,7 +296,7 @@
             <tr>
               <th>Hora</th>
               <th>Paciente</th>
-              <th>Medico</th>
+              <th>Médico</th>
               <th>Especialidad</th>
               <th>Consultorio</th>
             </tr>
@@ -286,12 +318,14 @@
   </article>
 </section>
 
+<!-- ============================================================
+     PRÓXIMAS CITAS
+     ============================================================ -->
 <section class="card dashboard-section-gap dashboard-table-card">
   <div class="section-title-wrap">
     <h2>Próximas citas programadas</h2>
     <span class="table-count"><%= upcoming.length %> en lista</span>
   </div>
-
   <% if (!upcoming.length) { %>
     <div class="tbl-empty">
       <div class="tbl-empty-icon"><img src="/img/icon-calendar.svg" alt="" /></div>
@@ -303,10 +337,10 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha</th>
+            <th class="sortable-header">Fecha</th>
             <th>Hora</th>
             <th>Paciente</th>
-            <th>Médico</th>
+            <th class="sortable-header">Médico</th>
             <th>Especialidad</th>
             <th>Consultorio</th>
             <th>Estado</th>
@@ -318,7 +352,12 @@
               <td><%= dmy(a.appointment_date) %></td>
               <td><%= a.start_time %></td>
               <td><%= a.patient_name %></td>
-              <td><%= a.doctor_name %></td>
+              <td>
+                <div class="td-name">
+                  <span class="td-avatar"><%= a.doctor_name.charAt(0).toUpperCase() %></span>
+                  <%= a.doctor_name %>
+                </div>
+              </td>
               <td><%= a.specialty %></td>
               <td><%= a.doctor_office || '-' %></td>
               <td><span class="status status-<%= a.status %>"><%= a.status %></span></td>
@@ -329,5 +368,115 @@
     </div>
   <% } %>
 </section>
+
+<!-- Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  var COLORS = {
+    done:    '#28a262',
+    pending: '#e0980e',
+    cancel:  '#d94444',
+    blue:    '#0d7fa3',
+    grid:    'rgba(18,46,66,0.06)',
+    text:    '#4a5f70'
+  };
+
+  // ---- DONUT: distribución de estados ----
+  var donutCtx = document.getElementById('chartDonut');
+  if (donutCtx) {
+    var completed = <%= summary.completed %>;
+    var pending   = <%= summary.pending %>;
+    var cancelled = <%= summary.cancelled %>;
+    var total     = completed + pending + cancelled;
+
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Completadas', 'Pendientes', 'Canceladas'],
+        datasets: [{
+          data: total > 0 ? [completed, pending, cancelled] : [1, 0, 0],
+          backgroundColor: [COLORS.done, COLORS.pending, COLORS.cancel],
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                var val = ctx.parsed;
+                var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                return ' ' + ctx.label + ': ' + val + ' (' + pct + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ---- BARRAS: carga por especialidad ----
+  var barsCtx = document.getElementById('chartBars');
+  if (barsCtx) {
+    var labels = <%- JSON.stringify(pendingBySpecialty.map(r => r.specialty)) %>;
+    var values = <%- JSON.stringify(pendingBySpecialty.map(r => r.total)) %>;
+
+    new Chart(barsCtx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Citas pendientes',
+          data: values,
+          backgroundColor: 'rgba(13,127,163,0.18)',
+          borderColor: COLORS.blue,
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return ' ' + ctx.parsed.y + ' pendiente(s)'; }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: COLORS.grid },
+            ticks: {
+              color: COLORS.text,
+              font: { size: 11 },
+              maxRotation: 30
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: COLORS.grid },
+            ticks: {
+              color: COLORS.text,
+              font: { size: 11 },
+              stepSize: 1,
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+  }
+})();
+</script>
 
 <%- include('../partials/foot') %>

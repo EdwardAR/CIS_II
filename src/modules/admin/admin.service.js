@@ -181,4 +181,44 @@ function getSummary() {
   };
 }
 
-module.exports = { getSummary };
+function getRatings() {
+  const allRatings = require('../../config/db').db.prepare(`
+    SELECT
+      r.id, r.rating, r.comment, r.created_at,
+      up.full_name AS patient_name,
+      ud.full_name AS doctor_name,
+      d.specialty,
+      a.appointment_date, a.start_time
+    FROM appointment_ratings r
+    INNER JOIN appointments a  ON a.id  = r.appointment_id
+    INNER JOIN patients    p  ON p.id  = a.patient_id
+    INNER JOIN users       up ON up.id = p.user_id
+    INNER JOIN doctors     d  ON d.id  = a.doctor_id
+    INNER JOIN users       ud ON ud.id = d.user_id
+    ORDER BY r.created_at DESC
+    LIMIT 50
+  `).all();
+
+  const byDoctor = require('../../config/db').db.prepare(`
+    SELECT
+      ud.full_name AS doctor_name,
+      d.specialty,
+      COUNT(r.id)  AS total,
+      ROUND(AVG(r.rating), 2) AS average,
+      SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) AS five_stars,
+      SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) AS four_stars,
+      SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) AS three_stars,
+      SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) AS two_stars,
+      SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) AS one_star
+    FROM appointment_ratings r
+    INNER JOIN appointments a  ON a.id  = r.appointment_id
+    INNER JOIN doctors      d  ON d.id  = a.doctor_id
+    INNER JOIN users        ud ON ud.id = d.user_id
+    GROUP BY d.id
+    ORDER BY average DESC, total DESC
+  `).all();
+
+  return { allRatings, byDoctor };
+}
+
+module.exports = { getSummary, getRatings };

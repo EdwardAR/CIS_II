@@ -548,3 +548,90 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') closeActive();
   });
 });
+
+/* ============================================================
+   PERFIL DE USUARIO — DROPDOWN DEL TOPBAR
+   ============================================================ */
+(function() {
+  var chip     = document.getElementById('profileChip');
+  var dropdown = document.getElementById('profileDropdown');
+  if (!chip || !dropdown) return;
+
+  var isOpen = false;
+
+  /* Mover el dropdown al body para escapar de cualquier stacking context */
+  document.body.appendChild(dropdown);
+
+  /* Calcula y aplica la posición fija del dropdown relativa al chip */
+  function positionDropdown() {
+    var rect  = chip.getBoundingClientRect();
+    var ddW   = dropdown.offsetWidth  || 300;
+    var vw    = window.innerWidth;
+
+    var top  = rect.bottom + window.scrollY + 8;
+    var left = rect.right  + window.scrollX - ddW;
+    if (left < 8) left = 8;
+    if (left + ddW > vw - 8) left = vw - ddW - 8;
+
+    dropdown.style.position = 'absolute';
+    dropdown.style.top      = top  + 'px';
+    dropdown.style.left     = left + 'px';
+    dropdown.style.right    = 'auto';
+    dropdown.style.zIndex   = '99999';
+  }
+
+  function openProfile() {
+    isOpen = true;
+    chip.classList.add('is-open');
+    chip.setAttribute('aria-expanded', 'true');
+
+    /* Medir antes de animar */
+    dropdown.style.visibility = 'hidden';
+    dropdown.style.display    = 'block';
+    positionDropdown();
+    dropdown.style.visibility = '';
+
+    dropdown.classList.add('is-open');
+    requestAnimationFrame(function() {
+      dropdown.style.opacity   = '1';
+      dropdown.style.transform = 'scale(1) translateY(0)';
+    });
+  }
+
+  function closeProfile() {
+    isOpen = false;
+    chip.classList.remove('is-open');
+    chip.setAttribute('aria-expanded', 'false');
+    dropdown.classList.remove('is-open');
+    dropdown.style.opacity   = '';
+    dropdown.style.transform = '';
+    dropdown.style.display   = '';
+  }
+
+  /* Reposicionar al scroll/resize */
+  window.addEventListener('scroll', function() { if (isOpen) positionDropdown(); }, { passive: true });
+  window.addEventListener('resize', function() { if (isOpen) positionDropdown(); }, { passive: true });
+
+  /* Toggle */
+  chip.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (isOpen) closeProfile(); else openProfile();
+  });
+
+  /* Teclado */
+  chip.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (isOpen) closeProfile(); else openProfile(); }
+    if (e.key === 'Escape') closeProfile();
+  });
+
+  /* Click fuera */
+  document.addEventListener('click', function(e) {
+    if (!isOpen) return;
+    if (!chip.contains(e.target) && !dropdown.contains(e.target)) closeProfile();
+  });
+
+  /* Escape global */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && isOpen) closeProfile();
+  });
+})();

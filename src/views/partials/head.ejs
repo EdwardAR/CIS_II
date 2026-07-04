@@ -39,28 +39,137 @@
         const firstName = tokens[tokenIndex] || tokens[0] || 'Usuario';
         const displayName = tokens.slice(tokenIndex, tokenIndex + 2).join(' ') || fullName;
         const avatarLetter = firstName.charAt(0).toUpperCase();
-        const roleLabel = {
-          admin: 'Administrador',
-          medico: 'Médico',
-          paciente: 'Paciente'
-        };
-        const roleIcon = {
-          admin: '/img/icon-shield.svg',
-          medico: '/img/icon-doctor.svg',
-          paciente: '/img/icon-user.svg'
+        const avatarLetter2 = tokens.length > 1 ? tokens[tokens.length - 1].charAt(0).toUpperCase() : '';
+        const roleLabel = { admin: 'Administrador', medico: 'Médico', paciente: 'Paciente' };
+        const roleIcon  = { admin: '/img/icon-shield.svg', medico: '/img/icon-doctor.svg', paciente: '/img/icon-user.svg' };
+        const roleColor = { admin: '#7c5fc0', medico: '#0d7fa3', paciente: '#28a262' };
+        const profileLink = {
+          admin:    '/admin',
+          medico:   '/medicos/mi-panel',
+          paciente: '/pacientes/perfil'
         };
       %>
-        <aside class="topbar-user-chip" aria-label="Usuario conectado">
-          <span class="topbar-user-avatar" aria-hidden="true"><%= avatarLetter %></span>
-          <div class="topbar-user-copy">
-            <span class="topbar-user-kicker">Sesión activa</span>
-            <strong class="topbar-user-name">Bienvenido, <%= displayName %></strong>
-            <small>
-              <img src="<%= roleIcon[currentUser.role] || '/img/icon-user.svg' %>" alt="" class="inline-icon" />
-              <%= roleLabel[currentUser.role] || 'Usuario' %>
-            </small>
+
+        <!-- Avatar con dropdown de perfil -->
+        <div class="profile-chip" id="profileChip" aria-label="Menú de usuario" aria-haspopup="true" aria-expanded="false" tabindex="0" role="button">
+          <div class="profile-chip-avatar" style="background:linear-gradient(135deg,<%= roleColor[currentUser.role] || '#0d7fa3' %> 0%,<%= roleColor[currentUser.role] ? roleColor[currentUser.role]+'cc' : '#0a5f7a' %> 100%)">
+            <%= avatarLetter %><%= avatarLetter2 %>
           </div>
-        </aside>
+          <div class="profile-chip-info">
+            <span class="profile-chip-name"><%= displayName %></span>
+            <span class="profile-chip-role"><%= roleLabel[currentUser.role] || 'Usuario' %></span>
+          </div>
+          <svg class="profile-chip-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+
+        <!-- Panel de perfil desplegable -->
+        <div class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de usuario">
+          <!-- Cabecera con avatar grande -->
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar" style="background:linear-gradient(135deg,<%= roleColor[currentUser.role] || '#0d7fa3' %> 0%,<%= roleColor[currentUser.role] ? roleColor[currentUser.role]+'cc' : '#0a5f7a' %> 100%)">
+              <%= avatarLetter %><%= avatarLetter2 %>
+            </div>
+            <div class="profile-dropdown-identity">
+              <strong><%= fullName %></strong>
+              <span><%= currentUser.email %></span>
+              <div class="profile-dropdown-badge" style="background:<%= roleColor[currentUser.role] || '#0d7fa3' %>18;color:<%= roleColor[currentUser.role] || '#0d7fa3' %>;border-color:<%= roleColor[currentUser.role] || '#0d7fa3' %>44">
+                <img src="<%= roleIcon[currentUser.role] || '/img/icon-user.svg' %>" alt="" style="width:11px;height:11px;filter:none;opacity:0.75" />
+                <%= roleLabel[currentUser.role] || 'Usuario' %>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-dropdown-sep"></div>
+
+          <!-- Accesos rápidos por rol -->
+          <div class="profile-dropdown-links" role="group">
+            <% if (currentUser.role === 'paciente') { %>
+              <a href="/pacientes/perfil" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-user.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Mi perfil</strong>
+                  <small>Ver y editar mis datos</small>
+                </div>
+              </a>
+              <a href="/citas" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-calendar.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Mis citas</strong>
+                  <small>Reservar o gestionar citas</small>
+                </div>
+              </a>
+            <% } %>
+
+            <% if (currentUser.role === 'medico') { %>
+              <a href="/medicos/mi-panel" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-doctor.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Mi panel</strong>
+                  <small>Agenda y atenciones del día</small>
+                </div>
+              </a>
+              <a href="/citas" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-calendar.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Agenda completa</strong>
+                  <small>Ver todas las citas</small>
+                </div>
+              </a>
+            <% } %>
+
+            <% if (currentUser.role === 'admin') { %>
+              <a href="/admin" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-shield.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Panel admin</strong>
+                  <small>Métricas y control operativo</small>
+                </div>
+              </a>
+              <a href="/medicos" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-doctor.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Gestionar médicos</strong>
+                  <small>Equipo y horarios</small>
+                </div>
+              </a>
+              <a href="/admin/calificaciones" class="profile-dropdown-link" role="menuitem">
+                <span class="profile-dropdown-link-icon">
+                  <img src="/img/icon-heart.svg" alt="" />
+                </span>
+                <div>
+                  <strong>Calificaciones</strong>
+                  <small>Satisfacción del servicio</small>
+                </div>
+              </a>
+            <% } %>
+          </div>
+
+          <div class="profile-dropdown-sep"></div>
+
+          <!-- Cerrar sesión -->
+          <div class="profile-dropdown-footer">
+            <form method="post" action="/auth/logout" class="inline-form" style="width:100%">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button type="submit" class="profile-logout-btn" data-loading-text="Cerrando sesión...">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
+        </div>
+
       <% } %>
     </div>
   </header>

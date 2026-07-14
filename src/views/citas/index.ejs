@@ -344,7 +344,17 @@
     <% if (isPaciente) { %>
     <div class="pac-citas-cards">
       <% appointments.forEach((a) => { %>
-        <article class="pac-cita-card pac-cita-<%= a.status %>">
+        <article class="pac-cita-card pac-cita-<%= a.status %>"
+          data-id="<%= a.id %>"
+          data-doctor="<%= a.doctor_name %>"
+          data-specialty="<%= a.specialty %>"
+          data-office="<%= a.doctor_office || '' %>"
+          data-status="<%= a.status %>"
+          data-date="<%= dmy(a.appointment_date) %>"
+          data-time="<%= a.start_time %>–<%= a.end_time %>"
+          data-reason="<%= a.reason || '' %>"
+          data-created-at="<%= a.created_at || '' %>"
+          data-patient="<%= a.patient_name || '' %>">
           <div class="pac-cita-card-left">
             <div class="pac-cita-date">
               <strong><%= dmy(a.appointment_date) %></strong>
@@ -408,7 +418,17 @@
           </thead>
           <tbody>
             <% appointments.forEach((a) => { %>
-              <tr class="<%= a.appointment_date === todayIso ? 'row-today' : '' %>">
+              <tr class="<%= a.appointment_date === todayIso ? 'row-today' : '' %>"
+                data-id="<%= a.id %>"
+                data-doctor="<%= a.doctor_name %>"
+                data-specialty="<%= a.specialty %>"
+                data-office="<%= a.doctor_office || '' %>"
+                data-status="<%= a.status %>"
+                data-date="<%= dmy(a.appointment_date) %>"
+                data-time="<%= a.start_time %>–<%= a.end_time %>"
+                data-patient="<%= a.patient_name %>"
+                data-reason="<%= a.reason || '' %>"
+                data-created-at="<%= a.created_at || '' %>">
                 <td>
                   <%= dmy(a.appointment_date) %>
                   <% if (a.appointment_date === todayIso) { %>
@@ -498,5 +518,130 @@
     <% } %>
   <% } %>
 </section>
+
+<div id="modalDetailOverlay" class="modal-detail-overlay">
+  <div class="modal-detail-box" role="dialog" aria-modal="true" aria-labelledby="mdId">
+    <div class="modal-detail-header">
+      <h3>Cita <span id="mdId"></span></h3>
+      <button type="button" class="modal-detail-close" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal-detail-body">
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Paciente</span>
+        <span class="modal-detail-value" id="mdPatient"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Médico</span>
+        <span class="modal-detail-value" id="mdDoctor"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Especialidad</span>
+        <span class="modal-detail-value" id="mdSpecialty"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Consultorio</span>
+        <span class="modal-detail-value" id="mdOffice"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Fecha</span>
+        <span class="modal-detail-value" id="mdDate"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Horario</span>
+        <span class="modal-detail-value" id="mdTime"></span>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Estado</span>
+        <span class="modal-detail-value"><span id="mdStatus" class="modal-detail-badge"></span></span>
+      </div>
+      <div class="modal-detail-row" id="mdReasonRow">
+        <span class="modal-detail-label">Motivo</span>
+        <div class="modal-detail-reason">
+          <strong>Motivo</strong>
+          <span class="modal-detail-reason-value"></span>
+        </div>
+      </div>
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">Creada</span>
+        <span class="modal-detail-value" id="mdCreatedAt"></span>
+      </div>
+    </div>
+    <div class="modal-detail-footer">
+      <button type="button" class="btn btn-secondary modal-detail-close-btn">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const overlayEl = document.getElementById('modalDetailOverlay');
+  if (!overlayEl) return;
+
+  function openDetail(el) {
+    const id       = el.dataset.id;
+    const patient  = el.dataset.patient || '—';
+    const doctor   = el.dataset.doctor  || '—';
+    const specialty= el.dataset.specialty || '—';
+    const office   = el.dataset.office  || '—';
+    const status   = el.dataset.status  || '—';
+    const dateStr  = el.dataset.date    || '—';
+    const timeStr  = el.dataset.time    || '—';
+    const reason   = el.dataset.reason  || '';
+    const createdAt= el.dataset.createdAt || '—';
+    document.getElementById('mdId').textContent         = '#' + id;
+    document.getElementById('mdPatient').textContent    = patient;
+    document.getElementById('mdDoctor').textContent     = doctor;
+    document.getElementById('mdSpecialty').textContent  = specialty;
+    document.getElementById('mdOffice').textContent     = office;
+    document.getElementById('mdDate').textContent       = dateStr;
+    document.getElementById('mdTime').textContent       = timeStr;
+    document.getElementById('mdCreatedAt').textContent  = createdAt;
+
+    const badge = document.getElementById('mdStatus');
+    badge.textContent = status;
+    badge.className = 'status status-' + status + ' modal-detail-badge';
+
+    const reasonRow = document.getElementById('mdReasonRow');
+    if (reason) {
+      reasonRow.querySelector('.modal-detail-reason-value').textContent = reason;
+      reasonRow.style.display = '';
+    } else {
+      reasonRow.style.display = 'none';
+    }
+
+    overlayEl.classList.add('is-visible');
+  }
+
+  function closeDetail() {
+    overlayEl.classList.remove('is-visible');
+  }
+
+  // Patient cards
+  document.querySelectorAll('.pac-cita-card').forEach(function (card) {
+    card.addEventListener('dblclick', function (e) {
+      if (e.target.closest('button') || e.target.closest('form') || e.target.closest('input')) return;
+      openDetail(this);
+    });
+  });
+
+  // Table rows
+  document.querySelectorAll('.appointments-table tbody tr').forEach(function (row) {
+    row.addEventListener('dblclick', function (e) {
+      if (e.target.closest('button') || e.target.closest('form') || e.target.closest('input') || e.target.closest('select') || e.target.closest('a')) return;
+      openDetail(this);
+    });
+  });
+
+  // Close handlers
+  overlayEl.querySelector('.modal-detail-close').addEventListener('click', closeDetail);
+  overlayEl.querySelector('.modal-detail-close-btn').addEventListener('click', closeDetail);
+  overlayEl.addEventListener('click', function (e) {
+    if (e.target === overlayEl) closeDetail();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlayEl.classList.contains('is-visible')) closeDetail();
+  });
+});
+</script>
 
 <%- include('../partials/foot') %>

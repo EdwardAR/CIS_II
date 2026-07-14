@@ -16,7 +16,7 @@ const ALLOWED_APPOINTMENT_STATUSES = new Set([
 const findPatientByUserStmt = db.prepare('SELECT id FROM patients WHERE user_id = ?');
 const findDoctorByUserStmt = db.prepare('SELECT id FROM doctors WHERE user_id = ?');
 
-const listAppointmentsBase = `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status,
+const listAppointmentsBase = `SELECT a.id, a.appointment_date, a.start_time, a.end_time, a.status, a.reason, a.created_at,
                                      up.full_name AS patient_name, ud.full_name AS doctor_name, d.specialty, d.office AS doctor_office
                               FROM appointments a
                               INNER JOIN patients p ON p.id = a.patient_id

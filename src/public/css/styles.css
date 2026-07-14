@@ -8748,6 +8748,142 @@ tr.row-today td:first-child {
 }
 
 /* ============================================================
+   MODAL DE DETALLE DE CITA (doble click)
+   ============================================================ */
+
+.modal-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(10, 30, 45, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.modal-detail-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-detail-box {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 32px 64px rgba(10, 30, 45, 0.3);
+  width: min(480px, calc(100% - 2rem));
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: scale(0.92) translateY(12px);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+  opacity: 0;
+}
+
+.modal-detail-overlay.is-visible .modal-detail-box {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.modal-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-detail-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-family: 'Source Serif 4', serif;
+}
+
+.modal-detail-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0.2rem;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.modal-detail-close:hover {
+  color: var(--text-main);
+  background: none;
+}
+
+.modal-detail-body {
+  padding: 1rem 1.25rem 1.25rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.modal-detail-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  align-items: baseline;
+}
+
+.modal-detail-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.modal-detail-value {
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.modal-detail-reason {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  background: #f4f9fc;
+  border-radius: 10px;
+  border: 1px solid #deeaf2;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.modal-detail-reason strong {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modal-detail-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.modal-detail-footer {
+  padding: 0.75rem 1.25rem 1.15rem;
+  border-top: 1px solid var(--line);
+  text-align: right;
+}
+
+.modal-detail-footer .btn {
+  min-height: 36px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
    PERFIL DE USUARIO — TOPBAR DROPDOWN
    ============================================================ */
 

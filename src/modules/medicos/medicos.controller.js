@@ -8,6 +8,7 @@ const {
   createSchedule,
   getDoctorPanelByUserId
 } = require('./medicos.service');
+const audit = require('../audit/audit.service');
 
 function index(req, res) {
   const selectedSpecialty = req.query.specialty || '';
@@ -37,6 +38,7 @@ function create(req, res) {
   }
 
   createDoctor(req.body);
+  audit.log(req.session.user, 'CREATE', 'doctor', null, 'Medico registrado: ' + req.body.full_name + ' - ' + req.body.specialty);
   req.session.flash = { type: 'success', message: 'Medico registrado correctamente.' };
   return res.redirect('/medicos');
 }
@@ -67,8 +69,9 @@ function addSchedule(req, res) {
   }
 
   createSchedule(doctorId, req.body);
+  audit.log(req.session.user, 'CREATE', 'schedule', doctorId, 'Horario agregado al medico #' + doctorId + ': dia ' + req.body.day_of_week + ' ' + req.body.start_time + '-' + req.body.end_time);
   req.session.flash = { type: 'success', message: 'Horario agregado correctamente.' };
-  return res.redirect(`/medicos/${doctorId}/horarios`);
+  return res.redirect('/medicos/' + doctorId + '/horarios');
 }
 
 function doctorPanel(req, res) {

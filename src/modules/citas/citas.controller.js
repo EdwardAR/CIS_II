@@ -18,6 +18,7 @@ const {
   rateAppointment
 } = require('./citas.service');
 const { formatIsoDateToDmy } = require('../../utils/date');
+const audit = require('../audit/audit.service');
 
 function buildViewData(user, options = {}) {
   const selectedSpecialty = options.selectedSpecialty || '';
@@ -118,6 +119,7 @@ function create(req, res) {
 
   try {
     createAppointment(req.body, req.session.user);
+    audit.log(req.session.user, 'CREATE', 'appointment', null, 'Cita creada: ' + req.body.appointment_date + ' ' + req.body.start_time + ' - Doctor #' + req.body.doctor_id);
     req.session.flash = { type: 'success', message: 'Cita registrada con exito.' };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };
@@ -128,7 +130,9 @@ function create(req, res) {
 
 function complete(req, res) {
   try {
-    completeAppointment(Number(req.params.id), req.session.user);
+    var appointmentId = Number(req.params.id);
+    completeAppointment(appointmentId, req.session.user);
+    audit.log(req.session.user, 'UPDATE', 'appointment', appointmentId, 'Cita #' + appointmentId + ' marcada como completada');
     req.session.flash = {
       type: 'success',
       message: 'Cita marcada como completada. El paciente y el administrador recibiran la notificacion correspondiente.'
@@ -141,7 +145,9 @@ function complete(req, res) {
 
 function cancel(req, res) {
   try {
-    cancelAppointment(Number(req.params.id), req.session.user);
+    var appointmentId = Number(req.params.id);
+    cancelAppointment(appointmentId, req.session.user);
+    audit.log(req.session.user, 'UPDATE', 'appointment', appointmentId, 'Cita #' + appointmentId + ' cancelada por ' + req.session.user.full_name);
     req.session.flash = { type: 'success', message: 'Cita cancelada. Se envio la notificacion al medico correspondiente.' };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };
@@ -161,7 +167,8 @@ function editStatus(req, res) {
 
   try {
     updateAppointmentStatus(appointmentId, status);
-    req.session.flash = { type: 'success', message: `Cita actualizada a estado ${status}.` };
+    audit.log(req.session.user, 'UPDATE', 'appointment', appointmentId, 'Cita #' + appointmentId + ' actualizada a estado: ' + status);
+    req.session.flash = { type: 'success', message: 'Cita actualizada a estado ' + status + '.' };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };
   }
@@ -174,6 +181,7 @@ function requestReschedule(req, res) {
 
   try {
     requestAppointmentReschedule(appointmentId, req.session.user);
+    audit.log(req.session.user, 'UPDATE', 'appointment', appointmentId, 'Cita #' + appointmentId + ' solicitud de reprogramacion por ' + req.session.user.full_name);
     req.session.flash = {
       type: 'success',
       message: 'Solicitud de reprogramacion enviada. Un medico o administrador debe aprobarla.'
@@ -190,9 +198,10 @@ function approveReschedule(req, res) {
 
   try {
     const result = approveAppointmentReschedule(appointmentId, req.session.user);
+    audit.log(req.session.user, 'UPDATE', 'appointment', appointmentId, 'Reprogramacion aprobada para cita #' + appointmentId + ' - Nueva cita #' + result.newAppointmentId + ' para ' + formatIsoDateToDmy(result.appointmentDate) + ' ' + result.startTime, null, { originalAppointmentId: result.originalAppointmentId, newAppointmentId: result.newAppointmentId, appointmentDate: result.appointmentDate, startTime: result.startTime });
     req.session.flash = {
       type: 'success',
-      message: `Reprogramacion aprobada. Nueva cita #${result.newAppointmentId} agendada para ${formatIsoDateToDmy(result.appointmentDate)} ${result.startTime}.`
+      message: 'Reprogramacion aprobada. Nueva cita #' + result.newAppointmentId + ' agendada para ' + formatIsoDateToDmy(result.appointmentDate) + ' ' + result.startTime + '.'
     };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };
@@ -210,9 +219,10 @@ function rate(req, res) {
 
   try {
     const result = rateAppointment(Number(req.params.id), req.session.user, Number(req.body.rating), req.body.comment);
+    audit.log(req.session.user, result.isUpdate ? 'UPDATE' : 'CREATE', 'rating', result.appointmentId, 'Calificacion de cita #' + result.appointmentId + ': ' + result.rating + ' estrellas para ' + result.doctorName);
     req.session.flash = {
       type: 'success',
-      message: `Gracias por calificar la atencion de ${result.doctorName} con ${result.rating} estrella(s).`
+      message: 'Gracias por calificar la atencion de ' + result.doctorName + ' con ' + result.rating + ' estrella(s).'
     };
   } catch (error) {
     req.session.flash = { type: 'error', message: error.message };

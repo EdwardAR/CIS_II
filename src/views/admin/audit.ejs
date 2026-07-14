@@ -1,0 +1,181 @@
+<%- include('../partials/head') %>
+<%- include('../partials/flash') %>
+<%
+  function dmy(v) {
+    if (!v) return v;
+    var parts = v.split(/[- :]/);
+    if (parts.length < 3) return v;
+    var utc = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), Number(parts[3] || 0), Number(parts[4] || 0), Number(parts[5] || 0)));
+    var pe = new Date(utc.getTime() - 5 * 60 * 60 * 1000);
+    var d = String(pe.getUTCDate()).padStart(2, '0');
+    var m = String(pe.getUTCMonth() + 1).padStart(2, '0');
+    var y = pe.getUTCFullYear();
+    var h = String(pe.getUTCHours()).padStart(2, '0');
+    var min = String(pe.getUTCMinutes()).padStart(2, '0');
+    return d + '-' + m + '-' + y + ' ' + h + ':' + min;
+  }
+%>
+
+<section class="mgmt-hero card">
+  <div class="mgmt-hero-copy">
+    <a href="/admin" class="auth-back-btn" style="display:inline-flex;margin-bottom:0.75rem">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver al panel
+    </a>
+    <span class="page-kicker"><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Auditoría</span>
+    <h2>Registro de auditoría</h2>
+    <p>Todas las acciones realizadas en el sistema, ordenadas de más reciente a más antigua.</p>
+    <div class="mgmt-hero-stats">
+      <div class="mgmt-hero-stat">
+        <strong><%= total %></strong>
+        <span>eventos registrados</span>
+      </div>
+    </div>
+  </div>
+  <div class="mgmt-hero-media">
+    <img src="/img/hero-profile.svg" alt="Auditoria" />
+  </div>
+</section>
+
+<section class="card dashboard-section-gap">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-clipboard.svg" alt="" class="inline-icon" />Filtros</h2>
+  </div>
+  <form method="get" action="/admin/auditoria" class="mgmt-filter-form" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:end">
+    <div class="reg-field" style="min-width:160px">
+      <label for="f-action" style="font-size:0.82rem;font-weight:600">Acción</label>
+      <div class="reg-input-wrap">
+        <select name="action" id="f-action" class="reg-input" onchange="this.form.submit()">
+          <option value="">Todas</option>
+          <option value="LOGIN" <%= filterAction === 'LOGIN' ? 'selected' : '' %>>Inicio de sesión</option>
+          <option value="LOGOUT" <%= filterAction === 'LOGOUT' ? 'selected' : '' %>>Cierre de sesión</option>
+          <option value="CREATE" <%= filterAction === 'CREATE' ? 'selected' : '' %>>Creación</option>
+          <option value="UPDATE" <%= filterAction === 'UPDATE' ? 'selected' : '' %>>Actualización</option>
+          <option value="DELETE" <%= filterAction === 'DELETE' ? 'selected' : '' %>>Eliminación</option>
+        </select>
+      </div>
+    </div>
+    <div class="reg-field" style="min-width:160px">
+      <label for="f-target" style="font-size:0.82rem;font-weight:600">Objetivo</label>
+      <div class="reg-input-wrap">
+        <select name="target" id="f-target" class="reg-input" onchange="this.form.submit()">
+          <option value="">Todos</option>
+          <option value="user" <%= filterTarget === 'user' ? 'selected' : '' %>>Usuario</option>
+          <option value="appointment" <%= filterTarget === 'appointment' ? 'selected' : '' %>>Cita</option>
+          <option value="rating" <%= filterTarget === 'rating' ? 'selected' : '' %>>Calificación</option>
+          <option value="doctor" <%= filterTarget === 'doctor' ? 'selected' : '' %>>Médico</option>
+          <option value="schedule" <%= filterTarget === 'schedule' ? 'selected' : '' %>>Horario</option>
+          <option value="notification" <%= filterTarget === 'notification' ? 'selected' : '' %>>Notificación</option>
+          <option value="patient" <%= filterTarget === 'patient' ? 'selected' : '' %>>Paciente</option>
+        </select>
+      </div>
+    </div>
+    <div class="reg-field" style="min-width:180px">
+      <label for="f-user" style="font-size:0.82rem;font-weight:600">Usuario</label>
+      <div class="reg-input-wrap">
+        <input type="text" name="user" id="f-user" placeholder="Buscar por nombre..." value="<%= filterUser %>" class="reg-input" />
+      </div>
+    </div>
+    <button type="submit" class="btn auth-submit" style="padding:0.5rem 1rem;min-height:auto;font-size:0.85rem">Filtrar</button>
+    <% if (filterAction || filterTarget || filterUser) { %>
+      <a href="/admin/auditoria" class="mgmt-filter-clear">✕ Limpiar filtros</a>
+    <% } %>
+  </form>
+</section>
+
+<section class="card dashboard-section-gap">
+  <div class="section-title-wrap">
+    <h2><img src="/img/icon-clock.svg" alt="" class="inline-icon" />Eventos</h2>
+    <span class="table-count"><%= total %> evento(s)</span>
+  </div>
+
+  <% if (!logs.length) { %>
+    <div class="tbl-empty">
+      <div class="tbl-empty-icon"><img src="/img/icon-clipboard.svg" alt="" /></div>
+      <strong>Sin resultados</strong>
+      <p>No se encontraron eventos de auditoría con los filtros seleccionados.</p>
+    </div>
+  <% } else { %>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Acción</th>
+            <th>Objetivo</th>
+            <th>Descripción</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% logs.forEach(function(log) { %>
+            <tr>
+              <td style="white-space:nowrap;font-size:0.82rem"><%= dmy(log.created_at) %></td>
+              <td>
+                <div class="td-name">
+                  <span class="td-avatar"><%= (log.user_full_name || 'Sistema').charAt(0).toUpperCase() %></span>
+                  <%= log.user_full_name || 'Sistema' %>
+                </div>
+              </td>
+              <td><span class="status" style="text-transform:lowercase"><%= log.user_role || '-' %></span></td>
+              <td>
+                <% if (log.action_type === 'LOGIN') { %>
+                  <span class="status status-completada" style="font-size:0.75rem">LOGIN</span>
+                <% } else if (log.action_type === 'LOGOUT') { %>
+                  <span class="status status-cancelada" style="font-size:0.75rem">LOGOUT</span>
+                <% } else if (log.action_type === 'CREATE') { %>
+                  <span class="status" style="background:#ddf5e6;color:#1f6a42;font-size:0.75rem">CREAR</span>
+                <% } else if (log.action_type === 'UPDATE') { %>
+                  <span class="status" style="background:#fff3d6;color:#9a680c;font-size:0.75rem">ACTUALIZAR</span>
+                <% } else if (log.action_type === 'DELETE') { %>
+                  <span class="status status-cancelada" style="font-size:0.75rem">ELIMINAR</span>
+                <% } else { %>
+                  <span class="status" style="font-size:0.75rem"><%= log.action_type %></span>
+                <% } %>
+              </td>
+              <td style="font-size:0.85rem"><%= log.target_type %></td>
+              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= log.description %>"><%= log.description %></td>
+              <td style="font-size:0.78rem">
+                <% if (log.old_values || log.new_values) { %>
+                  <button type="button" class="btn" style="padding:0.2rem 0.5rem;font-size:0.72rem;min-height:auto;background:#eef4f8;border:1px solid #d0dce8" onclick="toggleDetail(this)">Ver</button>
+                  <div class="audit-detail" style="display:none;margin-top:0.4rem;max-width:280px;background:#f7fafc;border:1px solid #dde6ef;border-radius:8px;padding:0.5rem;white-space:pre-wrap;font-size:0.72rem;line-height:1.3;word-break:break-all">
+                    <% if (log.old_values) { %><strong>Anterior:</strong> <%= log.old_values %><br><% } %>
+                    <% if (log.new_values) { %><strong>Nuevo:</strong> <%= log.new_values %><% } %>
+                  </div>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;flex-wrap:wrap">
+        <% if (page > 1) { %>
+          <a href="/admin/auditoria?page=<%= page - 1 %><%= filterAction ? '&action=' + filterAction : '' %><%= filterTarget ? '&target=' + filterTarget : '' %><%= filterUser ? '&user=' + filterUser : '' %>" class="btn" style="padding:0.35rem 0.75rem;font-size:0.82rem;min-height:auto">&laquo; Anterior</a>
+        <% } %>
+        <span style="padding:0.35rem 0.5rem;font-size:0.82rem;color:var(--text-muted)">Pág. <%= page %> de <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+          <a href="/admin/auditoria?page=<%= page + 1 %><%= filterAction ? '&action=' + filterAction : '' %><%= filterTarget ? '&target=' + filterTarget : '' %><%= filterUser ? '&user=' + filterUser : '' %>" class="btn" style="padding:0.35rem 0.75rem;font-size:0.82rem;min-height:auto">Siguiente &raquo;</a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</section>
+
+<script>
+function toggleDetail(btn) {
+  var detail = btn.nextElementSibling;
+  if (!detail) return;
+  var isHidden = detail.style.display === 'none' || !detail.style.display;
+  detail.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Ocultar' : 'Ver';
+}
+</script>
+
+<%- include('../partials/foot') %>

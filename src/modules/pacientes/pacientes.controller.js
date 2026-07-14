@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const { getPatientProfileByUserId, updatePatientProfile, getDoctorAvailabilitySnapshot } = require('./pacientes.service');
+const audit = require('../audit/audit.service');
 
 function buildAvailabilitySummary(doctorsAvailability) {
   const inShift = doctorsAvailability.filter((doctor) => doctor.is_in_shift).length;
@@ -36,8 +37,10 @@ function updateProfile(req, res) {
     });
   }
 
+  var oldPatient = getPatientProfileByUserId(req.session.user.id);
   updatePatientProfile(req.session.user.id, req.body);
   req.session.user.full_name = req.body.full_name;
+  audit.log(req.session.user, 'UPDATE', 'patient', req.session.user.id, 'Perfil de paciente actualizado', { full_name: oldPatient.full_name, phone: oldPatient.phone, address: oldPatient.address }, { full_name: req.body.full_name, phone: req.body.phone, address: req.body.address });
   req.session.flash = { type: 'success', message: 'Perfil actualizado correctamente.' };
   return res.redirect('/pacientes/perfil');
 }

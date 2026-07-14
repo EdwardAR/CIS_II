@@ -46,6 +46,9 @@
       <a href="/admin/calificaciones" class="<%= navPath === '/admin/calificaciones' ? 'nav-active' : '' %>">
         <img src="/img/icon-heart.svg" alt="" class="nav-icon" />Calificaciones
       </a>
+      <a href="/admin/auditoria" class="<%= navPath === '/admin/auditoria' || navPath.startsWith('/admin/auditoria') ? 'nav-active' : '' %>">
+        <img src="/img/icon-clipboard.svg" alt="" class="nav-icon" />Auditoría
+      </a>
     <% } %>
 
     <div class="nav-logout-wrap">

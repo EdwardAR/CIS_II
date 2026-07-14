@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS patients (
   phone TEXT NOT NULL,
   birth_date TEXT,
   address TEXT,
-  emergency_contact TEXT,
+  emergency_name TEXT,
+  emergency_phone TEXT,
+  emergency_relation TEXT,
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -108,3 +110,24 @@ CREATE TABLE IF NOT EXISTS appointment_ratings (
 
 CREATE INDEX IF NOT EXISTS idx_appointment_ratings_doctor
   ON appointment_ratings(doctor_user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  user_full_name TEXT,
+  user_role TEXT,
+  action_type TEXT NOT NULL,
+  target_type TEXT NOT NULL,
+  target_id INTEGER,
+  description TEXT NOT NULL,
+  old_values TEXT,
+  new_values TEXT,
+  ip_address TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created
+  ON audit_log(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_action
+  ON audit_log(action_type, target_type);

@@ -121,7 +121,7 @@
         </div>
 
         <div class="auth-field-row">
-          <div class="auth-field">
+          <div class="auth-field" data-field="full_name">
             <label for="reg-full_name">Nombre completo <span class="auth-required">*</span></label>
             <div class="auth-input-wrap">
               <img src="/img/icon-user.svg" alt="" class="auth-input-icon" />
@@ -130,12 +130,10 @@
                 class="auth-input <%= hasError('full_name') %>"
                 autocomplete="name" required minlength="5" />
             </div>
-            <% if (fieldError('full_name')) { %>
-              <span class="auth-field-error"><%= fieldError('full_name') %></span>
-            <% } %>
+            <span class="auth-field-error" data-error="full_name" style="display:<%= fieldError('full_name') ? '' : 'none' %>"><%= fieldError('full_name') || '' %></span>
           </div>
 
-          <div class="auth-field">
+          <div class="auth-field" data-field="dni">
             <label for="reg-dni">DNI <span class="auth-required">*</span></label>
             <div class="auth-input-wrap">
               <img src="/img/icon-clipboard.svg" alt="" class="auth-input-icon" />
@@ -144,16 +142,13 @@
                 class="auth-input <%= hasError('dni') %>"
                 autocomplete="off" required pattern="\d{8}" inputmode="numeric" maxlength="8" />
             </div>
-            <% if (fieldError('dni')) { %>
-              <span class="auth-field-error"><%= fieldError('dni') %></span>
-            <% } else { %>
-              <span class="auth-hint">8 dígitos numéricos</span>
-            <% } %>
+            <span class="auth-hint" data-hint="dni" style="display:<%= fieldError('dni') ? 'none' : '' %>">8 dígitos numéricos</span>
+            <span class="auth-field-error" data-error="dni" style="display:<%= fieldError('dni') ? '' : 'none' %>"><%= fieldError('dni') || '' %></span>
           </div>
         </div>
 
         <div class="auth-field-row">
-          <div class="auth-field">
+          <div class="auth-field" data-field="birth_date">
             <label for="reg-birth_date">Fecha de nacimiento</label>
             <div class="auth-input-wrap">
               <img src="/img/icon-clock.svg" alt="" class="auth-input-icon" />
@@ -161,12 +156,10 @@
                 class="auth-input <%= hasError('birth_date') %>"
                 autocomplete="bday" />
             </div>
-            <% if (fieldError('birth_date')) { %>
-              <span class="auth-field-error"><%= fieldError('birth_date') %></span>
-            <% } %>
+            <span class="auth-field-error" data-error="birth_date" style="display:<%= fieldError('birth_date') ? '' : 'none' %>"><%= fieldError('birth_date') || '' %></span>
           </div>
 
-          <div class="auth-field">
+          <div class="auth-field" data-field="phone">
             <label for="reg-phone">Teléfono <span class="auth-required">*</span></label>
             <div class="auth-input-wrap">
               <img src="/img/icon-heart.svg" alt="" class="auth-input-icon" />
@@ -175,11 +168,8 @@
                 class="auth-input <%= hasError('phone') %>"
                 autocomplete="tel" required pattern="9\d{8}" inputmode="numeric" maxlength="9" />
             </div>
-            <% if (fieldError('phone')) { %>
-              <span class="auth-field-error"><%= fieldError('phone') %></span>
-            <% } else { %>
-              <span class="auth-hint">Empieza con 9, 9 dígitos</span>
-            <% } %>
+            <span class="auth-hint" data-hint="phone" style="display:<%= fieldError('phone') ? 'none' : '' %>">Empieza con 9, 9 dígitos</span>
+            <span class="auth-field-error" data-error="phone" style="display:<%= fieldError('phone') ? '' : 'none' %>"><%= fieldError('phone') || '' %></span>
           </div>
         </div>
 
@@ -201,7 +191,7 @@
           Datos de acceso
         </div>
 
-        <div class="auth-field">
+        <div class="auth-field" data-field="email">
           <label for="reg-email">Correo electrónico <span class="auth-required">*</span></label>
           <div class="auth-input-wrap">
             <img src="/img/icon-mail.svg" alt="" class="auth-input-icon" />
@@ -210,12 +200,10 @@
               class="auth-input <%= hasError('email') %>"
               autocomplete="email" required />
           </div>
-          <% if (fieldError('email')) { %>
-            <span class="auth-field-error"><%= fieldError('email') %></span>
-          <% } %>
+          <span class="auth-field-error" data-error="email" style="display:<%= fieldError('email') ? '' : 'none' %>"><%= fieldError('email') || '' %></span>
         </div>
 
-        <div class="auth-field">
+        <div class="auth-field" data-field="password">
           <label for="reg-password">Contraseña <span class="auth-required">*</span></label>
           <div class="auth-input-wrap">
             <img src="/img/icon-lock.svg" alt="" class="auth-input-icon" />
@@ -228,9 +216,7 @@
               <svg class="eye-icon eye-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
           </div>
-          <% if (fieldError('password')) { %>
-            <span class="auth-field-error"><%= fieldError('password') %></span>
-          <% } %>
+          <span class="auth-field-error" data-error="password" style="display:<%= fieldError('password') ? '' : 'none' %>"><%= fieldError('password') || '' %></span>
           <!-- Barra de fortaleza -->
           <div class="pw-strength-bar-wrap" id="pwStrengthWrap" style="display:none">
             <div class="pw-strength-track">
@@ -255,15 +241,48 @@
           <span class="auth-group-optional-tag">opcional</span>
         </div>
 
-        <div class="auth-field">
-          <label for="reg-emergency">Nombre y teléfono</label>
-          <div class="auth-input-wrap">
-            <img src="/img/icon-shield.svg" alt="" class="auth-input-icon" />
-            <input type="text" id="reg-emergency" name="emergency_contact"
-              placeholder="Ej. Juan García — 987654321"
-              class="auth-input" />
+        <div class="auth-field-row">
+          <div class="auth-field" data-field="emergency_name">
+            <label for="reg-emergency_name">Nombre del contacto</label>
+            <div class="auth-input-wrap">
+              <img src="/img/icon-user.svg" alt="" class="auth-input-icon" />
+              <input type="text" id="reg-emergency_name" name="emergency_name"
+                placeholder="Ej. Juan García"
+                class="auth-input" />
+            </div>
+            <span class="auth-field-error" data-error="emergency_name" style="display:none"></span>
+          </div>
+
+          <div class="auth-field" data-field="emergency_phone">
+            <label for="reg-emergency_phone">Teléfono</label>
+            <div class="auth-input-wrap">
+              <img src="/img/icon-heart.svg" alt="" class="auth-input-icon" />
+              <input type="tel" id="reg-emergency_phone" name="emergency_phone"
+                placeholder="987654321"
+                class="auth-input" pattern="9\d{8}" inputmode="numeric" maxlength="9" />
+            </div>
+            <span class="auth-hint" data-hint="emergency_phone">Empieza con 9, 9 dígitos</span>
+            <span class="auth-field-error" data-error="emergency_phone" style="display:none"></span>
+          </div>
+
+          <div class="auth-field" data-field="emergency_relation">
+            <label for="reg-emergency_relation">Parentesco</label>
+            <div class="auth-input-wrap">
+              <img src="/img/icon-shield.svg" alt="" class="auth-input-icon" />
+              <select id="reg-emergency_relation" name="emergency_relation" class="auth-input">
+                <option value="">Seleccionar...</option>
+                <option value="Familiar">Familiar</option>
+                <option value="Amigo">Amigo</option>
+                <option value="Conyuge">Cónyuge</option>
+                <option value="Hijo">Hijo</option>
+                <option value="Padre">Padre/Madre</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <span class="auth-field-error" data-error="emergency_relation" style="display:none"></span>
           </div>
         </div>
+        <span class="auth-hint">Persona a contactar en caso de emergencia</span>
       </div>
 
       <div class="auth-form-footer">
@@ -335,6 +354,122 @@ document.querySelectorAll('.auth-eye-btn, .password-toggle').forEach(function(bt
     fill.className = 'pw-strength-fill ' + lvl.cls;
     text.textContent = lvl.label;
     text.className = 'pw-strength-text ' + lvl.cls;
+  });
+})();
+
+/* ============================================================
+   VALIDACIÓN EN TIEMPO REAL
+   ============================================================ */
+(function() {
+  var validators = {
+    full_name: {
+      sel: '#reg-full_name',
+      fn: function(v) {
+        if (v.trim().length < 5) return 'Nombre completo debe tener al menos 5 caracteres.';
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(v)) return 'Nombre solo debe contener letras y espacios.';
+        return '';
+      }
+    },
+    dni: {
+      sel: '#reg-dni',
+      fn: function(v) {
+        if (!/^\d{8}$/.test(v)) return 'DNI debe tener exactamente 8 dígitos.';
+        return '';
+      }
+    },
+    phone: {
+      sel: '#reg-phone',
+      fn: function(v) {
+        if (!/^9\d{8}$/.test(v)) return 'Teléfono debe tener 9 dígitos y comenzar con 9.';
+        return '';
+      }
+    },
+    birth_date: {
+      sel: '#reg-birth_date',
+      fn: function(v) {
+        if (v && isNaN(Date.parse(v))) return 'Fecha de nacimiento inválida.';
+        return '';
+      }
+    },
+    email: {
+      sel: '#reg-email',
+      fn: function(v) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return 'Ingrese un correo electrónico válido.';
+        return '';
+      }
+    },
+    password: {
+      sel: '#reg-password',
+      fn: function(v) {
+        if (v.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
+        if (!/[A-Z]/.test(v)) return 'La contraseña debe contener al menos una mayúscula.';
+        if (!/[0-9]/.test(v)) return 'La contraseña debe contener al menos un número.';
+        if (!/[!@#$%^&*(),.?":{}|<>_\-]/.test(v)) return 'La contraseña debe contener al menos un carácter especial.';
+        return '';
+      }
+    },
+    emergency_name: {
+      sel: '#reg-emergency_name',
+      fn: function(v) {
+        if (v.trim().length > 0 && v.trim().length < 3) return 'Nombre del contacto muy corto.';
+        return '';
+      }
+    },
+    emergency_phone: {
+      sel: '#reg-emergency_phone',
+      fn: function(v) {
+        if (v.trim().length > 0 && !/^9\d{8}$/.test(v)) return 'Teléfono de emergencia debe tener 9 dígitos y comenzar con 9.';
+        return '';
+      }
+    },
+    emergency_relation: {
+      sel: '#reg-emergency_relation',
+      fn: function(v) {
+        var valid = ['', 'Familiar', 'Amigo', 'Conyuge', 'Hijo', 'Padre', 'Otro'];
+        if (v && valid.indexOf(v) === -1) return 'Parentesco inválido.';
+        return '';
+      }
+    }
+  };
+
+  function validateField(name) {
+    var rule = validators[name];
+    if (!rule) return '';
+    var input = document.querySelector(rule.sel);
+    if (!input) return '';
+    var msg = rule.fn(input.value);
+    var errEl = document.querySelector('[data-error="' + name + '"]');
+    var hintEl = document.querySelector('[data-hint="' + name + '"]');
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.style.display = msg ? '' : 'none';
+    }
+    if (hintEl) {
+      hintEl.style.display = msg ? 'none' : '';
+    }
+    var field = input.closest('.auth-field');
+    if (field) {
+      var inp = field.querySelector('.auth-input');
+      if (inp) inp.classList.toggle('auth-input-error', !!msg);
+    }
+    return msg;
+  }
+
+  Object.keys(validators).forEach(function(name) {
+    var input = document.querySelector(validators[name].sel);
+    if (!input) return;
+    var events = name === 'birth_date' ? 'blur change' : 'input blur';
+    events.split(' ').forEach(function(evt) {
+      input.addEventListener(evt, function() { validateField(name); });
+    });
+  });
+
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    var hasError = false;
+    Object.keys(validators).forEach(function(name) {
+      if (validateField(name)) hasError = true;
+    });
+    if (hasError) e.preventDefault();
   });
 })();
 </script>

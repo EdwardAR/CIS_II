@@ -12,7 +12,7 @@ function createPatientUser(payload) {
     'INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, ?)'
   );
   const insertPatient = db.prepare(
-    'INSERT INTO patients (user_id, dni, phone, birth_date, address, emergency_contact) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO patients (user_id, dni, phone, birth_date, address, emergency_name, emergency_phone, emergency_relation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   );
 
   const tx = db.transaction(() => {
@@ -23,7 +23,9 @@ function createPatientUser(payload) {
       payload.phone,
       payload.birth_date || null,
       payload.address || null,
-      payload.emergency_contact || null
+      payload.emergency_name || null,
+      payload.emergency_phone || null,
+      payload.emergency_relation || null
     );
     return result.lastInsertRowid;
   });

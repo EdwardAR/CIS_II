@@ -11,7 +11,7 @@ db.pragma('synchronous = NORMAL');
 
 db.pragma('busy_timeout = 5000');
 
-db.exec(`
+	db.exec(`
 	CREATE TABLE IF NOT EXISTS notifications (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		recipient_user_id INTEGER NOT NULL,
@@ -47,6 +47,27 @@ db.exec(`
 
 	CREATE INDEX IF NOT EXISTS idx_appointment_ratings_doctor
 		ON appointment_ratings(doctor_user_id, created_at DESC);
+
+	CREATE TABLE IF NOT EXISTS audit_log (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER,
+		user_full_name TEXT,
+		user_role TEXT,
+		action_type TEXT NOT NULL,
+		target_type TEXT NOT NULL,
+		target_id INTEGER,
+		description TEXT NOT NULL,
+		old_values TEXT,
+		new_values TEXT,
+		ip_address TEXT,
+		created_at TEXT NOT NULL DEFAULT (datetime('now'))
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_audit_log_created
+		ON audit_log(created_at DESC);
+
+	CREATE INDEX IF NOT EXISTS idx_audit_log_action
+		ON audit_log(action_type, target_type);
 `);
 
 module.exports = { db };

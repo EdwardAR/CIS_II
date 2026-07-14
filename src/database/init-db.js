@@ -150,7 +150,9 @@ const DEFAULT_PATIENTS = [
     phone: '987654321',
     birthDate: '1992-04-15',
     address: 'Av. Los Rosales 123',
-    emergencyContact: 'Juan Perez - 999111222'
+    emergencyName: 'Juan Perez',
+    emergencyPhone: '999111222',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Jose Quispe',
@@ -159,7 +161,9 @@ const DEFAULT_PATIENTS = [
     phone: '912345678',
     birthDate: '1988-09-01',
     address: 'Jr. Los Olivos 580',
-    emergencyContact: 'Elena Quispe - 988777666'
+    emergencyName: 'Elena Quispe',
+    emergencyPhone: '988777666',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Carla Mendoza',
@@ -168,7 +172,9 @@ const DEFAULT_PATIENTS = [
     phone: '981223344',
     birthDate: '1995-11-20',
     address: 'Av. Primavera 420',
-    emergencyContact: 'Ramon Mendoza - 955443322'
+    emergencyName: 'Ramon Mendoza',
+    emergencyPhone: '955443322',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Luis Alvarado',
@@ -177,7 +183,9 @@ const DEFAULT_PATIENTS = [
     phone: '964112233',
     birthDate: '1983-02-08',
     address: 'Calle Las Flores 188',
-    emergencyContact: 'Mariela Alvarado - 977001122'
+    emergencyName: 'Mariela Alvarado',
+    emergencyPhone: '977001122',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Rosa Huaman',
@@ -186,7 +194,9 @@ const DEFAULT_PATIENTS = [
     phone: '973332211',
     birthDate: '1979-07-03',
     address: 'Jr. San Martin 950',
-    emergencyContact: 'Pedro Huaman - 966778899'
+    emergencyName: 'Pedro Huaman',
+    emergencyPhone: '966778899',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Andrea Salinas',
@@ -195,7 +205,9 @@ const DEFAULT_PATIENTS = [
     phone: '989001122',
     birthDate: '1998-05-27',
     address: 'Av. El Sol 330',
-    emergencyContact: 'Miguel Salinas - 978881144'
+    emergencyName: 'Miguel Salinas',
+    emergencyPhone: '978881144',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Pedro Caceres',
@@ -204,7 +216,9 @@ const DEFAULT_PATIENTS = [
     phone: '982776655',
     birthDate: '1986-10-10',
     address: 'Jr. Lima 541',
-    emergencyContact: 'Ruth Caceres - 981998877'
+    emergencyName: 'Ruth Caceres',
+    emergencyPhone: '981998877',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Daniela Rojas',
@@ -213,7 +227,9 @@ const DEFAULT_PATIENTS = [
     phone: '985667788',
     birthDate: '1993-01-19',
     address: 'Calle Central 88',
-    emergencyContact: 'Luis Rojas - 977554433'
+    emergencyName: 'Luis Rojas',
+    emergencyPhone: '977554433',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Ricardo Vega',
@@ -222,7 +238,9 @@ const DEFAULT_PATIENTS = [
     phone: '984443322',
     birthDate: '1975-12-02',
     address: 'Av. Progreso 761',
-    emergencyContact: 'Diana Vega - 971220033'
+    emergencyName: 'Diana Vega',
+    emergencyPhone: '971220033',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Luciana Soto',
@@ -231,7 +249,9 @@ const DEFAULT_PATIENTS = [
     phone: '981110022',
     birthDate: '2000-03-30',
     address: 'Jr. Los Claveles 452',
-    emergencyContact: 'Rosa Soto - 972334455'
+    emergencyName: 'Rosa Soto',
+    emergencyPhone: '972334455',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Fernando Aquino',
@@ -240,7 +260,9 @@ const DEFAULT_PATIENTS = [
     phone: '986220044',
     birthDate: '1981-06-14',
     address: 'Urb. Santa Ana Mz B Lt 9',
-    emergencyContact: 'Silvia Aquino - 973660077'
+    emergencyName: 'Silvia Aquino',
+    emergencyPhone: '973660077',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Gabriela Fuentes',
@@ -249,7 +271,9 @@ const DEFAULT_PATIENTS = [
     phone: '984201155',
     birthDate: '1991-08-09',
     address: 'Av. Los Eucaliptos 457',
-    emergencyContact: 'Mario Fuentes - 965778811'
+    emergencyName: 'Mario Fuentes',
+    emergencyPhone: '965778811',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Hector Vilca',
@@ -258,7 +282,9 @@ const DEFAULT_PATIENTS = [
     phone: '981234567',
     birthDate: '1984-01-22',
     address: 'Jr. Lima Norte 211',
-    emergencyContact: 'Rocio Vilca - 986554433'
+    emergencyName: 'Rocio Vilca',
+    emergencyPhone: '986554433',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Milagros Tejada',
@@ -267,7 +293,9 @@ const DEFAULT_PATIENTS = [
     phone: '989771122',
     birthDate: '1997-10-31',
     address: 'Calle Aurora 91',
-    emergencyContact: 'Luis Tejada - 977889944'
+    emergencyName: 'Luis Tejada',
+    emergencyPhone: '977889944',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Samuel Yupanqui',
@@ -276,7 +304,9 @@ const DEFAULT_PATIENTS = [
     phone: '983456710',
     birthDate: '1978-03-17',
     address: 'Av. Universitaria 654',
-    emergencyContact: 'Nelly Yupanqui - 969441122'
+    emergencyName: 'Nelly Yupanqui',
+    emergencyPhone: '969441122',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Paola Cuentas',
@@ -285,7 +315,9 @@ const DEFAULT_PATIENTS = [
     phone: '980665544',
     birthDate: '1990-12-11',
     address: 'Jr. Miraflores 308',
-    emergencyContact: 'Ruben Cuentas - 973114455'
+    emergencyName: 'Ruben Cuentas',
+    emergencyPhone: '973114455',
+    emergencyRelation: 'Familiar'
   },
   {
     fullName: 'Kevin Montoya',
@@ -294,7 +326,9 @@ const DEFAULT_PATIENTS = [
     phone: '987334455',
     birthDate: '2001-05-06',
     address: 'Pasaje Central 145',
-    emergencyContact: 'Dora Montoya - 981337799'
+    emergencyName: 'Dora Montoya',
+    emergencyPhone: '981337799',
+    emergencyRelation: 'Familiar'
   }
 ];
 
@@ -508,8 +542,8 @@ function ensurePatient(patientUserId, patientData) {
 
   return db
     .prepare(
-      `INSERT INTO patients (user_id, dni, phone, birth_date, address, emergency_contact)
-       VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO patients (user_id, dni, phone, birth_date, address, emergency_name, emergency_phone, emergency_relation)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       patientUserId,
@@ -517,7 +551,9 @@ function ensurePatient(patientUserId, patientData) {
       patientData.phone,
       patientData.birthDate,
       patientData.address,
-      patientData.emergencyContact
+      patientData.emergencyName,
+      patientData.emergencyPhone,
+      patientData.emergencyRelation
     ).lastInsertRowid;
 }
 
@@ -678,11 +714,28 @@ function purgeDeprecatedSpecialties() {
   db.prepare(`DELETE FROM users WHERE id IN (${userPlaceholders}) AND role = 'medico'`).run(...doctorUserIds);
 }
 
+function ensurePatientsEmergencyColumns() {
+  const columns = db
+    .prepare("PRAGMA table_info('patients')")
+    .all()
+    .map(function(c) { return c.name; });
+
+  if (columns.indexOf('emergency_name') !== -1) return;
+
+  var migrate = db.transaction(function() {
+    db.exec("ALTER TABLE patients ADD COLUMN emergency_name TEXT");
+    db.exec("ALTER TABLE patients ADD COLUMN emergency_phone TEXT");
+    db.exec("ALTER TABLE patients ADD COLUMN emergency_relation TEXT");
+  });
+  migrate();
+}
+
 function initDatabase() {
   const schemaPath = path.resolve(__dirname, 'schema.sql');
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   db.exec(schemaSql);
   ensureAppointmentsStatusSchema();
+  ensurePatientsEmergencyColumns();
 
   const defaultPasswordHash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
 

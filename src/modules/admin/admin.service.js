@@ -221,4 +221,36 @@ function getRatings() {
   return { allRatings, byDoctor };
 }
 
-module.exports = { getSummary, getRatings };
+function getAuditLogs(query) {
+  var where = [];
+  var params = [];
+
+  if (query.action) {
+    where.push('action_type = ?');
+    params.push(query.action);
+  }
+  if (query.target) {
+    where.push('target_type = ?');
+    params.push(query.target);
+  }
+  if (query.user) {
+    where.push('user_full_name LIKE ?');
+    params.push('%' + query.user + '%');
+  }
+
+  var whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+  var page = Math.max(parseInt(query.page, 10) || 1, 1);
+  var limit = 30;
+  var offset = (page - 1) * limit;
+
+  var total = db.prepare('SELECT COUNT(*) as count FROM audit_log ' + whereClause).get(...params).count;
+  var rows = db
+    .prepare('SELECT * FROM audit_log ' + whereClause + ' ORDER BY created_at DESC LIMIT ? OFFSET ?')
+    .all(...params, limit, offset);
+
+  var totalPages = Math.ceil(total / limit) || 1;
+
+  return { rows, total, page, totalPages, limit, action: query.action || '', target: query.target || '', user: query.user || '' };
+}
+
+module.exports = { getSummary, getRatings, getAuditLogs };

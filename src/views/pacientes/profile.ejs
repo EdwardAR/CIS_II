@@ -111,17 +111,44 @@
             <span class="reg-legend-num">2</span>
             Contacto de emergencia <span class="reg-legend-optional">(opcional)</span>
           </legend>
-          <div class="reg-field">
-            <label for="pf-emergency">Nombre y teléfono</label>
-            <div class="reg-input-wrap">
-              <img src="/img/icon-shield.svg" alt="" class="reg-input-icon" />
-              <input type="text" id="pf-emergency" name="emergency_contact"
-                value="<%= patient.emergency_contact || '' %>"
-                placeholder="Ej. Juan García — 987654321"
-                class="reg-input" />
+          <div class="reg-field-row">
+            <div class="reg-field">
+              <label for="pf-emergency_name">Nombre del contacto</label>
+              <div class="reg-input-wrap">
+                <img src="/img/icon-user.svg" alt="" class="reg-input-icon" />
+                <input type="text" id="pf-emergency_name" name="emergency_name"
+                  value="<%= patient.emergency_name || '' %>"
+                  placeholder="Ej. Juan García"
+                  class="reg-input" />
+              </div>
             </div>
-            <span class="reg-hint">Persona a contactar en caso de emergencia</span>
+            <div class="reg-field">
+              <label for="pf-emergency_phone">Teléfono</label>
+              <div class="reg-input-wrap">
+                <img src="/img/icon-heart.svg" alt="" class="reg-input-icon" />
+                <input type="tel" id="pf-emergency_phone" name="emergency_phone"
+                  value="<%= patient.emergency_phone || '' %>"
+                  placeholder="987654321"
+                  class="reg-input" pattern="9\d{8}" inputmode="numeric" maxlength="9" />
+              </div>
+            </div>
+            <div class="reg-field">
+              <label for="pf-emergency_relation">Parentesco</label>
+              <div class="reg-input-wrap">
+                <img src="/img/icon-shield.svg" alt="" class="reg-input-icon" />
+                <select id="pf-emergency_relation" name="emergency_relation" class="reg-input">
+                  <option value="">Seleccionar...</option>
+                  <option value="Familiar" <%= patient.emergency_relation === 'Familiar' ? 'selected' : '' %>>Familiar</option>
+                  <option value="Amigo" <%= patient.emergency_relation === 'Amigo' ? 'selected' : '' %>>Amigo</option>
+                  <option value="Conyuge" <%= patient.emergency_relation === 'Conyuge' ? 'selected' : '' %>>Cónyuge</option>
+                  <option value="Hijo" <%= patient.emergency_relation === 'Hijo' ? 'selected' : '' %>>Hijo</option>
+                  <option value="Padre" <%= patient.emergency_relation === 'Padre' ? 'selected' : '' %>>Padre/Madre</option>
+                  <option value="Otro" <%= patient.emergency_relation === 'Otro' ? 'selected' : '' %>>Otro</option>
+                </select>
+              </div>
+            </div>
           </div>
+          <span class="reg-hint">Persona a contactar en caso de emergencia</span>
         </fieldset>
 
         <button type="submit" class="btn auth-submit" style="width:100%;justify-content:center;min-height:46px;margin-top:0.25rem">

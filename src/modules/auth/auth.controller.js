@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const { findUserByEmail, createPatientUser, validatePassword } = require('./auth.service');
+const audit = require('../audit/audit.service');
 
 function showLogin(req, res) {
   return res.render('auth/login', { pageTitle: 'Iniciar sesion' });
@@ -28,6 +29,7 @@ function register(req, res) {
 
   try {
     createPatientUser(req.body);
+    audit.log(null, 'CREATE', 'user', null, 'Nuevo paciente registrado: ' + req.body.full_name + ' (' + req.body.email + ')', null, { full_name: req.body.full_name, email: req.body.email, dni: req.body.dni });
     req.session.flash = { type: 'success', message: 'Registro exitoso. Ya puede iniciar sesion.' };
     return res.redirect('/auth/login');
   } catch (error) {
@@ -62,11 +64,16 @@ function login(req, res) {
     role: user.role
   };
 
+  audit.log(req.session.user, 'LOGIN', 'user', user.id, 'Inicio de sesion: ' + user.full_name + ' (' + user.role + ')');
   return res.redirect('/');
 }
 
 function logout(req, res) {
+  var user = req.session.user;
   req.session.destroy(() => {
+    if (user) {
+      audit.log({ id: user.id, full_name: user.full_name, role: user.role }, 'LOGOUT', 'user', user.id, 'Cierre de sesion: ' + user.full_name);
+    }
     res.redirect('/auth/login');
   });
 }

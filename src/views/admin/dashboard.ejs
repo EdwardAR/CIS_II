@@ -208,9 +208,9 @@
             <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="#dde9f2" stroke-width="12" stroke-linecap="round"/>
             <!-- Fill proporcional a satisfactionRate -->
             <% const gaugeAngle = Math.min(summary.satisfaction.satisfactionRate, 100) / 100; %>
-            <% const endX = 10 + 100 * Math.cos(Math.PI * (1 - gaugeAngle)); %>
+            <% const endX = 60 + 50 * Math.cos(Math.PI * (1 - gaugeAngle)); %>
             <% const endY = 65 - 50 * Math.sin(Math.PI * (1 - gaugeAngle)); %>
-            <% const largeArc = gaugeAngle > 0.5 ? 1 : 0; %>
+            <% const largeArc = 0; %>
             <path d="M 10 65 A 50 50 0 <%= largeArc %> 1 <%= endX.toFixed(1) %> <%= endY.toFixed(1) %>" fill="none"
               stroke="<%= summary.satisfaction.satisfactionRate >= 70 ? '#28a262' : summary.satisfaction.satisfactionRate >= 40 ? '#e0980e' : '#d94444' %>"
               stroke-width="12" stroke-linecap="round"/>
